@@ -3,10 +3,12 @@
 The registry is intentionally a flat, simple format so a stdlib parser is safe:
 
     backends:
-      - name: sentiment
+      house-price-reg:
+        path: services/inference
         tier: standard        # realtime | standard | batch
         target: cpu           # cpu | gpu
-        path: services/sentiment
+        max_replicas: 3
+        scale_to_zero: true
 
 Only this shape is supported; anything fancier should go through a real YAML
 library inside a service's own tooling, not here.
@@ -29,7 +31,10 @@ def registry_path(repo_root: Path) -> Path:
 
 
 def load(repo_root: Path) -> list[dict]:
-    """Return the list of backend entries. Missing file -> empty list."""
+    """Return backend entries as dicts (mapping key becomes 'name').
+
+    Missing file -> empty list.
+    """
     path = registry_path(repo_root)
     if not path.exists():
         return []
@@ -39,18 +44,19 @@ def load(repo_root: Path) -> list[dict]:
         line = raw.split("#", 1)[0].rstrip()
         if not line.strip() or line.strip() == "backends:":
             continue
+        indent = len(line) - len(line.lstrip())
         stripped = line.strip()
-        if stripped.startswith("- "):
-            current = {}
+        if indent == 2 and stripped.endswith(":"):
+            current = {"name": stripped[:-1].strip()}
             backends.append(current)
-            stripped = stripped[2:]
-        if ":" in stripped and current is not None:
+        elif indent >= 4 and ":" in stripped and current is not None:
             key, _, value = stripped.partition(":")
             current[key.strip()] = value.strip().strip("'\"")
     return backends
 
 
-def add(repo_root: Path, name: str, tier: str, target: str, path: str) -> None:
+def add(repo_root: Path, name: str, tier: str, target: str, path: str,
+        max_replicas: int = 3, scale_to_zero: bool = True) -> None:
     """Append a backend entry, creating the registry file if needed."""
     if tier not in VALID_TIERS:
         raise ValueError(f"tier must be one of {VALID_TIERS}, got {tier!r}")
@@ -63,10 +69,12 @@ def add(repo_root: Path, name: str, tier: str, target: str, path: str) -> None:
     if not text.endswith("\n"):
         text += "\n"
     text += (
-        f"  - name: {name}\n"
+        f"  {name}:\n"
+        f"    path: {path}\n"
         f"    tier: {tier}\n"
         f"    target: {target}\n"
-        f"    path: {path}\n"
+        f"    max_replicas: {max_replicas}\n"
+        f"    scale_to_zero: {'true' if scale_to_zero else 'false'}\n"
     )
     reg.write_text(text)
 

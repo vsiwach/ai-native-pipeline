@@ -28,6 +28,7 @@ class RegistryTest(unittest.TestCase):
         self.assertEqual(backends[0], {
             "name": "foo", "tier": "realtime",
             "target": "gpu", "path": "services/foo",
+            "max_replicas": "3", "scale_to_zero": "true",
         })
 
     def test_add_rejects_duplicate_name(self):
@@ -44,7 +45,7 @@ class RegistryTest(unittest.TestCase):
     def test_validate_flags_missing_path_and_bad_values(self):
         registry.registry_path(self.root).write_text(
             "backends:\n"
-            "  - name: ghost\n"
+            "  ghost:\n"
             "    tier: warp\n"
             "    target: cpu\n"
             "    path: services/ghost\n"
