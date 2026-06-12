@@ -1,0 +1,13 @@
+py_library(
+    name = "policy_check_lib",
+    srcs = ["policy_check.py", "registry_json.py"],
+    data = ["//governance:agent-policy.yaml", "//:inference-registry.yaml"],
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "policy_check_test",
+    srcs = ["tests/test_policy_check.py"],
+    main = "tests/test_policy_check.py",
+    deps = [":policy_check_lib"],
+)

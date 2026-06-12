@@ -1,0 +1,120 @@
+# Container CI for every backend in inference-registry.yaml.
+# The matrix is generated from the registry — adding a backend never edits
+# this file (that's the Phase 2 design contract).
+name: containers
+
+on:
+  pull_request:
+    paths: ["services/**", "contracts/**", "inference-registry.yaml"]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.registry.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: registry
+        name: Parse inference-registry.yaml into build matrix
+        run: echo "matrix=$(python3 tools/registry_json.py)" >> "$GITHUB_OUTPUT"
+
+  build-test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image (GHA layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.service.path }}/Dockerfile
+          load: true
+          push: false
+          tags: ${{ matrix.service.name }}:ci
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,scope=${{ matrix.service.name }},mode=max
+
+      - name: Smoke test — /healthz within 30s
+        run: |
+          docker run -d --rm -p 8080:8080 -e INFERENCE_API_KEY=ci \
+            --name smoke ${{ matrix.service.name }}:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/healthz >/dev/null; then
+              echo "healthy after ${i}s"; exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::${{ matrix.service.name }} never became healthy"
+          docker logs smoke
+          exit 1
+
+      - name: Contract check — /v1/info matches registry
+        run: |
+          info=$(curl -fsS http://127.0.0.1:8080/v1/info)
+          echo "$info"
+          tier=$(echo "$info" | python3 -c 'import json,sys;print(json.load(sys.stdin)["tier"])')
+          target=$(echo "$info" | python3 -c 'import json,sys;print(json.load(sys.stdin)["target"])')
+          [ "$tier" = "${{ matrix.service.tier }}" ] || { echo "::error::tier mismatch: $tier != ${{ matrix.service.tier }}"; exit 1; }
+          [ "$target" = "${{ matrix.service.target }}" ] || { echo "::error::target mismatch: $target != ${{ matrix.service.target }}"; exit 1; }
+
+      - name: SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ matrix.service.name }}:ci
+          artifact-name: sbom-${{ matrix.service.name }}.spdx.json
+
+      - name: Vulnerability scan (fail on CRITICAL)
+        uses: anchore/scan-action@v6
+        with:
+          image: ${{ matrix.service.name }}:ci
+          severity-cutoff: critical
+          fail-build: true
+          output-format: table
+
+      # ---- publish: main only, governed by agent policy ----
+      - name: Policy gate for publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          python3 tools/policy_check.py --action container-publish \
+            --requested-by "${{ github.actor }}" --ref "${{ github.ref }}"
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push sha + latest tags
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.service.path }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.service.name }}:sha-${{ github.sha }}
+            ghcr.io/${{ github.repository }}/${{ matrix.service.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+
+  # Single gate other workflows can `needs:` / watch for. Green only when the
+  # entire smoke-test matrix passed.
+  containers:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "all container builds and smoke tests passed"

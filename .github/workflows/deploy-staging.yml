@@ -1,0 +1,47 @@
+# Staging deploy — gated on the containers workflow having fully passed.
+# Agents may trigger this (governance: staging-deploy is agent-allowed when CI
+# is green); production deploys are human-only and live in Phase 4's
+# deploy-multicloud.yml.
+name: deploy-staging
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [containers]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    # workflow_run path: only when the full containers matrix succeeded.
+    # workflow_dispatch path: verify the latest containers run on main is green.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify CI green (dispatch path)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion=$(gh run list --workflow containers --branch main \
+            --limit 1 --json conclusion -q '.[0].conclusion')
+          [ "$conclusion" = "success" ] || {
+            echo "::error::latest containers run on main is '$conclusion', not success"; exit 1; }
+
+      - name: Policy gate
+        run: |
+          python3 tools/policy_check.py --action staging-deploy \
+            --requested-by "${{ github.actor }}"
+
+      - name: Deploy to staging
+        run: |
+          # Real multi-cloud deploy arrives in Phase 4 (deploy-multicloud.yml);
+          # until then this stage records the gated, policy-checked handoff.
+          echo "deploying images sha-${{ github.sha }} to staging"

@@ -1,0 +1,29 @@
+# Agent governance policy — enforced by tools/policy_check.py.
+# CLAUDE.md binds all agents working in this repo to these rules.
+#
+# Identities matching agent_identities are treated as agents; everyone else
+# is a human. Actions not listed here are denied to agents by default.
+
+agent_identities: claude, claude[bot], agent, github-actions[bot]
+
+actions:
+  test-gen:
+    agent_allowed: true
+    paths: "*/tests/**"
+    max_files: 10
+    trailer: "[agent:test-gen]"
+  staging-deploy:
+    agent_allowed: true
+    requires_ci_green: true
+  deploy:
+    agent_allowed: true
+    allowed_envs: staging
+  production-deploy:
+    agent_allowed: false
+    reason: production deploys are human-only
+  container-publish:
+    agent_allowed: true
+    allowed_refs: refs/heads/main
+    reason: agents may publish images only from main, never PR branches
+  push:
+    agent_allowed: true

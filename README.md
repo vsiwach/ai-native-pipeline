@@ -32,6 +32,9 @@ deployment → dev-facing UX — using Claude Code, one phase per session.
 | house-price-reg | `services/inference` | First backend — vendored from eightBEC/fastapi-ml-skeleton (Apache-2.0), standard tier, cpu |
 | Backend registry | `inference-registry.yaml` | Config-driven routing source of truth (tier, target, scaling) |
 | devkit | `tools/devkit` | `./dev` productivity CLI |
+| Container pipeline | `.github/workflows/containers.yml` | registry-driven matrix: build → healthz smoke → contract check → SBOM + grype → GHCR push (main only, policy-gated) |
+| Staging gate | `.github/workflows/deploy-staging.yml` | deploys only after the full containers matrix is green; agent-allowed per governance |
+| Governance | `governance/agent-policy.yaml` + `tools/policy_check.py` | what agents may do (staging yes, production never, publish from main only) |
 
 ## Dev productivity: `./dev`
 
