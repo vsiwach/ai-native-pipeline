@@ -7,3 +7,13 @@ backends:
     target: cpu
     max_replicas: 3
     scale_to_zero: true
+
+# Infrastructure services: built and smoke-tested by the same CI matrix,
+# but never routing targets.
+services:
+  router:
+    path: services/router
+    tier: realtime
+    target: cpu
+    max_replicas: 3
+    scale_to_zero: false

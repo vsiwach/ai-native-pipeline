@@ -9,6 +9,7 @@ import subprocess
 from pathlib import Path
 
 import registry
+import sync
 import ui
 
 REQUIRED_SERVICE_FILES = ("Dockerfile", "BUILD.bazel", "README.md")
@@ -24,6 +25,11 @@ def check_registry(repo_root: Path) -> int:
     if not problems:
         ui.ok(f"registry valid ({len(registry.load(repo_root))} backend(s))")
     return len(problems)
+
+
+def check_registry_drift(repo_root: Path) -> int:
+    """Fail if inference-registry.yaml drifts from the service.py manifests."""
+    return sync.sync(repo_root, check=True)
 
 
 def check_service_artifacts(repo_root: Path) -> int:
@@ -96,6 +102,8 @@ def run(repo_root: Path, action: str = "push") -> int:
     failures = 0
     ui.heading("Registry")
     failures += check_registry(repo_root)
+    ui.heading("Registry drift (manifests → registry)")
+    failures += check_registry_drift(repo_root)
     ui.heading("Service artifacts")
     failures += check_service_artifacts(repo_root)
     ui.heading("Governance")

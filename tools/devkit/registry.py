@@ -30,29 +30,35 @@ def registry_path(repo_root: Path) -> Path:
     return repo_root / "inference-registry.yaml"
 
 
-def load(repo_root: Path) -> list[dict]:
-    """Return backend entries as dicts (mapping key becomes 'name').
-
-    Missing file -> empty list.
+def load(repo_root: Path, section: str = "backends") -> list[dict]:
+    """Return entries of a top-level section as dicts (mapping key becomes
+    'name'). Sections: 'backends' (model services behind the router) and
+    'services' (infrastructure like the router itself — built/tested by CI
+    but never routing targets). Missing file or section -> empty list.
     """
     path = registry_path(repo_root)
     if not path.exists():
         return []
-    backends: list[dict] = []
+    entries: list[dict] = []
     current: dict | None = None
+    current_section = None
     for raw in path.read_text().splitlines():
         line = raw.split("#", 1)[0].rstrip()
-        if not line.strip() or line.strip() == "backends:":
+        if not line.strip():
             continue
         indent = len(line) - len(line.lstrip())
         stripped = line.strip()
-        if indent == 2 and stripped.endswith(":"):
+        if indent == 0 and stripped.endswith(":"):
+            current_section = stripped[:-1].strip()
+            current = None
+        elif current_section == section and indent == 2 and stripped.endswith(":"):
             current = {"name": stripped[:-1].strip()}
-            backends.append(current)
-        elif indent >= 4 and ":" in stripped and current is not None:
+            entries.append(current)
+        elif (current_section == section and indent >= 4
+              and ":" in stripped and current is not None):
             key, _, value = stripped.partition(":")
             current[key.strip()] = value.strip().strip("'\"")
-    return backends
+    return entries
 
 
 def add(repo_root: Path, name: str, tier: str, target: str, path: str,
@@ -82,7 +88,7 @@ def add(repo_root: Path, name: str, tier: str, target: str, path: str,
 def validate(repo_root: Path) -> list[str]:
     """Return a list of problems (empty list = healthy)."""
     problems: list[str] = []
-    backends = load(repo_root)
+    backends = load(repo_root) + load(repo_root, section="services")
     seen: set[str] = set()
     for i, b in enumerate(backends):
         label = b.get("name", f"entry #{i + 1}")

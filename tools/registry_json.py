@@ -25,10 +25,13 @@ def main() -> int:
         for p in problems:
             print(f"registry invalid: {p}", file=sys.stderr)
         return 1
+    everything = backends + registry.load(REPO_ROOT, section="services")
     if "--names" in sys.argv:
-        print(json.dumps([b["name"] for b in backends]))
-    else:
+        print(json.dumps([b["name"] for b in everything]))
+    elif "--backends-only" in sys.argv:
         print(json.dumps(backends))
+    else:
+        print(json.dumps(everything))
     return 0
 
 

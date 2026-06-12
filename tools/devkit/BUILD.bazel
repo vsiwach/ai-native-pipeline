@@ -4,9 +4,11 @@ py_library(
     srcs = [
         "checks.py",
         "doctor.py",
+        "manifest.py",
         "registry.py",
         "scaffold.py",
         "status.py",
+        "sync.py",
         "ui.py",
     ],
     visibility = ["//visibility:public"],
@@ -30,5 +32,12 @@ py_test(
     name = "scaffold_test",
     srcs = ["tests/test_scaffold.py"],
     main = "tests/test_scaffold.py",
+    deps = [":devkit_lib"],
+)
+
+py_test(
+    name = "manifest_test",
+    srcs = ["tests/test_manifest.py"],
+    main = "tests/test_manifest.py",
     deps = [":devkit_lib"],
 )

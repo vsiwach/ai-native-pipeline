@@ -7,6 +7,8 @@ Commands:
   build                       bazel build //... (when a workspace exists)
   test                        bazel test //... or plain-unittest fallback
   check [--action X]          registry + artifacts + policy + tests (pre-push)
+  sync [--check]              regenerate inference-registry.yaml from service.py
+      [--dockerfiles]         (or --check it in CI; --dockerfiles to preview)
   new service <name>          scaffold a contract-compliant service
       [--tier realtime|standard|batch] [--target cpu|gpu]
   run <service> [--port N]    docker build + run + /healthz probe
@@ -27,6 +29,7 @@ import checks
 import doctor
 import scaffold
 import status
+import sync
 import ui
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -122,6 +125,12 @@ def main(argv: list[str] | None = None) -> int:
     p_check.add_argument("--action", default="push",
                          help="governance action to validate (default: push)")
 
+    p_sync = sub.add_parser("sync", help="regenerate registry from service.py manifests")
+    p_sync.add_argument("--check", action="store_true",
+                        help="fail if the registry is out of date (CI mode)")
+    p_sync.add_argument("--dockerfiles", action="store_true",
+                        help="print each manifest's rendered Dockerfile and exit")
+
     p_new = sub.add_parser("new", help="scaffold things")
     new_sub = p_new.add_subparsers(dest="kind", required=True)
     p_svc = new_sub.add_parser("service", help="scaffold an inference service")
@@ -145,6 +154,8 @@ def main(argv: list[str] | None = None) -> int:
         "build": lambda: cmd_build(args),
         "test": lambda: cmd_test(args),
         "check": lambda: checks.run(REPO_ROOT, args.action),
+        "sync": lambda: (sync.print_dockerfiles(REPO_ROOT) if args.dockerfiles
+                         else sync.sync(REPO_ROOT, check=args.check)),
         "new": lambda: cmd_new_service(args),
         "run": lambda: cmd_run(args),
     }
