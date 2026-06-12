@@ -39,6 +39,9 @@ deployment → dev-facing UX — using Claude Code, one phase per session.
 | Container pipeline | `.github/workflows/containers.yml` | registry-driven matrix: build → healthz smoke → contract check → SBOM + grype → GHCR push (main only, policy-gated) |
 | Staging gate | `.github/workflows/deploy-staging.yml` | deploys only after the full containers matrix is green; agent-allowed per governance |
 | Governance | `governance/agent-policy.yaml` + `tools/policy_check.py` | what agents may do (staging yes, production never, publish from main only) |
+| Multi-cloud IaC | `deploy/terraform` | one service interface, two implementations: GCP Cloud Run v2 + AWS App Runner; staging composes both clouds |
+| Deploy pipeline | `.github/workflows/deploy-multicloud.yml` | plan on PRs (commented), apply via dispatch only (OIDC, policy-gated); endpoint map auto-synced into routing policy |
+| MCP server | `tools/mcp_server.py` | agent tools: `get_cloud_endpoints`, `run_terraform_plan` (read-only) |
 
 ## Dev productivity: `./dev`
 

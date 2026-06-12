@@ -1,0 +1,119 @@
+# Multi-cloud staging deploys: plan on PRs (commented), apply via dispatch
+# only, gated by governance. Auth is OIDC — no long-lived keys anywhere
+# (required repo settings documented in deploy/README.md).
+name: deploy-multicloud
+
+on:
+  pull_request:
+    paths: ["deploy/**"]
+  workflow_dispatch:
+    inputs:
+      cloud:
+        description: which cloud(s) to apply
+        type: choice
+        options: [gcp, aws, both]
+        default: both
+      environment:
+        description: target environment
+        type: choice
+        options: [staging]
+        default: staging
+
+permissions:
+  contents: write       # endpoint-sync commit
+  pull-requests: write  # plan comment
+  id-token: write       # OIDC
+
+env:
+  TF_DIR: deploy/terraform/envs/staging
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: terraform plan (placeholder creds — read-only)
+        id: plan
+        run: |
+          terraform -chdir="$TF_DIR" init -input=false
+          terraform -chdir="$TF_DIR" plan -var-file=placeholder.tfvars \
+            -input=false -no-color | tee plan.txt
+        continue-on-error: true
+
+      - name: Post plan as PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('plan.txt', 'utf8');
+            const tail = plan.length > 60000 ? plan.slice(-60000) : plan;
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: '### terraform plan (`envs/staging`, placeholder vars)\n' +
+                    '```\n' + tail + '\n```\n' +
+                    '_apply happens only via workflow_dispatch, gated by ' +
+                    'governance/agent-policy.yaml._',
+            });
+
+      - name: Fail job if plan failed
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+  apply:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Policy gate
+        run: |
+          python3 tools/policy_check.py --action deploy \
+            --env "${{ inputs.environment }}" \
+            --requested-by "${{ github.actor }}"
+
+      - name: Auth to GCP (OIDC)
+        if: inputs.cloud == 'gcp' || inputs.cloud == 'both'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Auth to AWS (OIDC)
+        if: inputs.cloud == 'aws' || inputs.cloud == 'both'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: terraform apply
+        run: |
+          terraform -chdir="$TF_DIR" init -input=false
+          TARGETS=()
+          [ "${{ inputs.cloud }}" = "gcp" ] && TARGETS+=(-target=module.gcp)
+          [ "${{ inputs.cloud }}" = "aws" ] && TARGETS+=(-target=module.aws)
+          terraform -chdir="$TF_DIR" apply -input=false -auto-approve "${TARGETS[@]}" \
+            -var gcp_project="${{ vars.GCP_PROJECT }}" \
+            -var aws_account_id="${{ vars.AWS_ACCOUNT_ID }}" \
+            -var github_owner="${{ github.repository_owner }}" \
+            -var image_tag="sha-${{ github.sha }}"
+
+      - name: Sync endpoints into routing-policy.yaml
+        run: |
+          terraform -chdir="$TF_DIR" output -json | python3 tools/sync_endpoints.py
+
+      - name: Commit endpoint map
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add routing-policy.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m "infra: sync cloud endpoints after ${{ inputs.cloud }} apply
+
+          [agent:deploy]"
+          git push

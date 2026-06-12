@@ -1,13 +1,37 @@
 py_library(
     name = "policy_check_lib",
-    srcs = ["policy_check.py", "registry_json.py"],
-    data = ["//governance:agent-policy.yaml", "//:inference-registry.yaml"],
+    srcs = [
+        "mcp_server.py",
+        "policy_check.py",
+        "registry_json.py",
+        "sync_endpoints.py",
+    ],
+    data = [
+        "//:inference-registry.yaml",
+        "//:routing-policy.yaml",
+        "//governance:agent-policy.yaml",
+    ],
     visibility = ["//visibility:public"],
+    deps = ["//tools/devkit:devkit_lib"],
 )
 
 py_test(
     name = "policy_check_test",
     srcs = ["tests/test_policy_check.py"],
     main = "tests/test_policy_check.py",
+    deps = [":policy_check_lib"],
+)
+
+py_test(
+    name = "sync_endpoints_test",
+    srcs = ["tests/test_sync_endpoints.py"],
+    main = "tests/test_sync_endpoints.py",
+    deps = [":policy_check_lib"],
+)
+
+py_test(
+    name = "mcp_server_test",
+    srcs = ["tests/test_mcp_server.py"],
+    main = "tests/test_mcp_server.py",
     deps = [":policy_check_lib"],
 )
