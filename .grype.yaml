@@ -1,0 +1,17 @@
+# Vulnerability gate policy (read automatically by grype / anchore/scan-action).
+#
+# The CI gate fails on CRITICAL findings that are ACTIONABLE — i.e. a fix
+# exists and rebuilding the image picks it up. Findings nobody has shipped a
+# fix for can't be remediated by us and would permanently wedge the pipeline;
+# they remain visible in the SBOM artifacts and this file is the audit trail.
+# Revisit on every base-image bump (services/*/service.py → Image.debian_slim).
+ignore:
+  # Debian marks these "won't fix" in the stable base (libc6, perl-base, …)
+  - fix-state: wont-fix
+  # No upstream fix released anywhere yet (e.g. CVE-2026-6100 in CPython)
+  - fix-state: not-fixed
+  - fix-state: unknown
+  # CVE-2026-7210: CPython binary; per grype the only fix is 3.15.0b2 — a
+  # beta with no stable docker image. Pinned ignore, not a state ignore, so
+  # it resurfaces the moment a stable fixed release exists for our line.
+  - vulnerability: CVE-2026-7210
