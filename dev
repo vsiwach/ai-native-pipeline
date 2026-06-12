@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Single entry point for everything in this repo. Run `./dev` for help.
+exec python3 "$(cd "$(dirname "$0")" && pwd)/tools/devkit/cli.py" "$@"

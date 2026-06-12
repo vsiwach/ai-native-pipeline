@@ -1,0 +1,34 @@
+# devkit is stdlib-only by design — it must run before any deps are installed.
+py_library(
+    name = "devkit_lib",
+    srcs = [
+        "checks.py",
+        "doctor.py",
+        "registry.py",
+        "scaffold.py",
+        "status.py",
+        "ui.py",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "dev",
+    srcs = ["cli.py"],
+    main = "cli.py",
+    deps = [":devkit_lib"],
+)
+
+py_test(
+    name = "registry_test",
+    srcs = ["tests/test_registry.py"],
+    main = "tests/test_registry.py",
+    deps = [":devkit_lib"],
+)
+
+py_test(
+    name = "scaffold_test",
+    srcs = ["tests/test_scaffold.py"],
+    main = "tests/test_scaffold.py",
+    deps = [":devkit_lib"],
+)
