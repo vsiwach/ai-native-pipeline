@@ -1,0 +1,24 @@
+# Local demo of the full stack: router + inference backend.
+#   docker compose up --build
+#   curl -X POST 'localhost:8090/v1/predict?model=house-price-reg' \
+#     -H 'token: local-dev-key' -H 'Content-Type: application/json' \
+#     -d @services/inference/docs/sample_payload.json
+services:
+  inference:
+    build:
+      context: .
+      dockerfile: services/inference/Dockerfile
+    environment:
+      INFERENCE_API_KEY: local-dev-key
+    # internal only — the router is the single public entrypoint
+
+  router:
+    build:
+      context: .
+      dockerfile: services/router/Dockerfile
+    ports:
+      - "8090:8080"
+    environment:
+      HEALTH_POLL_INTERVAL_S: "5"
+    depends_on:
+      - inference

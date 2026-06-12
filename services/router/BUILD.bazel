@@ -1,0 +1,27 @@
+# Tests only — the container build stays in Docker/CI (see Dockerfile,
+# which is rendered from service.py's Image manifest).
+load("@pypi//:requirements.bzl", "requirement")
+
+py_library(
+    name = "router_app",
+    srcs = glob(["router_app/**/*.py"]),
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = [
+        requirement("fastapi"),
+        requirement("httpx"),
+        requirement("pydantic"),
+        requirement("pyyaml"),
+    ],
+)
+
+py_test(
+    name = "router_tests",
+    size = "medium",
+    srcs = glob(["tests/**/*.py"]),
+    main = "tests/bazel_runner.py",
+    deps = [
+        ":router_app",
+        requirement("pytest"),
+    ],
+)

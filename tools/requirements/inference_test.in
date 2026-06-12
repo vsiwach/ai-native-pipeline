@@ -1,5 +1,6 @@
 -r ../../services/inference/requirements.txt
+-r ../../services/router/requirements.txt
 
-# test-only deps (Bazel test env; not shipped in the container image)
+# test-only deps (Bazel test env; not shipped in container images)
 pytest==8.3.5
 httpx==0.28.1

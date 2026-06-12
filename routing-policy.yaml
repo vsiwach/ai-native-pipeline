@@ -1,0 +1,20 @@
+# Routing policy — the router's only decision input besides the registry.
+# Ops maintains cost_table; Phase 4's deploy pipeline appends cloud endpoints.
+tiers:
+  realtime: {max_latency_ms: 250, prefer: lowest_latency}
+  standard: {max_latency_ms: 2000, prefer: lowest_cost}
+  batch: {max_latency_ms: null, prefer: lowest_cost, queue: true}
+
+cost_table: # $/1M requests, maintained by ops — router just reads it
+  gcp-cloudrun-cpu: 0.40
+  aws-apprunner-cpu: 0.46
+  local-docker: 0.10
+
+cache: {enabled: true, ttl_s: 300, backend: in_memory} # swap for redis later
+
+# Backend endpoints per model. provider must be a cost_table key.
+# deploy/terraform's endpoint sync appends real cloud URLs after apply.
+endpoints:
+  house-price-reg:
+    - provider: local-docker
+      url: http://inference:8080

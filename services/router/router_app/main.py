@@ -1,0 +1,237 @@
+"""Router — the single public entrypoint for inference.
+
+Request flow for POST /v1/predict?model=M&tier=T:
+  cache -> healthy candidates from registry+policy -> tier-policy pick ->
+  proxy -> record latency/cost -> X-Cache / X-Backend / X-Est-Cost headers.
+Batch tier requests are enqueued instead (see batch.py, /v1/batch routes).
+Config hot-reloads on SIGHUP. No per-model logic anywhere in this package.
+"""
+
+import json
+import os
+import signal
+import time
+from pathlib import Path
+
+import httpx
+from fastapi import FastAPI, Query, Request, Response
+from fastapi.responses import JSONResponse
+
+from router_app import config as cfg
+from router_app.batch import BatchQueue, BatchWorker
+from router_app.cache import TTLCache, cache_key
+from router_app.costs import CostLedger
+from router_app.health import HealthPoller
+from router_app.policy import (NoHealthyBackend, UnknownModel, resolve_tier,
+                               select)
+
+ROUTER_VERSION = "1.0"
+FORWARDED_HEADERS = ("token",)
+
+
+class RouterState:
+    def __init__(self, registry_path: Path | None = None,
+                 policy_path: Path | None = None):
+        self.registry_path = registry_path
+        self.policy_path = policy_path
+        self.ledger = CostLedger()
+        self.reload()
+        self.poller = HealthPoller(
+            get_endpoints=lambda: self.policy["endpoints"],
+            interval_s=float(os.environ.get("HEALTH_POLL_INTERVAL_S", "10")),
+        )
+        queue_dir = Path(os.environ.get("ROUTER_QUEUE_DIR",
+                                        "/tmp/router-batch-queue"))
+        self.queue = BatchQueue(queue_dir)
+        concurrency = int(self.policy["tiers"].get("batch", {})
+                          .get("concurrency", 2))
+        self.worker = BatchWorker(self.queue, self.process_batch_job,
+                                  concurrency=concurrency)
+
+    def reload(self) -> None:
+        self.registry = cfg.load_registry(self.registry_path)
+        self.policy = cfg.load_policy(self.policy_path)
+        cache_cfg = self.policy["cache"]
+        self.cache = TTLCache(ttl_s=float(cache_cfg.get("ttl_s", 300)),
+                              enabled=bool(cache_cfg.get("enabled", True)))
+
+    # ---- core proxy path (shared by live predict and batch worker) ----
+
+    def call_backend(self, model: str, tier_param: str | None,
+                     payload: dict, headers: dict) -> tuple[dict, "object"]:
+        """Returns (response_json, Choice). Raises UnknownModel /
+        NoHealthyBackend. Failing endpoints are marked unhealthy and the
+        next candidate is tried."""
+        attempts = len(self.policy["endpoints"].get(model, [])) or 1
+        last_error: Exception | None = None
+        for _ in range(attempts):
+            choice = select(model, tier_param, self.registry, self.policy,
+                            self.poller.status_for)
+            tier_rules = self.policy["tiers"].get(choice.tier, {})
+            max_ms = tier_rules.get("max_latency_ms")
+            timeout_s = (max_ms / 1000) if max_ms else 30.0
+            start = time.monotonic()
+            try:
+                resp = httpx.post(
+                    f"{choice.url}/v1/predict", json=payload,
+                    headers={k: v for k, v in headers.items()
+                             if k.lower() in FORWARDED_HEADERS},
+                    timeout=timeout_s,
+                )
+                latency_ms = (time.monotonic() - start) * 1000
+            except httpx.HTTPError as exc:
+                self.poller.mark_unhealthy(choice.url)
+                last_error = exc
+                continue
+            self.poller.record_latency(choice.url, latency_ms)
+            if resp.status_code >= 500:
+                self.poller.mark_unhealthy(choice.url)
+                last_error = NoHealthyBackend(f"{choice.url} -> {resp.status_code}")
+                continue
+            self.ledger.record(model, choice.provider, choice.est_cost_usd,
+                               latency_ms)
+            body = resp.json() if resp.status_code == 200 else {
+                "status_code": resp.status_code, "detail": resp.json()}
+            if resp.status_code != 200:
+                # backend rejected the request (auth/validation) — not a
+                # routing failure; surface as-is without caching
+                raise BackendRejection(resp.status_code, body["detail"])
+            return body, choice
+        raise NoHealthyBackend(str(last_error) if last_error else model)
+
+    def process_batch_job(self, job: dict) -> dict:
+        body, choice = self.call_backend(job["model"], "batch",
+                                         job["payload"], job["headers"])
+        return {"prediction": body, "backend": choice.provider,
+                "est_cost_usd": choice.est_cost_usd}
+
+
+class BackendRejection(Exception):
+    def __init__(self, status_code: int, detail):
+        self.status_code = status_code
+        self.detail = detail
+
+
+def _error(status: int, code: str, message: str, **extra) -> JSONResponse:
+    return JSONResponse(status_code=status,
+                        content={"error": {"code": code, "message": message,
+                                           **extra}})
+
+
+def get_app(registry_path: Path | None = None,
+            policy_path: Path | None = None,
+            start_background: bool = True) -> FastAPI:
+    state = RouterState(registry_path, policy_path)
+    app = FastAPI(title="inference-router", version=ROUTER_VERSION)
+    app.state.router_state = state
+
+    if start_background:
+        state.poller.start()
+        state.worker.start()
+        try:  # SIGHUP hot-reload (unavailable in some test harnesses)
+            signal.signal(signal.SIGHUP, lambda *_: state.reload())
+        except ValueError:
+            pass
+
+    @app.get("/healthz")
+    def healthz():
+        return {"status": "ok", "degraded": state.poller.degraded()}
+
+    @app.get("/v1/info")
+    def info():
+        return {"model": "router", "version": ROUTER_VERSION,
+                "tier": "realtime", "target": "cpu"}
+
+    @app.post("/v1/predict")
+    async def predict(request: Request,
+                      model: str = Query(...),
+                      tier: str | None = Query(default=None)):
+        try:
+            payload = await request.json()
+        except json.JSONDecodeError:
+            return _error(400, "invalid_json", "request body must be JSON")
+        headers = dict(request.headers)
+
+        try:
+            resolved = resolve_tier(model, tier, state.registry, state.policy)
+            tier_rules = state.policy["tiers"].get(resolved, {})
+        except UnknownModel:
+            return _error(404, "unknown_model",
+                          f"model '{model}' is not in inference-registry.yaml",
+                          model=model)
+
+        if tier_rules.get("queue"):
+            job_id = state.queue.submit(model, payload, {
+                k: v for k, v in headers.items()
+                if k.lower() in FORWARDED_HEADERS})
+            return JSONResponse(status_code=202, content={
+                "job_id": job_id, "status": "pending",
+                "poll": f"/v1/batch/{job_id}"})
+
+        key = cache_key(model, payload)
+        cached = state.cache.get(key)
+        if cached is not None:
+            entry = json.loads(cached)
+            state.ledger.record(model, entry["provider"], 0.0, cached=True)
+            return JSONResponse(content=entry["body"], headers={
+                "X-Cache": "hit", "X-Backend": entry["provider"],
+                "X-Est-Cost": "0"})
+
+        try:
+            body, choice = state.call_backend(model, tier, payload, headers)
+        except UnknownModel:
+            return _error(404, "unknown_model",
+                          f"model '{model}' is not in inference-registry.yaml",
+                          model=model)
+        except NoHealthyBackend as exc:
+            return _error(503, "no_healthy_backend",
+                          f"no healthy backend for model '{model}': {exc}",
+                          model=model)
+        except BackendRejection as exc:
+            return JSONResponse(status_code=exc.status_code,
+                                content=exc.detail if isinstance(exc.detail, dict)
+                                else {"detail": exc.detail})
+
+        state.cache.put(key, json.dumps(
+            {"body": body, "provider": choice.provider}).encode())
+        return JSONResponse(content=body, headers={
+            "X-Cache": "miss", "X-Backend": choice.provider,
+            "X-Est-Cost": f"{choice.est_cost_usd:.10f}"})
+
+    @app.post("/v1/batch")
+    async def submit_batch(request: Request, model: str = Query(...)):
+        try:
+            payload = await request.json()
+        except json.JSONDecodeError:
+            return _error(400, "invalid_json", "request body must be JSON")
+        if model not in state.registry:
+            return _error(404, "unknown_model",
+                          f"model '{model}' is not in inference-registry.yaml",
+                          model=model)
+        headers = {k: v for k, v in request.headers.items()
+                   if k.lower() in FORWARDED_HEADERS}
+        job_id = state.queue.submit(model, payload, headers)
+        return JSONResponse(status_code=202, content={
+            "job_id": job_id, "status": "pending",
+            "poll": f"/v1/batch/{job_id}"})
+
+    @app.get("/v1/batch/{job_id}")
+    def batch_status(job_id: str):
+        job = state.queue.get(job_id)
+        if job is None:
+            return _error(404, "unknown_job", f"no job '{job_id}'")
+        return {"job_id": job["id"], "status": job["status"],
+                "result": job["result"], "error": job["error"]}
+
+    @app.get("/v1/costs")
+    def costs():
+        snap = state.ledger.snapshot()
+        snap["cache"] = {"hits": state.cache.hits,
+                         "misses": state.cache.misses,
+                         "hit_rate": round(state.cache.hit_rate, 4)}
+        return snap
+
+    return app
+
+
+app = get_app() if os.environ.get("ROUTER_AUTOSTART", "1") == "1" else None

@@ -17,7 +17,9 @@ certifi==2026.5.20
 click==8.4.1
     # via uvicorn
 fastapi==0.115.12
-    # via -r tools/requirements/../../services/inference/requirements.txt
+    # via
+    #   -r tools/requirements/../../services/inference/requirements.txt
+    #   -r tools/requirements/../../services/router/requirements.txt
 h11==0.16.0
     # via
     #   httpcore
@@ -25,7 +27,9 @@ h11==0.16.0
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via -r tools/requirements/inference_test.in
+    # via
+    #   -r tools/requirements/../../services/router/requirements.txt
+    #   -r tools/requirements/inference_test.in
 idna==3.18
     # via
     #   anyio
@@ -50,11 +54,14 @@ pluggy==1.6.0
 pydantic==2.11.4
     # via
     #   -r tools/requirements/../../services/inference/requirements.txt
+    #   -r tools/requirements/../../services/router/requirements.txt
     #   fastapi
 pydantic-core==2.33.2
     # via pydantic
 pytest==8.3.5
     # via -r tools/requirements/inference_test.in
+pyyaml==6.0.2
+    # via -r tools/requirements/../../services/router/requirements.txt
 scikit-learn==1.6.1
     # via -r tools/requirements/../../services/inference/requirements.txt
 scipy==1.17.1
@@ -73,4 +80,6 @@ typing-extensions==4.15.0
 typing-inspection==0.4.2
     # via pydantic
 uvicorn==0.34.2
-    # via -r tools/requirements/../../services/inference/requirements.txt
+    # via
+    #   -r tools/requirements/../../services/inference/requirements.txt
+    #   -r tools/requirements/../../services/router/requirements.txt
