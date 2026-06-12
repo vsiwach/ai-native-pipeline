@@ -1,14 +1,16 @@
 """Scaffold a new inference service with every artifact the conventions require:
 
+  services/<name>/service.py      manifest — resources & image as code
   services/<name>/app.py          stdlib HTTP service implementing the contract
   services/<name>/tests/          unittest suite (Bazel AND plain-python runnable)
-  services/<name>/Dockerfile
+  services/<name>/Dockerfile      rendered from the manifest's Image chain
   services/<name>/BUILD.bazel
   services/<name>/README.md
   services/<name>/requirements.txt (empty — pip deps go here, Docker-only)
-  inference-registry.yaml entry
   .github/workflows/service-<name>.yml  (container /healthz CI job)
 
+New services are born manifest-first: the registry entry comes from running
+`./dev sync` over the generated service.py, never from editing the registry.
 The generated service is stdlib-only so it builds under Bazel with no pip deps.
 Swap app.py for FastAPI later if you like — keep the three contract routes.
 """
@@ -16,9 +18,74 @@ Swap app.py for FastAPI later if you like — keep the three contract routes.
 import re
 from pathlib import Path
 
-from registry import add as registry_add
+import sync as sync_mod
+from manifest import Image
 
 NAME_RE = re.compile(r"^[a-z][a-z0-9-]{1,40}$")
+
+HEALTHCHECK_CMD = ('python -c "import urllib.request;'
+                   "urllib.request.urlopen('http://127.0.0.1:8080/healthz')\"")
+
+
+def _image(name: str) -> Image:
+    """The scaffolded container image. The service.py template below declares
+    the IDENTICAL chain — the Dockerfile is rendered from here, so image
+    definition and Dockerfile cannot drift at birth."""
+    return (
+        Image.debian_slim("3.11")
+        .workdir("/srv")
+        .copy(f"services/{name}/requirements.txt", ".")
+        .pip_install_requirements("requirements.txt")
+        .copy(f"services/{name}/app.py", ".")
+        .env(PORT="8080")
+        .expose(8080)
+        .healthcheck(HEALTHCHECK_CMD)
+        .cmd(["python", "app.py"])
+    )
+
+
+def _service_manifest(name: str, tier: str, target: str) -> str:
+    return f'''"""{name} — resources & image as code.
+
+Single source of truth for how this service is deployed. Edit THIS file,
+then run `./dev sync` to regenerate inference-registry.yaml; never hand-edit
+the registry. Keep stdlib-only — `./dev sync` imports this module, so declare
+the model libraries in requirements.txt, don't import them here.
+"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "devkit"))
+
+from manifest import Image, service  # noqa: E402
+
+PATH = "services/{name}"
+
+# Mirrors the generated Dockerfile — preview with `./dev sync --dockerfiles`.
+image = (
+    Image.debian_slim("3.11")
+    .workdir("/srv")
+    .copy(f"{{PATH}}/requirements.txt", ".")
+    .pip_install_requirements("requirements.txt")
+    .copy(f"{{PATH}}/app.py", ".")
+    .env(PORT="8080")
+    .expose(8080)
+    .healthcheck('python -c "import urllib.request;'
+                 "urllib.request.urlopen('http://127.0.0.1:8080/healthz')\\"")
+    .cmd(["python", "app.py"])
+)
+
+SERVICE = service(
+    name="{name}",
+    path=PATH,
+    tier="{tier}",        # realtime | standard | batch
+    target="{target}",    # cpu | gpu
+    max_replicas=3,
+    scale_to_zero=True,
+    image=image,
+)
+'''
 
 
 def _app_py(name: str, tier: str) -> str:
@@ -164,17 +231,9 @@ if __name__ == "__main__":
 
 
 def _dockerfile(name: str) -> str:
-    return f"""FROM python:3.11-slim
-WORKDIR /srv
-COPY services/{name}/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY services/{name}/app.py .
-ENV PORT=8080
-EXPOSE 8080
-HEALTHCHECK --interval=10s --timeout=3s CMD \\
-  python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/healthz')"
-CMD ["python", "app.py"]
-"""
+    # Rendered from the manifest's Image chain — never hand-written, so the
+    # service.py declaration and the Dockerfile agree by construction.
+    return _image(name).to_dockerfile()
 
 
 def _build_bazel(name: str) -> str:
@@ -267,6 +326,7 @@ def create_service(repo_root: Path, name: str, tier: str, target: str) -> list[P
         raise ValueError(f"services/{name} already exists")
 
     files = {
+        service_dir / "service.py": _service_manifest(name, tier, target),
         service_dir / "app.py": _app_py(name, tier),
         service_dir / "tests" / "__init__.py": "",
         service_dir / "tests" / "test_app.py": _test_py(name),
@@ -280,5 +340,6 @@ def create_service(repo_root: Path, name: str, tier: str, target: str) -> list[P
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
 
-    registry_add(repo_root, name, tier, target, f"services/{name}")
+    # Manifest-first: the registry entry is generated, never written directly.
+    sync_mod.sync(repo_root)
     return list(files)

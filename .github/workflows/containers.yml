@@ -20,6 +20,8 @@ jobs:
       matrix: ${{ steps.registry.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
+      - name: Registry drift gate (manifests are the source of truth)
+        run: ./dev sync --check
       - id: registry
         name: Parse inference-registry.yaml into build matrix
         run: echo "matrix=$(python3 tools/registry_json.py)" >> "$GITHUB_OUTPUT"

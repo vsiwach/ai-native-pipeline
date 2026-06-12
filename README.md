@@ -34,7 +34,7 @@ deployment → dev-facing UX — using Claude Code, one phase per session.
 | devkit | `tools/devkit` | `./dev` productivity CLI |
 | Router | `services/router` | Single public entrypoint: cache → healthy candidates → tier policy (cost/latency) → proxy; batch queue; `/v1/costs` |
 | Routing policy | `routing-policy.yaml` | Tiers, cost table, cache config, backend endpoints — the router's only decision input |
-| Manifests | `services/*/service.py` + `./dev sync` | Resources & image as code (Modal-style); the registry is a generated projection |
+| Manifests | `services/*/service.py` + `./dev sync` | Resources & image as code (Modal-style, no Modal dependency). The registry — both `backends:` and `services:` blocks — is generated from manifests; never hand-edit it. CI fails on drift |
 | Local demo | `docker-compose.yml` | `docker compose up` → router + backend wired |
 | Container pipeline | `.github/workflows/containers.yml` | registry-driven matrix: build → healthz smoke → contract check → SBOM + grype → GHCR push (main only, policy-gated) |
 | Staging gate | `.github/workflows/deploy-staging.yml` | deploys only after the full containers matrix is green; agent-allowed per governance |

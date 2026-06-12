@@ -24,12 +24,31 @@ class ScaffoldTest(unittest.TestCase):
     def test_creates_all_required_artifacts(self):
         scaffold.create_service(self.root, "demo", "standard", "cpu")
         svc = self.root / "services" / "demo"
-        for rel in ("app.py", "Dockerfile", "BUILD.bazel", "README.md",
-                    "requirements.txt", "tests/test_app.py"):
+        for rel in ("service.py", "app.py", "Dockerfile", "BUILD.bazel",
+                    "README.md", "requirements.txt", "tests/test_app.py"):
             self.assertTrue((svc / rel).exists(), f"missing {rel}")
         self.assertTrue(
             (self.root / ".github" / "workflows" / "service-demo.yml").exists()
         )
+
+    def test_manifest_is_typed_and_drives_the_registry(self):
+        import sync
+        scaffold.create_service(self.root, "demo", "batch", "gpu")
+        manifest_src = (self.root / "services/demo/service.py").read_text()
+        self.assertIn("from manifest import Image, service", manifest_src)
+        self.assertNotIn("SERVICE = {", manifest_src)  # typed, not a dict
+        # registry was generated via sync and stays drift-free
+        self.assertEqual(sync.sync(self.root, check=True), 0)
+        entry = registry.load(self.root)[0]
+        self.assertEqual((entry["tier"], entry["target"]), ("batch", "gpu"))
+
+    def test_dockerfile_matches_manifest_image_chain(self):
+        import runpy
+        scaffold.create_service(self.root, "demo", "standard", "cpu")
+        rendered = runpy.run_path(
+            str(self.root / "services/demo/service.py"))["image"].to_dockerfile()
+        self.assertEqual(
+            (self.root / "services/demo/Dockerfile").read_text(), rendered)
 
     def test_registers_backend(self):
         scaffold.create_service(self.root, "demo", "realtime", "gpu")

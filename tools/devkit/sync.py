@@ -44,52 +44,32 @@ def discover(repo_root: Path) -> list[Service]:
     return found
 
 
+SERVICES_COMMENT = (
+    "\n# Infrastructure services: built and smoke-tested by the same CI matrix,\n"
+    "# but never routing targets.\n"
+)
+
+
 def render_registry(services: list[Service], current: str = "") -> str:
-    """Render inference-registry.yaml, regenerating only the `backends:` block.
+    """Render the complete inference-registry.yaml from manifests.
 
-    Non-destructive: the file's existing header and any sections after the
-    backends block (e.g. an infra `services:` section the router build owns) are
-    preserved verbatim. Only the backend entries are projected from manifests,
-    so this can never clobber hand- or tool-managed content elsewhere.
-    Manifests with section="services" (infrastructure like the router) are
-    never projected here — their entries live in that preserved tail.
+    Both blocks are generated: `backends:` from section="backends" manifests
+    (routing targets) and `services:` from section="services" manifests
+    (infrastructure like the router — CI-built, never routed to). Each block
+    is sorted by name and rendering is deterministic, so `./dev sync` on a
+    clean tree is byte-stable. `current` is accepted for signature
+    compatibility but the file is fully a projection of the manifests.
     """
-    entries = "".join(
-        s.to_registry_entry()
-        for s in sorted(services, key=lambda s: s.name)
-        if s.section == "backends"
+    backends = [s for s in services if s.section == "backends"]
+    infra = [s for s in services if s.section == "services"]
+    text = registry.REGISTRY_HEADER + "".join(
+        s.to_registry_entry() for s in sorted(backends, key=lambda s: s.name)
     )
-    entry_lines = entries.splitlines()
-
-    if not current.strip():
-        return registry.REGISTRY_HEADER + entries
-
-    lines = current.splitlines()
-    bi = next(
-        (i for i, ln in enumerate(lines)
-         if ln.strip() == "backends:" and not ln.startswith(" ")),
-        None,
-    )
-    if bi is None:
-        # No backends section yet — prepend one, keep the rest untouched.
-        return "backends:\n" + entries + "\n" + current
-
-    # Walk past the current backend entries to find where the next section begins.
-    last_entry = bi
-    k = bi + 1
-    while k < len(lines):
-        stripped = lines[k].strip()
-        if stripped == "":
-            k += 1
-            continue
-        if not lines[k].startswith(" "):  # top-level comment or new section
-            break
-        last_entry = k
-        k += 1
-
-    header = lines[: bi + 1]
-    tail = lines[last_entry + 1:]
-    return "\n".join(header + entry_lines + tail) + "\n"
+    if infra:
+        text += SERVICES_COMMENT + "services:\n" + "".join(
+            s.to_registry_entry() for s in sorted(infra, key=lambda s: s.name)
+        )
+    return text
 
 
 def sync(repo_root: Path, check: bool = False) -> int:

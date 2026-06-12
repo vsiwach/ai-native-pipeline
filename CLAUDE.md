@@ -23,6 +23,11 @@ Services are pluggable: anything implementing the inference contract
 3. **Cost tiers**: every backend declares `tier: realtime|standard|batch` and
    `target: cpu|gpu` in `inference-registry.yaml`. Router decisions are
    config-driven, not hard-coded.
+3b. **Resources as code**: each service's container image and runtime
+   resources are declared in `services/<name>/service.py` (stdlib-only
+   manifest; Modal-style `Image` chaining). `inference-registry.yaml` is
+   GENERATED from these by `./dev sync` — never hand-edit it; CI fails on
+   drift (`./dev sync --check`).
 4. **Multi-cloud neutrality**: nothing may import a cloud vendor SDK inside a
    service. All cloud specifics live in `deploy/terraform/<vendor>/`.
 5. **One concern per PR.** Never mix infra and service changes.
@@ -35,8 +40,10 @@ Services are pluggable: anything implementing the inference contract
 ## Conventions
 - Conventional commits (`feat:`, `fix:`, `infra:`, `test:`)
 - Tests: unittest, in `<package>/tests/`, runnable via Bazel AND plain python
-- Every new service ships with: Dockerfile, BUILD.bazel, tests, registry entry,
-  README section, and a CI job that exercises its /healthz in a container
+- Every new service ships with: a `service.py` manifest, Dockerfile (rendered
+  from the manifest's Image), BUILD.bazel, tests, README section, and a CI job
+  that exercises its /healthz in a container — `./dev new service` generates
+  all of it and runs `./dev sync` for the registry entry
 
 ## Definition of done (every phase)
 1. `bazel test //...` green

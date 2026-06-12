@@ -59,6 +59,15 @@ class ServiceTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             manifest.service("a", "services/a", "batch", "tpu")
 
+    def test_rejects_bad_section(self):
+        with self.assertRaises(ValueError):
+            manifest.service("a", "services/a", "batch", "cpu",
+                             section="middleware")
+
+    def test_section_defaults_to_backends(self):
+        svc = manifest.service("a", "services/a", "batch", "cpu")
+        self.assertEqual(svc.section, "backends")
+
 
 class SyncTest(unittest.TestCase):
     def setUp(self):
@@ -92,6 +101,39 @@ class SyncTest(unittest.TestCase):
         # Mutate the file on disk -> drift -> check must fail.
         registry.registry_path(self.root).write_text("backends:\n")
         self.assertEqual(sync.sync(self.root, check=True), 1)
+
+    def test_check_fails_after_manifest_edit_without_resync(self):
+        sync.sync(self.root)
+        manifest_py = self.root / "services" / "foo" / "service.py"
+        manifest_py.write_text(
+            manifest_py.read_text().replace("'realtime'", "'batch'"))
+        self.assertEqual(sync.sync(self.root, check=True), 1)
+        sync.sync(self.root)  # regenerate -> clean again
+        self.assertEqual(sync.sync(self.root, check=True), 0)
+        self.assertEqual(registry.load(self.root)[0]["tier"], "batch")
+
+    def test_services_section_round_trip(self):
+        infra_dir = self.root / "services" / "gateway"
+        infra_dir.mkdir(parents=True)
+        (infra_dir / "service.py").write_text(
+            "import sys\n"
+            f"sys.path.insert(0, {str(Path(__file__).resolve().parent.parent)!r})\n"
+            "from manifest import service\n"
+            "SERVICE = service('gateway', 'services/gateway', 'realtime',\n"
+            "                   'cpu', scale_to_zero=False, section='services')\n"
+        )
+        self.assertEqual(sync.sync(self.root), 0)
+        infra = registry.load(self.root, section="services")
+        self.assertEqual(len(infra), 1)
+        self.assertEqual(infra[0]["name"], "gateway")
+        self.assertEqual(infra[0]["scale_to_zero"], "false")
+        # backends section still only holds routing targets
+        backends = registry.load(self.root)
+        self.assertEqual([b["name"] for b in backends], ["foo"])
+        # deterministic render: a second sync is a no-op
+        before = registry.registry_path(self.root).read_text()
+        sync.sync(self.root)
+        self.assertEqual(registry.registry_path(self.root).read_text(), before)
 
 
 if __name__ == "__main__":
