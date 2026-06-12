@@ -1,0 +1,21 @@
+"""Bazel module for the ai-native-pipeline monorepo.
+
+Hermetic Python 3.11 toolchain; pip deps come from the fully-pinned lock in
+tools/requirements/. Container builds stay in Docker/CI — Bazel owns build
+and test of Python code only.
+"""
+
+module(name = "ai_native_pipeline", version = "0.1.0")
+
+bazel_dep(name = "rules_python", version = "1.4.1")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.11", is_default = True)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pypi",
+    python_version = "3.11",
+    requirements_lock = "//tools/requirements:inference_lock.txt",
+)
+use_repo(pip, "pypi")

@@ -1,0 +1,30 @@
+# Tests only — the container build stays in Docker/CI (see Dockerfile).
+load("@pypi//:requirements.bzl", "requirement")
+
+py_library(
+    name = "inference_app",
+    srcs = glob(["inference_app/**/*.py"]),
+    data = ["sample_model/lin_reg_california_housing_model.joblib"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = [
+        requirement("fastapi"),
+        requirement("joblib"),
+        requirement("loguru"),
+        requirement("numpy"),
+        requirement("pydantic"),
+        requirement("scikit-learn"),
+    ],
+)
+
+py_test(
+    name = "inference_tests",
+    size = "medium",
+    srcs = glob(["tests/**/*.py"]),
+    main = "tests/bazel_runner.py",
+    deps = [
+        ":inference_app",
+        requirement("httpx"),
+        requirement("pytest"),
+    ],
+)

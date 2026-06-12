@@ -1,0 +1,23 @@
+# Vendored from eightBEC/fastapi-ml-skeleton (Apache-2.0); payload schema kept,
+# now served under /v1/predict with the same API-key auth.
+from fastapi import APIRouter, Depends
+from starlette.requests import Request
+
+from inference_app.core import security
+from inference_app.models.payload import HousePredictionPayload
+from inference_app.models.prediction import HousePredictionResult
+from inference_app.services.models import HousePriceModel
+
+router = APIRouter()
+
+
+@router.post("/predict", response_model=HousePredictionResult, name="predict")
+def post_predict(
+    request: Request,
+    block_data: HousePredictionPayload,
+    _: bool = Depends(security.validate_request),
+) -> HousePredictionResult:
+    model: HousePriceModel = request.app.state.model
+    prediction: HousePredictionResult = model.predict(block_data)
+
+    return prediction

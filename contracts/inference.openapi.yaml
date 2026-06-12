@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: Inference Service Contract
+  version: "1.0"
+  description: >
+    Every inference backend in this monorepo implements exactly this surface.
+    The router (services/router) is the only public entrypoint; it relies on
+    these three endpoints existing on every backend. Model-specific request
+    and response bodies for /v1/predict are declared per-service; everything
+    else is fixed.
+paths:
+  /healthz:
+    get:
+      summary: Liveness probe (unauthenticated)
+      operationId: healthz
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+  /v1/info:
+    get:
+      summary: Model identity and routing metadata (unauthenticated)
+      operationId: info
+      responses:
+        "200":
+          description: Identity used by the router and the registry
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [model, version, tier, target]
+                properties:
+                  model:
+                    type: string
+                    description: Backend name, must match inference-registry.yaml
+                  version:
+                    type: string
+                  tier:
+                    type: string
+                    enum: [realtime, standard, batch]
+                  target:
+                    type: string
+                    enum: [cpu, gpu]
+  /v1/predict:
+    post:
+      summary: Run inference (authenticated)
+      operationId: predict
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Model-specific payload, declared per-service.
+      responses:
+        "200":
+          description: Model-specific prediction result
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Missing API key
+        "401":
+          description: Invalid API key
+        "422":
+          description: Payload failed validation
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: token
+      description: Value of the INFERENCE_API_KEY env var on the backend.

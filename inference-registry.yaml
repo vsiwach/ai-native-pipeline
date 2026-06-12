@@ -1,0 +1,9 @@
+# Backend registry — the router reads this; never hard-code routing.
+# Managed by `./dev new service`, hand-edits welcome.
+backends:
+  house-price-reg:
+    path: services/inference
+    tier: standard
+    target: cpu
+    max_replicas: 3
+    scale_to_zero: true

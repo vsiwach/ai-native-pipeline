@@ -1,0 +1,5 @@
+-r ../../services/inference/requirements.txt
+
+# test-only deps (Bazel test env; not shipped in the container image)
+pytest==8.3.5
+httpx==0.28.1

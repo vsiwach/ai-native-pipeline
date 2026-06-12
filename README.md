@@ -24,6 +24,15 @@ deployment → dev-facing UX — using Claude Code, one phase per session.
 | `PHASE_4_multicloud_deploy.md` | Terraform: GCP Cloud Run + AWS App Runner + failover | large |
 | `PHASE_5_devtool_ux.md` | Dev dashboard (React, Claude-style design) over the pipeline | medium |
 
+## Architecture
+
+| Component | Path | Role |
+|---|---|---|
+| Inference contract | `contracts/inference.openapi.yaml` | The surface every backend implements (`/healthz`, `/v1/info`, `/v1/predict`) |
+| house-price-reg | `services/inference` | First backend — vendored from eightBEC/fastapi-ml-skeleton (Apache-2.0), standard tier, cpu |
+| Backend registry | `inference-registry.yaml` | Config-driven routing source of truth (tier, target, scaling) |
+| devkit | `tools/devkit` | `./dev` productivity CLI |
+
 ## Dev productivity: `./dev`
 
 The repo ships a single-command developer framework ([tools/devkit](tools/devkit/README.md),
