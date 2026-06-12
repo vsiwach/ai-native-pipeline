@@ -42,6 +42,7 @@ deployment → dev-facing UX — using Claude Code, one phase per session.
 | Multi-cloud IaC | `deploy/terraform` | one service interface, two implementations: GCP Cloud Run v2 + AWS App Runner; staging composes both clouds |
 | Deploy pipeline | `.github/workflows/deploy-multicloud.yml` | plan on PRs (commented), apply via dispatch only (OIDC, policy-gated); endpoint map auto-synced into routing policy |
 | MCP server | `tools/mcp_server.py` | agent tools: `get_cloud_endpoints`, `run_terraform_plan` (read-only) |
+| devboard | `tools/devboard` | zero-backend dashboard: pipeline, deployments (+gated deploy button), inference economics, agent activity |
 
 ## Dev productivity: `./dev`
 

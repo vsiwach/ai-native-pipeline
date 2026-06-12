@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>devboard — ai-native-pipeline</title>
+<style>
+  :root {
+    --bg: #FAF9F5; --ink: #141413; --muted: #595950; --accent: #D97757;
+    --ok: #2E7D4F; --fail: #C0392B; --hairline: #E8E6DD; --card: #FFFFFF;
+    --skeleton: #EFEDE6; --btn-bg: #98471F; --btn-ink: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161512; --ink: #ECEAE2; --muted: #A8A698; --accent: #D97757;
+      --ok: #5BA87A; --fail: #D5705F; --hairline: #2C2A25; --card: #1E1C18;
+      --skeleton: #26241F; --btn-bg: #D97757; --btn-ink: #141413;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+  }
+  h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 17px; margin: 0 0 4px; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 64px; }
+  header.top {
+    display: flex; align-items: baseline; gap: 14px; padding-bottom: 18px;
+    border-bottom: 1px solid var(--hairline); margin-bottom: 24px;
+  }
+  .top .sub { color: var(--muted); font-size: 13px; }
+  .top .spacer { flex: 1; }
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+  .panel {
+    grid-column: span 6; background: var(--card);
+    border: 1px solid var(--hairline); border-radius: 10px; padding: 18px 20px;
+  }
+  @media (max-width: 880px) { .panel { grid-column: span 12; } }
+  .panel .desc { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+  .row {
+    display: flex; align-items: center; gap: 10px; padding: 7px 0;
+    border-top: 1px solid var(--hairline); font-size: 13.5px;
+  }
+  .row:first-of-type { border-top: 0; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .dot.ok { background: var(--ok); } .dot.fail { background: var(--fail); }
+  .dot.run { background: var(--accent); }
+  .dot.neutral { background: var(--muted); }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 12px; color: var(--muted); }
+  .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+          white-space: nowrap; }
+  .muted { color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; }
+  .badge {
+    font-size: 10.5px; padding: 1.5px 7px; border-radius: 999px;
+    border: 1px solid var(--hairline); color: var(--muted);
+    text-transform: uppercase; letter-spacing: .04em; flex: none;
+  }
+  .badge.gcp { color: #2D5E9E; border-color: #2D5E9E; }
+  .badge.aws { color: #7A5712; border-color: #7A5712; }
+  @media (prefers-color-scheme: dark) {
+    .badge.gcp { color: #7FAEE8; border-color: #7FAEE8; }
+    .badge.aws { color: #D9AC54; border-color: #D9AC54; }
+  }
+  button.primary {
+    background: var(--btn-bg); color: var(--btn-ink); border: 0;
+    border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+  }
+  button.primary:hover { filter: brightness(.95); }
+  button.ghost {
+    background: none; border: 1px solid var(--hairline); color: var(--ink);
+    border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+  }
+  .skeleton {
+    height: 13px; border-radius: 6px; background: var(--skeleton);
+    animation: pulse 1.2s ease-in-out infinite; margin: 11px 0;
+  }
+  @keyframes pulse { 50% { opacity: .45; } }
+  .state { color: var(--muted); font-size: 13px; padding: 14px 0; }
+  .state.error { color: var(--fail); }
+  .statgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+              margin-bottom: 10px; }
+  .stat { border: 1px solid var(--hairline); border-radius: 8px;
+          padding: 10px 12px; }
+  .stat .v { font-size: 20px; font-family: Georgia, serif; }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase;
+             letter-spacing: .05em; }
+  .drawer-back { position: fixed; inset: 0; background: rgba(20,20,19,.35); }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 92vw);
+    background: var(--card); border-left: 1px solid var(--hairline);
+    padding: 26px 24px; overflow-y: auto;
+  }
+  .drawer label { display: block; font-size: 12px; color: var(--muted);
+                  margin: 14px 0 4px; }
+  .drawer input {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--hairline);
+    border-radius: 8px; background: var(--bg); color: var(--ink); font-size: 13px;
+  }
+  .dialog-back { position: fixed; inset: 0; background: rgba(20,20,19,.35);
+                 display: grid; place-items: center; }
+  .dialog {
+    background: var(--card); border: 1px solid var(--hairline);
+    border-radius: 12px; max-width: 480px; padding: 24px; margin: 16px;
+  }
+  .dialog blockquote {
+    margin: 12px 0; padding: 10px 14px; border-left: 3px solid var(--accent);
+    background: var(--bg); font-size: 12.5px; border-radius: 0 8px 8px 0;
+  }
+  .actions { display: flex; gap: 10px; justify-content: flex-end;
+             margin-top: 16px; }
+  .note { font-size: 11.5px; color: var(--muted); }
+  footer { margin-top: 28px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+import React from "https://esm.sh/react@18.3.1";
+import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+import htm from "https://esm.sh/htm@3.1.1";
+
+const html = htm.bind(React.createElement);
+const { useState, useEffect, useCallback, useRef } = React;
+
+const MOCK = new URLSearchParams(location.search).get("mock") === "true";
+const POLICY_LINE =
+  "staging-deploy: agent_allowed: true · requires_ci_green: true " +
+  "— governance/agent-policy.yaml";
+
+// ---------- data helpers ----------------------------------------------------
+const relTime = (iso) => {
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60) return `${s | 0}s ago`;
+  if (s < 3600) return `${(s / 60) | 0}m ago`;
+  if (s < 86400) return `${(s / 3600) | 0}h ago`;
+  return `${(s / 86400) | 0}d ago`;
+};
+
+const gh = async (settings, path) => {
+  const res = await fetch(`https://api.github.com${path}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      ...(settings.token ? { Authorization: `Bearer ${settings.token}` } : {}),
+    },
+  });
+  if (!res.ok) throw new Error(`GitHub ${res.status} on ${path}`);
+  return res.json();
+};
+
+// ---------- mock data (mock=true or no token set) ---------------------------
+const now = Date.now(), m = (min) => new Date(now - min * 60000).toISOString();
+const MOCK_DATA = {
+  runs: [
+    { id: 1, name: "containers", conclusion: "success", head_sha: "c1c1a4f33",
+      html_url: "#", updated_at: m(18) },
+    { id: 2, name: "deploy-staging", conclusion: "success", head_sha: "c1c1a4f33",
+      html_url: "#", updated_at: m(15) },
+    { id: 3, name: "containers", conclusion: "failure", head_sha: "bb2dc0144",
+      html_url: "#", updated_at: m(190) },
+  ],
+  prs: [
+    { number: 42, title: "feat: add sentiment backend behind the contract",
+      html_url: "#", user: { login: "vikram" }, created_at: m(95), draft: false },
+    { number: 41, title: "test: harden router policy engine edge cases [agent:test-gen]",
+      html_url: "#", user: { login: "claude[bot]" }, created_at: m(300), draft: true },
+  ],
+  deployments: [
+    { id: 11, environment: "staging", description: "cloud:gcp",
+      sha: "c1c1a4f33", created_at: m(60), statuses: "success" },
+    { id: 12, environment: "staging", description: "cloud:aws",
+      sha: "c1c1a4f33", created_at: m(58), statuses: "success" },
+    { id: 13, environment: "staging", description: "cloud:gcp",
+      sha: "bb2dc0144", created_at: m(1500), statuses: "failure" },
+  ],
+  costs: {
+    backends: {
+      "house-price-reg@gcp-cloudrun-cpu": {
+        model: "house-price-reg", provider: "gcp-cloudrun-cpu",
+        requests: 18234, cache_hits: 9120, cache_hit_rate: 0.333,
+        est_cost_usd: 0.0073, avg_latency_ms: 41.2 },
+      "house-price-reg@aws-apprunner-cpu": {
+        model: "house-price-reg", provider: "aws-apprunner-cpu",
+        requests: 4031, cache_hits: 1530, cache_hit_rate: 0.275,
+        est_cost_usd: 0.0019, avg_latency_ms: 56.8 },
+    },
+    total_requests: 22265, total_est_cost_usd: 0.0092,
+    cache: { hits: 10650, misses: 22265, hit_rate: 0.3235 },
+  },
+  agentPrs: {
+    merged: 14, agent: 5,
+    items: [
+      { number: 38, title: "test: contract tests for /v1/info [agent:test-gen]",
+        html_url: "#", merged_at: m(2000), humanEdited: false },
+      { number: 35, title: "infra: sync cloud endpoints after apply [agent:deploy]",
+        html_url: "#", merged_at: m(4300), humanEdited: false },
+      { number: 31, title: "test: batch queue restart safety [agent:test-gen]",
+        html_url: "#", merged_at: m(7000), humanEdited: true },
+    ],
+    humanEditRate: 0.2,
+  },
+};
+
+// ---------- tiny components -------------------------------------------------
+const Skeleton = ({ n = 4 }) => html`<div role="status" aria-label="loading">
+  ${Array.from({ length: n }, (_, i) =>
+    html`<div class="skeleton" key=${i} style=${{ width: `${88 - i * 9}%` }}></div>`)}
+</div>`;
+
+const Dot = ({ kind, label }) => html`
+  <span class=${`dot ${kind}`} role="img" aria-label=${label}></span>`;
+
+const Sparkline = ({ points, stroke }) => {
+  if (!points || points.length < 2) return html`<span class="muted note">—</span>`;
+  const w = 84, h = 22, max = Math.max(...points, 1), min = Math.min(...points);
+  const span = max - min || 1;
+  const d = points.map((p, i) =>
+    `${(i / (points.length - 1)) * w},${h - 2 - ((p - min) / span) * (h - 4)}`)
+    .join(" ");
+  return html`<svg width=${w} height=${h} viewBox=${`0 0 ${w} ${h}`}
+    role="img" aria-label="request trend sparkline">
+    <polyline points=${d} fill="none" stroke=${stroke || "var(--accent)"}
+      stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`;
+};
+
+const Panel = ({ title, desc, children }) => html`
+  <section class="panel" aria-label=${title}>
+    <h2>${title}</h2>
+    <p class="desc">${desc}</p>
+    ${children}
+  </section>`;
+
+const useAsync = (fn, deps) => {
+  const [state, set] = useState({ loading: true });
+  useEffect(() => {
+    let live = true;
+    set({ loading: true });
+    fn().then((data) => live && set({ data }))
+        .catch((error) => live && set({ error: String(error) }));
+    return () => { live = false; };
+  }, deps);
+  return state;
+};
+
+const States = ({ s, empty, children }) => {
+  if (s.loading) return html`<${Skeleton} />`;
+  if (s.error) return html`<div class="state error" role="alert">${s.error}</div>`;
+  if (!s.data || (Array.isArray(s.data) && !s.data.length))
+    return html`<div class="state">${empty}</div>`;
+  return children(s.data);
+};
+
+// ---------- panels -----------------------------------------------------------
+const runDot = (r) =>
+  r.conclusion === "success" ? ["ok", "passed"] :
+  r.conclusion ? ["fail", r.conclusion] : ["run", "in progress"];
+
+function PipelinePanel({ settings }) {
+  const s = useAsync(async () => {
+    if (MOCK || !settings.token)
+      return { runs: MOCK_DATA.runs, prs: MOCK_DATA.prs, mock: true };
+    const repo = `/repos/${settings.owner}/${settings.repo}`;
+    const [runs, prs] = await Promise.all([
+      gh(settings, `${repo}/actions/runs?branch=main&per_page=6`),
+      gh(settings, `${repo}/pulls?state=open&per_page=6`),
+    ]);
+    return { runs: runs.workflow_runs, prs };
+  }, [settings.token, settings.owner, settings.repo]);
+
+  return html`<${Panel} title="Pipeline"
+    desc="Latest CI on main, and open pull requests.">
+    <${States} s=${s} empty="No runs yet.">${(d) => html`
+      ${d.runs.map((r) => { const [k, label] = runDot(r); return html`
+        <div class="row" key=${r.id}>
+          <${Dot} kind=${k} label=${label} />
+          <a class="grow" href=${r.html_url} target="_blank" rel="noreferrer">
+            ${r.name}</a>
+          <span class="mono">${r.head_sha.slice(0, 7)}</span>
+          <span class="muted num">${relTime(r.updated_at)}</span>
+        </div>`; })}
+      ${d.prs.map((p) => html`
+        <div class="row" key=${`pr${p.number}`}>
+          <${Dot} kind=${p.draft ? "neutral" : "run"}
+            label=${p.draft ? "draft" : "open"} />
+          <a class="grow" href=${p.html_url} target="_blank" rel="noreferrer">
+            #${p.number} ${p.title}</a>
+          <span class="muted">${p.user.login}</span>
+          <span class="muted num">${relTime(p.created_at)}</span>
+        </div>`)}
+    `}<//>
+  <//>`;
+}
+
+function DeploymentsPanel({ settings }) {
+  const [confirming, setConfirming] = useState(false);
+  const [fired, setFired] = useState(null);
+
+  const s = useAsync(async () => {
+    if (MOCK || !settings.token) return MOCK_DATA.deployments;
+    const repo = `/repos/${settings.owner}/${settings.repo}`;
+    const deps = await gh(settings, `${repo}/deployments?per_page=8`);
+    return deps.map((d) => ({ ...d, statuses: "unknown" }));
+  }, [settings.token, settings.owner, settings.repo]);
+
+  const fire = async () => {
+    setConfirming(false);
+    if (MOCK || !settings.token) {
+      setFired("mock mode — would POST workflow_dispatch for deploy-staging");
+      return;
+    }
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${settings.owner}/${settings.repo}` +
+        `/actions/workflows/deploy-staging.yml/dispatches`,
+        { method: "POST",
+          headers: { Accept: "application/vnd.github+json",
+                     Authorization: `Bearer ${settings.token}` },
+          body: JSON.stringify({ ref: "main" }) });
+      setFired(res.status === 204
+        ? "workflow_dispatch fired — check the Actions tab"
+        : `dispatch failed: HTTP ${res.status}`);
+    } catch (e) { setFired(String(e)); }
+  };
+
+  const cloudOf = (d) =>
+    /aws/.test(d.description || "") ? "aws" :
+    /gcp/.test(d.description || "") ? "gcp" : null;
+
+  return html`<${Panel} title="Deployments"
+    desc="GitHub Deployments per environment, with cloud badges.">
+    <div style=${{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+      <button class="primary" onClick=${() => setConfirming(true)}
+        aria-haspopup="dialog">Deploy staging</button>
+    </div>
+    ${fired && html`<div class="state" role="status">${fired}</div>`}
+    <${States} s=${s} empty="No deployments recorded yet.">${(deps) => html`
+      ${deps.map((d) => html`
+        <div class="row" key=${d.id}>
+          <${Dot} kind=${d.statuses === "success" ? "ok" :
+                         d.statuses === "failure" ? "fail" : "neutral"}
+            label=${String(d.statuses)} />
+          <span class="grow">${d.environment}</span>
+          ${cloudOf(d) && html`<span class=${`badge ${cloudOf(d)}`}>
+            ${cloudOf(d)}</span>`}
+          <span class="mono">${(d.sha || "").slice(0, 7)}</span>
+          <span class="muted num">${relTime(d.created_at)}</span>
+        </div>`)}
+    `}<//>
+    ${confirming && html`
+      <div class="dialog-back" onClick=${() => setConfirming(false)}>
+        <div class="dialog" role="dialog" aria-modal="true"
+          aria-labelledby="dlg-t" onClick=${(e) => e.stopPropagation()}>
+          <h2 id="dlg-t">Deploy to staging?</h2>
+          <p>This fires <span class="mono">deploy-staging.yml</span> via
+            workflow_dispatch. You are invoking this governance policy:</p>
+          <blockquote>${POLICY_LINE}</blockquote>
+          <p class="note">The workflow itself re-verifies CI is green and
+            re-runs policy_check before deploying.</p>
+          <div class="actions">
+            <button class="ghost" onClick=${() => setConfirming(false)}>
+              Cancel</button>
+            <button class="primary" onClick=${fire}>Deploy staging</button>
+          </div>
+        </div>
+      </div>`}
+  <//>`;
+}
+
+function EconomicsPanel({ settings }) {
+  const [snap, setSnap] = useState(null);
+  const [error, setError] = useState(null);
+  const history = useRef({});
+
+  useEffect(() => {
+    let live = true;
+    const poll = async () => {
+      try {
+        let data;
+        if (MOCK || !settings.routerUrl) {
+          // drift the mock so sparklines move
+          data = JSON.parse(JSON.stringify(MOCK_DATA.costs));
+          for (const b of Object.values(data.backends))
+            b.requests += Math.round(Math.random() * 60);
+        } else {
+          const res = await fetch(`${settings.routerUrl}/v1/costs`);
+          if (!res.ok) throw new Error(`router ${res.status}`);
+          data = await res.json();
+        }
+        for (const [k, b] of Object.entries(data.backends || {})) {
+          (history.current[k] ||= []).push(b.requests);
+          history.current[k] = history.current[k].slice(-24);
+        }
+        if (live) { setSnap(data); setError(null); }
+      } catch (e) { if (live) setError(String(e)); }
+    };
+    poll();
+    const t = setInterval(poll, 5000);
+    return () => { live = false; clearInterval(t); };
+  }, [settings.routerUrl]);
+
+  return html`<${Panel} title="Inference economics"
+    desc="Live from the router’s /v1/costs — polled every 5s.">
+    ${error && html`<div class="state error" role="alert">${error}</div>`}
+    ${!snap && !error && html`<${Skeleton} />`}
+    ${snap && html`
+      <div class="statgrid">
+        <div class="stat"><div class="v num">
+          ${snap.total_requests.toLocaleString()}</div>
+          <div class="k">requests</div></div>
+        <div class="stat"><div class="v num">
+          $${(snap.total_est_cost_usd ?? 0).toFixed(4)}</div>
+          <div class="k">est. spend</div></div>
+        <div class="stat"><div class="v num">
+          ${Math.round((snap.cache?.hit_rate ?? 0) * 100)}%</div>
+          <div class="k">cache hits</div></div>
+      </div>
+      ${Object.entries(snap.backends || {}).map(([k, b]) => html`
+        <div class="row" key=${k}>
+          <span class="grow">${b.model}
+            <span class="muted">· ${b.provider}</span></span>
+          <${Sparkline} points=${history.current[k]} />
+          <span class="num" style=${{ width: 70, textAlign: "right" }}>
+            ${b.requests.toLocaleString()}</span>
+          <span class="muted num" style=${{ width: 64, textAlign: "right" }}>
+            $${b.est_cost_usd.toFixed(4)}</span>
+          <span class="muted num" style=${{ width: 42, textAlign: "right" }}>
+            ${Math.round(b.cache_hit_rate * 100)}%</span>
+        </div>`)}
+      ${!Object.keys(snap.backends || {}).length &&
+        html`<div class="state">No traffic yet — send a prediction through
+          the router.</div>`}`}
+  <//>`;
+}
+
+function AgentPanel({ settings }) {
+  const s = useAsync(async () => {
+    if (MOCK || !settings.token) return MOCK_DATA.agentPrs;
+    const since = new Date(Date.now() - 14 * 86400000)
+      .toISOString().slice(0, 10);
+    const q = encodeURIComponent(
+      `repo:${settings.owner}/${settings.repo} is:pr is:merged merged:>=${since}`);
+    const res = await gh(settings, `/search/issues?q=${q}&per_page=50`);
+    const agent = res.items.filter((p) =>
+      /\[agent:[^\]]+\]/.test(`${p.title} ${p.body || ""}`));
+    return {
+      merged: res.total_count, agent: agent.length,
+      humanEditRate: null, // needs per-PR commit authors; see metrics/dora.py
+      items: agent.slice(0, 6).map((p) => ({
+        number: p.number, title: p.title, html_url: p.html_url,
+        merged_at: p.closed_at, humanEdited: null })),
+    };
+  }, [settings.token, settings.owner, settings.repo]);
+
+  return html`<${Panel} title="Agent activity"
+    desc="Merged PRs with [agent:*] trailers, last 14 days.">
+    <${States} s=${s} empty="No merged PRs in the window.">${(d) => html`
+      <div class="statgrid">
+        <div class="stat"><div class="v num">${d.agent}<span class="muted"
+          style=${{ fontSize: 13 }}> / ${d.merged}</span></div>
+          <div class="k">agent-authored</div></div>
+        <div class="stat"><div class="v num">
+          ${d.merged ? Math.round((d.agent / d.merged) * 100) : 0}%</div>
+          <div class="k">agent share</div></div>
+        <div class="stat"><div class="v num">
+          ${d.humanEditRate == null ? "—"
+            : `${Math.round(d.humanEditRate * 100)}%`}</div>
+          <div class="k">human-edit rate</div></div>
+      </div>
+      ${d.items.map((p) => html`
+        <div class="row" key=${p.number}>
+          <${Dot} kind="ok" label="merged" />
+          <a class="grow" href=${p.html_url} target="_blank" rel="noreferrer">
+            #${p.number} ${p.title}</a>
+          ${p.humanEdited && html`<span class="badge">human-edited</span>`}
+          <span class="muted num">${relTime(p.merged_at)}</span>
+        </div>`)}
+    `}<//>
+  <//>`;
+}
+
+// ---------- settings drawer --------------------------------------------------
+function Drawer({ settings, onChange, onClose }) {
+  const first = useRef(null);
+  useEffect(() => first.current?.focus(), []);
+  const bind = (k) => ({
+    value: settings[k] || "",
+    onChange: (e) => onChange({ ...settings, [k]: e.target.value }),
+  });
+  return html`
+    <div class="drawer-back" onClick=${onClose}>
+      <div class="drawer" role="dialog" aria-modal="true"
+        aria-label="Settings" onClick=${(e) => e.stopPropagation()}>
+        <h2>Settings</h2>
+        <label for="s-owner">GitHub owner</label>
+        <input id="s-owner" ref=${first} ...${bind("owner")}
+          placeholder="my-github-user" />
+        <label for="s-repo">Repository</label>
+        <input id="s-repo" ...${bind("repo")} placeholder="ai-native-pipeline" />
+        <label for="s-token">Personal access token</label>
+        <input id="s-token" type="password" autocomplete="off"
+          ...${bind("token")} placeholder="ghp_…" />
+        <p class="note">Kept in memory only — never written to localStorage
+          or anywhere else. Refresh forgets it.</p>
+        <label for="s-router">Router URL (for /v1/costs)</label>
+        <input id="s-router" ...${bind("routerUrl")}
+          placeholder="http://localhost:8090" />
+        <div class="actions">
+          <button class="primary" onClick=${onClose}>Done</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ---------- app ---------------------------------------------------------------
+function App() {
+  const [settings, setSettings] = useState({
+    owner: localStorage.getItem("db.owner") || "",
+    repo: localStorage.getItem("db.repo") || "ai-native-pipeline",
+    routerUrl: localStorage.getItem("db.router") || "",
+    token: "", // memory only, by design
+  });
+  const [drawer, setDrawer] = useState(false);
+
+  const update = useCallback((next) => {
+    setSettings(next);
+    localStorage.setItem("db.owner", next.owner || "");
+    localStorage.setItem("db.repo", next.repo || "");
+    localStorage.setItem("db.router", next.routerUrl || "");
+    // deliberately NOT the token
+  }, []);
+
+  return html`
+    <div class="wrap">
+      <header class="top">
+        <h1>devboard</h1>
+        <span class="sub">ai-native-pipeline · coding → CI → routing → clouds</span>
+        ${(MOCK || !settings.token) && html`
+          <span class="badge" title="set a token in settings for live data">
+            ${MOCK ? "mock data" : "no token — showing mock"}</span>`}
+        <span class="spacer"></span>
+        <button class="ghost" onClick=${() => setDrawer(true)}
+          aria-haspopup="dialog">Settings</button>
+      </header>
+      <main class="grid">
+        <${PipelinePanel} settings=${settings} />
+        <${DeploymentsPanel} settings=${settings} />
+        <${EconomicsPanel} settings=${settings} />
+        <${AgentPanel} settings=${settings} />
+      </main>
+      <footer>
+        Decisions are config: inference-registry.yaml + routing-policy.yaml.
+        Agents are governed: governance/agent-policy.yaml.
+      </footer>
+      ${drawer && html`<${Drawer} settings=${settings}
+        onChange=${update} onClose=${() => setDrawer(false)} />`}
+    </div>`;
+}
+
+createRoot(document.getElementById("root")).render(html`<${App} />`);
+</script>
+</body>
+</html>
