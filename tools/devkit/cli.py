@@ -15,6 +15,7 @@ Commands:
 """
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -68,6 +69,44 @@ def cmd_new_service(args) -> int:
     return 0
 
 
+def _chat(port: int, prompt: str, model: str, stream: bool) -> int:
+    """POST a chat completion to a running LLM service (stdlib only)."""
+    url = f"http://127.0.0.1:{port}/v1/chat/completions"
+    payload = json.dumps({
+        "model": model, "stream": stream, "max_tokens": 48,
+        "messages": [{"role": "user", "content": prompt}],
+    }).encode()
+    req = urllib.request.Request(url, data=payload,
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            cache = resp.headers.get("X-Cache", "?")
+            ttft = resp.headers.get("X-TTFT-Ms", "?")
+            if stream:
+                ui.heading(f"streaming (cache={cache}, ttft={ttft}ms)")
+                for raw in resp:
+                    line = raw.decode().strip()
+                    if not line.startswith("data:") or line == "data: [DONE]":
+                        continue
+                    delta = json.loads(line[5:]).get("choices", [{}])[0]
+                    sys.stdout.write(delta.get("delta", {}).get("content", ""))
+                    sys.stdout.flush()
+                print()
+            else:
+                body = json.loads(resp.read())
+                print(body["choices"][0]["message"]["content"])
+                ui.info(f"cache={cache}  ttft={ttft}ms  "
+                        f"tokens={body['usage']['completion_tokens']}")
+        return 0
+    except (urllib.error.URLError, OSError) as exc:
+        ui.fail(f"chat failed ({exc}); is the service running? `./dev run {model}`")
+        return 1
+
+
+def cmd_chat(args) -> int:
+    return _chat(args.port, args.prompt, args.model, args.stream)
+
+
 def cmd_run(args) -> int:
     if not shutil.which("docker"):
         ui.fail("docker not installed")
@@ -94,11 +133,28 @@ def cmd_run(args) -> int:
         return 1
 
     ui.heading("Probing /healthz")
+
+    def _capabilities(port: int) -> list:
+        try:
+            with urllib.request.urlopen(
+                    f"http://127.0.0.1:{port}/v1/info", timeout=2) as resp:
+                return json.loads(resp.read()).get("capabilities", [])
+        except (urllib.error.URLError, OSError, ValueError):
+            return []
+
     for _ in range(20):
         try:
             with urllib.request.urlopen(f"http://127.0.0.1:{port}/healthz", timeout=2):
                 ui.ok(f"{name} is healthy at http://127.0.0.1:{port}")
-                print(f"\n  try:  curl -s http://127.0.0.1:{port}/v1/info")
+                # chat-capable backend? boot a sample chat (Phase 6 acceptance).
+                caps = _capabilities(port)
+                if "chat" in caps:
+                    ui.heading("sample chat")
+                    _chat(port, "In one sentence, what is prefill vs decode?",
+                          name, stream=True)
+                    print(f"\n  more: ./dev chat \"your prompt\" --port {port}")
+                else:
+                    print(f"\n  try:  curl -s http://127.0.0.1:{port}/v1/info")
                 print(f"  stop: docker rm -f {container}")
                 return 0
         except (urllib.error.URLError, OSError):
@@ -143,6 +199,12 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("name")
     p_run.add_argument("--port", type=int, default=8080)
 
+    p_chat = sub.add_parser("chat", help="send a chat completion to a running LLM service")
+    p_chat.add_argument("prompt")
+    p_chat.add_argument("--port", type=int, default=8080)
+    p_chat.add_argument("--model", default="llm-sim")
+    p_chat.add_argument("--stream", action="store_true")
+
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
@@ -158,6 +220,7 @@ def main(argv: list[str] | None = None) -> int:
                          else sync.sync(REPO_ROOT, check=args.check)),
         "new": lambda: cmd_new_service(args),
         "run": lambda: cmd_run(args),
+        "chat": lambda: cmd_chat(args),
     }
     return dispatch[args.command]()
 

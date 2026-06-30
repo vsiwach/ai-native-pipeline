@@ -43,6 +43,7 @@ from dataclasses import dataclass, field
 
 VALID_TIERS = ("realtime", "standard", "batch")
 VALID_TARGETS = ("cpu", "gpu")
+VALID_ENGINES = ("max", "sklearn")
 
 
 class Image:
@@ -141,6 +142,14 @@ class Service:
     # 'backends' = routing target behind the router; 'services' =
     # infrastructure (e.g. the router itself) — CI-built, never routed to.
     section: str = "backends"
+    # --- LLM serving fields (Phase 6+). Optional: only emitted to the registry
+    # when set, so non-LLM entries stay byte-identical. engine selects the
+    # BackendAdapter; cold_start_s / kv_ttl_s parameterize the simulator's
+    # economics; model_id is the HF id a real `max serve` would load.
+    engine: str | None = None        # max | sklearn
+    cold_start_s: float | None = None
+    kv_ttl_s: float | None = None
+    model_id: str | None = None
 
     def __post_init__(self) -> None:
         if self.tier not in VALID_TIERS:
@@ -153,29 +162,46 @@ class Service:
             raise ValueError(
                 f"section must be 'backends' or 'services', got {self.section!r}"
             )
+        if self.engine is not None and self.engine not in VALID_ENGINES:
+            raise ValueError(
+                f"engine must be one of {VALID_ENGINES}, got {self.engine!r}"
+            )
 
     def to_registry_entry(self) -> str:
         """Render this service as its inference-registry.yaml block.
 
         Byte-compatible with what `registry.add` writes, so generating the
-        registry from manifests reproduces a hand-written one exactly.
+        registry from manifests reproduces a hand-written one exactly. Optional
+        LLM fields are appended only when set.
         """
-        return (
-            f"  {self.name}:\n"
-            f"    path: {self.path}\n"
-            f"    tier: {self.tier}\n"
-            f"    target: {self.target}\n"
-            f"    max_replicas: {self.max_replicas}\n"
-            f"    scale_to_zero: {'true' if self.scale_to_zero else 'false'}\n"
-        )
+        lines = [
+            f"  {self.name}:\n",
+            f"    path: {self.path}\n",
+            f"    tier: {self.tier}\n",
+            f"    target: {self.target}\n",
+            f"    max_replicas: {self.max_replicas}\n",
+            f"    scale_to_zero: {'true' if self.scale_to_zero else 'false'}\n",
+        ]
+        if self.engine is not None:
+            lines.append(f"    engine: {self.engine}\n")
+        if self.model_id is not None:
+            lines.append(f"    model_id: {self.model_id}\n")
+        if self.cold_start_s is not None:
+            lines.append(f"    cold_start_s: {self.cold_start_s}\n")
+        if self.kv_ttl_s is not None:
+            lines.append(f"    kv_ttl_s: {self.kv_ttl_s}\n")
+        return "".join(lines)
 
 
 def service(name: str, path: str, tier: str, target: str,
             max_replicas: int = 3, scale_to_zero: bool = True,
-            image: Image | None = None, section: str = "backends") -> Service:
+            image: Image | None = None, section: str = "backends",
+            engine: str | None = None, cold_start_s: float | None = None,
+            kv_ttl_s: float | None = None, model_id: str | None = None) -> Service:
     """Declare a service. Thin wrapper over Service for a Modal-like call site."""
     return Service(
         name=name, path=path, tier=tier, target=target,
         max_replicas=max_replicas, scale_to_zero=scale_to_zero, image=image,
-        section=section,
+        section=section, engine=engine, cold_start_s=cold_start_s,
+        kv_ttl_s=kv_ttl_s, model_id=model_id,
     )

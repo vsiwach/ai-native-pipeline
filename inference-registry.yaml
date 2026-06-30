@@ -8,6 +8,16 @@ backends:
     target: cpu
     max_replicas: 3
     scale_to_zero: true
+  llm-sim:
+    path: services/llm
+    tier: realtime
+    target: cpu
+    max_replicas: 3
+    scale_to_zero: true
+    engine: max
+    model_id: google/gemma-3-12b-it
+    cold_start_s: 8.0
+    kv_ttl_s: 300.0
 
 # Infrastructure services: built and smoke-tested by the same CI matrix,
 # but never routing targets.

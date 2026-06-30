@@ -64,6 +64,36 @@ class ServiceTest(unittest.TestCase):
             manifest.service("a", "services/a", "batch", "cpu",
                              section="middleware")
 
+    def test_rejects_bad_engine(self):
+        with self.assertRaises(ValueError):
+            manifest.service("a", "services/a", "realtime", "cpu",
+                             engine="vllm")
+
+    def test_llm_fields_omitted_when_unset_keeps_entry_byte_stable(self):
+        # a non-LLM service must render exactly as before (no new lines)
+        svc = manifest.service("foo", "services/foo", "standard", "cpu")
+        self.assertNotIn("engine:", svc.to_registry_entry())
+        self.assertNotIn("cold_start_s:", svc.to_registry_entry())
+
+    def test_llm_fields_render_in_order_when_set(self):
+        svc = manifest.service(
+            "llm-sim", "services/llm", "realtime", "cpu", engine="max",
+            model_id="google/gemma-3-12b-it", cold_start_s=8.0, kv_ttl_s=300.0,
+        )
+        self.assertEqual(
+            svc.to_registry_entry(),
+            "  llm-sim:\n"
+            "    path: services/llm\n"
+            "    tier: realtime\n"
+            "    target: cpu\n"
+            "    max_replicas: 3\n"
+            "    scale_to_zero: true\n"
+            "    engine: max\n"
+            "    model_id: google/gemma-3-12b-it\n"
+            "    cold_start_s: 8.0\n"
+            "    kv_ttl_s: 300.0\n",
+        )
+
     def test_section_defaults_to_backends(self):
         svc = manifest.service("a", "services/a", "batch", "cpu")
         self.assertEqual(svc.section, "backends")

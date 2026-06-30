@@ -1,8 +1,11 @@
-# Local demo of the full stack: router + inference backend.
+# Local demo of the full stack: router + sklearn backend + LLM (MAX sim).
 #   docker compose up --build
+#   # legacy predict via the router:
 #   curl -X POST 'localhost:8090/v1/predict?model=house-price-reg' \
 #     -H 'token: local-dev-key' -H 'Content-Type: application/json' \
 #     -d @services/inference/docs/sample_payload.json
+#   # streaming chat straight from the no-GPU MAX simulator:
+#   ./dev chat "what is prefill vs decode?" --port 8100 --stream
 services:
   inference:
     build:
@@ -11,6 +14,19 @@ services:
     environment:
       INFERENCE_API_KEY: local-dev-key
     # internal only — the router is the single public entrypoint
+
+  llm:
+    build:
+      context: .
+      dockerfile: services/llm/Dockerfile
+    ports:
+      - "8100:8080"   # exposed so you can hit the OpenAI-compatible API directly
+    environment:
+      ENGINE: max      # max (sim) | sklearn ; flip TARGET=gpu + MAX_BASE_URL for real max serve
+      TARGET: cpu
+      MODEL_NAME: llm-sim
+      COLD_START_S: "8.0"
+      KV_TTL_S: "300.0"
 
   router:
     build:
