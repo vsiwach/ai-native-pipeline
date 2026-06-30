@@ -38,4 +38,16 @@ def load_policy(path: Path | None = None) -> dict:
     data.setdefault("cost_table", {})
     data.setdefault("cache", {"enabled": False})
     data.setdefault("endpoints", {})
+    data.setdefault("affinity", {"enabled": False, "prefix_tokens": 32,
+                                 "capacity": 8})
     return data
+
+
+def replicas_for(policy: dict, model: str) -> list[dict]:
+    """Endpoint entries for a model as replica dicts: each gets a stable `id`
+    (defaults to the url) so the affinity ring and KV state can key on it."""
+    out = []
+    for ep in policy.get("endpoints", {}).get(model, []):
+        out.append({"id": ep.get("id", ep["url"]), "provider": ep["provider"],
+                    "url": ep["url"]})
+    return out

@@ -21,9 +21,11 @@ from router_app import config as cfg
 from router_app.batch import BatchQueue, BatchWorker
 from router_app.cache import TTLCache, cache_key
 from router_app.costs import CostLedger
+from router_app.events import EventLog
 from router_app.health import HealthPoller
+from router_app.kvstate import KVState
 from router_app.policy import (NoHealthyBackend, UnknownModel, resolve_tier,
-                               select)
+                               select, select_replica)
 
 ROUTER_VERSION = "1.0"
 FORWARDED_HEADERS = ("token",)
@@ -35,6 +37,7 @@ class RouterState:
         self.registry_path = registry_path
         self.policy_path = policy_path
         self.ledger = CostLedger()
+        self.events = EventLog()
         self.reload()
         self.poller = HealthPoller(
             get_endpoints=lambda: self.policy["endpoints"],
@@ -54,6 +57,61 @@ class RouterState:
         cache_cfg = self.policy["cache"]
         self.cache = TTLCache(ttl_s=float(cache_cfg.get("ttl_s", 300)),
                               enabled=bool(cache_cfg.get("enabled", True)))
+        # KV/prefix state shared across reloads would lose warmth; keep it if
+        # present, else create with the configured TTL.
+        ttl = float(cache_cfg.get("ttl_s", 300))
+        if getattr(self, "kvstate", None) is None:
+            self.kvstate = KVState(kv_ttl_s=ttl)
+        else:
+            self.kvstate.kv_ttl_s = ttl
+
+    def proxy_chat(self, model: str, body: dict, headers: dict):
+        """Select a replica with prefix affinity, forward the chat completion,
+        record LLM economics, and return (httpx.Response, ReplicaChoice).
+        Raises UnknownModel / NoHealthyBackend."""
+        if model not in self.registry:
+            raise UnknownModel(model)
+        replicas = cfg.replicas_for(self.policy, model)
+        if not replicas:
+            raise NoHealthyBackend(model)
+        prompt = "\n".join(m.get("content", "")
+                           for m in body.get("messages", []))
+        tier = self.registry[model].get("tier", "realtime")
+        tier_rules = self.policy["tiers"].get(tier, {})
+        affinity = self.policy.get("affinity", {})
+
+        choice = select_replica(
+            prompt, replicas, is_usable=lambda u: self.poller.status_for(u).usable,
+            kvstate=self.kvstate, tier_rules=tier_rules,
+            cost_of=lambda p: float(self.policy["cost_table"].get(p, 0.0)),
+            affinity_cfg=affinity, capacity=int(affinity.get("capacity", 8)),
+            latency_of=lambda u: self.poller.status_for(u).p50_ms)
+
+        self.kvstate.inc_pending(choice.replica_id)
+        try:
+            fwd = {k: v for k, v in headers.items()
+                   if k.lower() in FORWARDED_HEADERS}
+            resp = httpx.post(f"{choice.url}/v1/chat/completions", json=body,
+                              headers=fwd, timeout=120)
+            ttft = float(resp.headers.get("X-TTFT-Ms", 0.0))
+            tps = float(resp.headers.get("X-Tokens-Per-Sec", 0.0))
+            cost = float(resp.headers.get("X-Est-Cost", 0.0))
+            prompt_tokens = int(resp.headers.get("X-Prompt-Tokens", 0))
+            completion_tokens = int(resp.headers.get("X-Completion-Tokens", 0))
+            backend_hit = resp.headers.get("X-Cache") == "hit"
+        finally:
+            self.kvstate.dec_pending(choice.replica_id)
+        # record what the replica now holds (warm + prefix cached)
+        self.kvstate.record_prefix(choice.replica_id, choice.prefix)
+        self.ledger.record_llm(
+            model, choice.provider, est_cost_usd=cost,
+            cache_hit=choice.cache_hit or backend_hit, ttft_ms=ttft,
+            tokens_per_sec=tps, prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens)
+        self.events.emit("route", model=model, replica=choice.replica_id,
+                         provider=choice.provider, cache_hit=choice.cache_hit,
+                         reason=choice.reason, ttft_ms=ttft)
+        return resp, choice
 
     # ---- core proxy path (shared by live predict and batch worker) ----
 
@@ -197,6 +255,43 @@ def get_app(registry_path: Path | None = None,
         return JSONResponse(content=body, headers={
             "X-Cache": "miss", "X-Backend": choice.provider,
             "X-Est-Cost": f"{choice.est_cost_usd:.10f}"})
+
+    @app.post("/v1/chat/completions")
+    async def chat_completions(request: Request,
+                               model: str = Query(default=None)):
+        try:
+            body = await request.json()
+        except json.JSONDecodeError:
+            return _error(400, "invalid_json", "request body must be JSON")
+        model = model or body.get("model")
+        try:
+            resp, choice = state.proxy_chat(model, body, dict(request.headers))
+        except UnknownModel:
+            return _error(404, "unknown_model",
+                          f"model '{model}' is not in inference-registry.yaml",
+                          model=model)
+        except NoHealthyBackend as exc:
+            return _error(503, "no_healthy_backend",
+                          f"no healthy replica for model '{model}': {exc}",
+                          model=model)
+        except httpx.HTTPError as exc:
+            return _error(502, "backend_error", f"chat backend failed: {exc}",
+                          model=model)
+        headers = {
+            "X-Backend": choice.provider, "X-Replica": choice.replica_id,
+            "X-Cache": "hit" if choice.cache_hit else "miss",
+            "X-Route-Reason": choice.reason,
+        }
+        media = resp.headers.get("content-type", "application/json")
+        if media.startswith("text/event-stream"):
+            return Response(content=resp.content, media_type=media,
+                            headers=headers)
+        return JSONResponse(content=resp.json(), headers=headers)
+
+    @app.get("/v1/events")
+    def events(limit: int = 100, kind: str | None = None):
+        return {"events": state.events.recent(limit, kind),
+                "counts": state.events.kinds()}
 
     @app.post("/v1/batch")
     async def submit_batch(request: Request, model: str = Query(...)):

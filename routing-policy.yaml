@@ -1,8 +1,10 @@
 # Routing policy — the router's only decision input besides the registry.
 # Ops maintains cost_table; Phase 4's deploy pipeline appends cloud endpoints.
 tiers:
-  realtime: {max_latency_ms: 250, prefer: lowest_latency}
-  standard: {max_latency_ms: 2000, prefer: lowest_cost}
+  # ttft_ms / tpot_ms are the LLM SLOs (time-to-first-token, time-per-output-
+  # token) the router routes and (Phase 8) autoscales against.
+  realtime: {max_latency_ms: 250, prefer: lowest_latency, ttft_ms: 500, tpot_ms: 40}
+  standard: {max_latency_ms: 2000, prefer: lowest_cost, ttft_ms: 2000, tpot_ms: 80}
   batch: {max_latency_ms: null, prefer: lowest_cost, queue: true}
 
 cost_table: # $/1M requests, maintained by ops — router just reads it
@@ -12,9 +14,18 @@ cost_table: # $/1M requests, maintained by ops — router just reads it
 
 cache: {enabled: true, ttl_s: 300, backend: in_memory} # swap for redis later
 
-# Backend endpoints per model. provider must be a cost_table key.
+# Stateful KV/prefix-aware routing (Phase 7). consistent_hash keeps a prompt
+# prefix landing on the same replica so its KV is a hit, not an expensive
+# prefill; on that replica failing, traffic re-lands consistently elsewhere.
+affinity: {enabled: true, prefix_tokens: 32, strategy: consistent_hash, capacity: 8}
+
+# Backend endpoints per model. Each entry is a replica: optional `id`
+# (defaults to url), a `provider` (a cost_table key), and a `url`.
 # deploy/terraform's endpoint sync appends real cloud URLs after apply.
 endpoints:
   house-price-reg:
     - provider: local-docker
       url: http://inference:8080
+  llm-sim:
+    - provider: local-docker
+      url: http://llm:8080
