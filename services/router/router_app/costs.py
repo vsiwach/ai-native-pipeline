@@ -26,7 +26,7 @@ class CostLedger:
             "cache_hits": 0, "served": 0, "est_cost_usd": 0.0,
             "latency_ms_sum": 0.0, "latency_samples": 0, "ttft_ms_sum": 0.0,
             "ttft_samples": 0, "tps_sum": 0.0, "tps_samples": 0,
-            "prompt_tokens": 0, "completion_tokens": 0,
+            "prompt_tokens": 0, "completion_tokens": 0, "slo_met": 0,
         })
 
     def record(self, model: str, provider: str, est_cost_usd: float,
@@ -48,7 +48,8 @@ class CostLedger:
 
     def record_llm(self, model: str, provider: str, *, est_cost_usd: float,
                    cache_hit: bool, ttft_ms: float, tokens_per_sec: float,
-                   prompt_tokens: int, completion_tokens: int) -> None:
+                   prompt_tokens: int, completion_tokens: int,
+                   slo_met: bool = True) -> None:
         # LLM path: a KV/prefix hit is still a backend request (just a cheap
         # one), so it counts toward both `requests` and `served`.
         with self._lock:
@@ -57,6 +58,8 @@ class CostLedger:
             entry["served"] += 1
             if cache_hit:
                 entry["cache_hits"] += 1
+            if slo_met:
+                entry["slo_met"] += 1
             entry["est_cost_usd"] += est_cost_usd
             entry["ttft_ms_sum"] += ttft_ms
             entry["ttft_samples"] += 1
@@ -88,6 +91,8 @@ class CostLedger:
                     "prompt_tokens": e["prompt_tokens"],
                     "completion_tokens": e["completion_tokens"],
                     "usd_per_1m_tokens": usd_per_1m,
+                    "goodput": (round(e["slo_met"] / e["requests"], 4)
+                                if e["requests"] else None),
                 }
             return {
                 "backends": backends,

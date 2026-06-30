@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>devboard — LLM control surface</title>
+<style>
+  :root {
+    --bg: #FAF9F5; --ink: #141413; --muted: #595950; --accent: #D97757;
+    --ok: #2E7D4F; --fail: #C0392B; --warn: #7A5212; --hairline: #E8E6DD;
+    --card: #FFFFFF; --skeleton: #EFEDE6; --btn-bg: #98471F; --btn-ink: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161512; --ink: #ECEAE2; --muted: #A8A698; --accent: #D97757;
+      --ok: #5BA87A; --fail: #D5705F; --warn: #D9AC54; --hairline: #2C2A25;
+      --card: #1E1C18; --skeleton: #26241F; --btn-bg: #D97757; --btn-ink: #141413;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  h1, h2 { font-family: Georgia, serif; font-weight: 500; }
+  h1 { font-size: 22px; margin: 0; } h2 { font-size: 17px; margin: 0 0 4px; }
+  a { color: var(--accent); } a:focus-visible, button:focus-visible,
+  input:focus-visible, select:focus-visible { outline: 2px solid var(--accent);
+    outline-offset: 2px; border-radius: 4px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 64px; }
+  header.top { display: flex; align-items: baseline; gap: 14px;
+    padding-bottom: 18px; border-bottom: 1px solid var(--hairline); margin-bottom: 24px; }
+  .top .sub { color: var(--muted); font-size: 13px; } .top .spacer { flex: 1; }
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+  .panel { grid-column: span 12; background: var(--card);
+    border: 1px solid var(--hairline); border-radius: 10px; padding: 18px 20px; }
+  .panel.half { grid-column: span 6; }
+  @media (max-width: 880px) { .panel.half { grid-column: span 12; } }
+  .panel .desc { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 6px 8px; border-top: 1px solid var(--hairline); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--muted); font-weight: 500; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .04em; }
+  .num { font-variant-numeric: tabular-nums; }
+  .statgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+    margin-bottom: 14px; }
+  .stat { border: 1px solid var(--hairline); border-radius: 8px; padding: 10px 12px; }
+  .stat .v { font-size: 21px; font-family: Georgia, serif; }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .05em; }
+  .pill { font-size: 11px; padding: 1px 8px; border-radius: 999px;
+    border: 1px solid var(--hairline); color: var(--muted); }
+  .pill.ok { color: var(--ok); border-color: var(--ok); }
+  .pill.bad { color: var(--fail); border-color: var(--fail); }
+  .pill.warn { color: var(--warn); border-color: var(--warn); }
+  button.primary { background: var(--btn-bg); color: var(--btn-ink); border: 0;
+    border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; }
+  button.ghost { background: none; border: 1px solid var(--hairline);
+    color: var(--ink); border-radius: 8px; padding: 6px 12px; font-size: 13px;
+    cursor: pointer; }
+  input, select { padding: 6px 9px; border: 1px solid var(--hairline);
+    border-radius: 7px; background: var(--bg); color: var(--ink); font-size: 13px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 7px 0;
+    border-top: 1px solid var(--hairline); font-size: 13px; }
+  .row:first-of-type { border-top: 0; } .grow { flex: 1; min-width: 0; }
+  .muted { color: var(--muted); } .mono { font-family: ui-monospace, Menlo, monospace;
+    font-size: 12px; }
+  .bar { height: 7px; border-radius: 4px; background: var(--skeleton); overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px;
+    flex-wrap: wrap; }
+  .state { color: var(--muted); padding: 12px 0; } .incident { border-left: 3px solid var(--fail);
+    padding: 8px 12px; margin: 8px 0; background: var(--bg); border-radius: 0 8px 8px 0; }
+  .incident.resolved { border-left-color: var(--ok); }
+  footer { margin-top: 26px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+import React from "https://esm.sh/react@18.3.1";
+import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+import htm from "https://esm.sh/htm@3.1.1";
+const html = htm.bind(React.createElement);
+const { useState, useEffect, useRef, useCallback } = React;
+
+const MOCK = new URLSearchParams(location.search).get("mock") === "true";
+const fmt = (n, d = 0) => n == null ? "—" : Number(n).toLocaleString(undefined,
+  { minimumFractionDigits: d, maximumFractionDigits: d });
+
+// ---- mock data: a simulated load run so the board renders with NO backend ---
+function mockCosts(load = 0) {
+  const base = {
+    "llm-sim@gcp-cloudrun-cpu": { model: "llm-sim", provider: "gcp-cloudrun-cpu",
+      requests: 1840 + load, cache_hits: 1180 + load, cache_hit_rate: 0.64,
+      avg_ttft_ms: 142, avg_tokens_per_sec: 96, prompt_tokens: 240000,
+      completion_tokens: 88000, usd_per_1m_tokens: 0.42, goodput: 0.97 },
+    "llm-sim@aws-apprunner-cpu": { model: "llm-sim", provider: "aws-apprunner-cpu",
+      requests: 610, cache_hits: 220, cache_hit_rate: 0.36, avg_ttft_ms: 268,
+      avg_tokens_per_sec: 71, prompt_tokens: 92000, completion_tokens: 31000,
+      usd_per_1m_tokens: 0.51, goodput: 0.9 },
+  };
+  return { backends: base,
+    total_requests: Object.values(base).reduce((s, b) => s + b.requests, 0),
+    total_est_cost_usd: 0.071 };
+}
+const MOCK_EVENTS = () => ({ counts: { route: 2450, scale: 7, placement: 12 },
+  events: [
+    { seq: 1, kind: "scale", action: "start", cold_start_avoided_ms: 8000, model: "llm-sim" },
+    { seq: 2, kind: "placement", model: "llm-sim", eligible_pools: ["gcp-hipaa-us-central1"] },
+    { seq: 3, kind: "route", model: "llm-sim", reason: "affinity_warm", cache_hit: true },
+  ] });
+const MOCK_PLACEMENT = { capacity_preference: ["cheapest"],
+  compliance: { sensitive_capacity_tags: ["sensitive"] }, pools: [
+    { id: "gcp-us-central1", region: "us-central1", provider: "gcp-cloudrun-cpu", cost_rank: 1, tags: [] },
+    { id: "aws-us-east-1", region: "us-east-1", provider: "aws-apprunner-cpu", cost_rank: 2, tags: [] },
+    { id: "gcp-hipaa-us-central1", region: "us-central1", provider: "gcp-cloudrun-cpu",
+      cost_rank: 3, tags: ["sensitive"], compliance_regimes: ["hipaa"] }] };
+
+// ---- router API (live) or mock --------------------------------------------
+function useApi(routerUrl) {
+  const get = useCallback(async (path) => {
+    if (MOCK || !routerUrl) return null;
+    const r = await fetch(routerUrl + path);
+    if (!r.ok) throw new Error(`${path} → ${r.status}`);
+    return r.json();
+  }, [routerUrl]);
+  return { get, live: !MOCK && !!routerUrl };
+}
+
+const Stat = ({ k, v, sub }) => html`<div class="stat">
+  <div class="v num">${v}</div><div class="k">${k}</div>
+  ${sub && html`<div class="muted" style=${{ fontSize: 11 }}>${sub}</div>`}</div>`;
+
+// ---- 1. live LLM metrics ----------------------------------------------------
+function Metrics({ api, routerUrl, loadTick }) {
+  const [snap, setSnap] = useState(MOCK || !routerUrl ? mockCosts(loadTick) : null);
+  const [err, setErr] = useState(null);
+  useEffect(() => {
+    let live = true;
+    const poll = async () => {
+      try {
+        const d = (MOCK || !routerUrl) ? mockCosts(loadTick) : await api.get("/v1/costs");
+        if (live) { setSnap(d); setErr(null); }
+      } catch (e) { if (live) setErr(String(e)); }
+    };
+    poll(); const t = setInterval(poll, 4000);
+    return () => { live = false; clearInterval(t); };
+  }, [api, routerUrl, loadTick]);
+
+  if (err) return html`<div class="panel"><h2>LLM metrics</h2>
+    <div class="state" role="alert" style=${{ color: "var(--fail)" }}>${err}</div></div>`;
+  if (!snap) return html`<div class="panel"><h2>LLM metrics</h2>
+    <div class="state">loading…</div></div>`;
+
+  const rows = Object.entries(snap.backends || {});
+  const avgGoodput = rows.length ? rows.reduce((s, [, b]) => s + (b.goodput ?? 1), 0) / rows.length : 1;
+  const totHits = rows.reduce((s, [, b]) => s + (b.cache_hits || 0), 0);
+  const totReq = rows.reduce((s, [, b]) => s + (b.requests || 0), 0);
+  const savedPct = totReq ? (totHits / totReq) * 0.9 : 0;  // ~90% prefill avoided per hit
+
+  return html`<div class="panel">
+    <h2>LLM metrics</h2>
+    <p class="desc">Live from the router's <span class="mono">/v1/costs</span> —
+      TTFT, TPOT, throughput, goodput vs SLO, cache-hit, $/1M tokens. Polled 4s.</p>
+    <div class="statgrid">
+      <${Stat} k="requests" v=${fmt(snap.total_requests)} />
+      <${Stat} k="est. spend" v=${"$" + fmt(snap.total_est_cost_usd, 4)} />
+      <${Stat} k="avg goodput" v=${fmt(avgGoodput * 100) + "%"} sub="met SLO" />
+      <${Stat} k="cache + affinity" v=${fmt(savedPct * 100) + "%"}
+        sub="prefill compute avoided" />
+    </div>
+    <table>
+      <thead><tr><th>backend</th><th>req</th><th>TTFT</th><th>TPOT</th>
+        <th>tok/s</th><th>cache</th><th>goodput</th><th>$/1M</th></tr></thead>
+      <tbody>${rows.map(([k, b]) => {
+        const tpot = b.avg_tokens_per_sec ? 1000 / b.avg_tokens_per_sec : null;
+        const gp = (b.goodput ?? 1);
+        return html`<tr key=${k}>
+          <td>${b.model} <span class="muted">· ${b.provider}</span></td>
+          <td class="num">${fmt(b.requests)}</td>
+          <td class="num">${fmt(b.avg_ttft_ms, 0)}ms</td>
+          <td class="num">${fmt(tpot, 1)}ms</td>
+          <td class="num">${fmt(b.avg_tokens_per_sec, 0)}</td>
+          <td class="num">${fmt((b.cache_hit_rate || 0) * 100)}%</td>
+          <td class="num"><span class=${"pill " + (gp >= 0.95 ? "ok" : gp >= 0.9 ? "warn" : "bad")}>
+            ${fmt(gp * 100)}%</span></td>
+          <td class="num">$${fmt(b.usd_per_1m_tokens, 2)}</td></tr>`;
+      })}</tbody>
+    </table>
+  </div>`;
+}
+
+// ---- 2. config-as-UX: placement editor + route-where simulator --------------
+function Placement({ api, routerUrl }) {
+  const [policy, setPolicy] = useState(MOCK || !routerUrl ? MOCK_PLACEMENT : null);
+  const [sim, setSim] = useState({ region: "", compliance: "" });
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    if (MOCK || !routerUrl) { setPolicy(MOCK_PLACEMENT); return; }
+    api.get("/v1/policy/placement").then(setPolicy).catch(() => setPolicy(MOCK_PLACEMENT));
+  }, [api, routerUrl]);
+
+  // route-where simulator — reuses the router's eligible_pools when live, else
+  // the SAME logic client-side so it works with no backend.
+  const simulate = () => {
+    const regime = sim.compliance.trim() || null;
+    const region = sim.region.trim() || null;
+    const sensitiveTags = new Set((policy.compliance?.sensitive_capacity_tags) || []);
+    const isSensitive = (p) => (p.tags || []).some((t) => sensitiveTags.has(t));
+    let pools = (policy.pools || []).filter((p) =>
+      regime ? (p.compliance_regimes || []).includes(regime) : true);
+    pools = [...pools].sort((a, b) =>
+      ((region && a.region !== region) - (region && b.region !== region)) ||
+      ((regime ? 0 : isSensitive(a)) - (regime ? 0 : isSensitive(b))) ||
+      ((a.cost_rank || 0) - (b.cost_rank || 0)));
+    return pools;
+  };
+
+  const apply = async () => {
+    if (MOCK || !routerUrl) { setStatus("mock — would POST /v1/policy/placement"); return; }
+    try {
+      const r = await fetch(routerUrl + "/v1/policy/placement",
+        { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(policy) });
+      setStatus(r.ok ? "applied — affects the next request" : `failed: ${r.status}`);
+    } catch (e) { setStatus(String(e)); }
+  };
+
+  if (!policy) return html`<div class="panel half"><h2>Placement</h2>
+    <div class="state">loading…</div></div>`;
+  const eligible = simulate();
+
+  return html`<div class="panel half">
+    <h2>Placement — config as UX</h2>
+    <p class="desc">The policy is the source of truth; this is a lens. Toggle a
+      pool's <span class="mono">sensitive</span> tag and apply — it changes
+      routing on the next request.</p>
+    ${(policy.pools || []).map((p, i) => html`<div class="row" key=${p.id}>
+      <span class="grow mono">${p.id} <span class="muted">${p.region}</span></span>
+      <label class="muted" style=${{ fontSize: 12 }}>
+        <input type="checkbox" checked=${(p.tags || []).includes("sensitive")}
+          onChange=${(e) => { const pools = policy.pools.map((q, j) => j !== i ? q
+            : { ...q, tags: e.target.checked ? ["sensitive"] : [] }); setPolicy({ ...policy, pools }); }} />
+        sensitive</label></div>`)}
+    <div class="toolbar" style=${{ marginTop: 12 }}>
+      <button class="primary" onClick=${apply}>Apply policy</button>
+      ${status && html`<span class="muted">${status}</span>`}
+    </div>
+    <h2 style=${{ marginTop: 16, fontSize: 15 }}>Route-where simulator</h2>
+    <div class="toolbar">
+      <input placeholder="region (optional)" value=${sim.region}
+        aria-label="region" onInput=${(e) => setSim({ ...sim, region: e.target.value })} />
+      <input placeholder="compliance e.g. hipaa" value=${sim.compliance}
+        aria-label="compliance" onInput=${(e) => setSim({ ...sim, compliance: e.target.value })} />
+    </div>
+    <div class="state" style=${{ paddingTop: 4 }}>eligible capacity:
+      ${eligible.length ? eligible.map((p) => html`<span class="pill ${p.tags?.includes("sensitive") ? "warn" : "ok"}"
+        key=${p.id} style=${{ marginLeft: 6 }}>${p.id}</span>`)
+        : html` ${"none — denied by policy"}`}</div>
+  </div>`;
+}
+
+// ---- 3. self-serve incident management + MTTR trend -------------------------
+const MTTR_KEY = "devboard.mttr.samples";
+function Incidents({ api, routerUrl, injected }) {
+  const [incidents, setIncidents] = useState([]);
+  const [mttr, setMttr] = useState(() => JSON.parse(localStorage.getItem(MTTR_KEY) || "[]"));
+  const seen = useRef(new Set());
+  const clock = useRef(0);
+
+  const ingestBreach = useCallback((ev) => {
+    const key = ev.seq ?? `${ev.kind}-${++clock.current}`;
+    if (seen.current.has(key)) return;
+    seen.current.add(key);
+    const now = Date.now();
+    setIncidents((prev) => [{
+      id: "INC-" + (prev.length + 1), trigger: ev,
+      detected: now, resolved: null,
+      remediation: ev.remediation || "scale up / reroute / roll back",
+    }, ...prev]);
+  }, []);
+
+  // watch the live event stream for breach/failover/rollback
+  useEffect(() => {
+    if (MOCK || !routerUrl) return;
+    let live = true;
+    const poll = async () => {
+      try {
+        const d = await api.get("/v1/events?limit=50");
+        (d.events || []).filter((e) => ["slo_breach", "failover", "rollback"]
+          .includes(e.kind)).forEach(ingestBreach);
+      } catch { /* ignore */ }
+    };
+    poll(); const t = setInterval(poll, 4000);
+    return () => { live = false; clearInterval(t); };
+  }, [api, routerUrl, ingestBreach]);
+
+  // mock/inject button feeds synthetic breaches
+  useEffect(() => {
+    if (injected > 0) ingestBreach({ kind: "slo_breach", model: "llm-sim",
+      ttft_ms: 8004, slo_ttft_ms: 500, remediation: "scale up warm pool + reroute" });
+  }, [injected, ingestBreach]);
+
+  const resolve = (id) => setIncidents((prev) => prev.map((inc) => {
+    if (inc.id !== id || inc.resolved) return inc;
+    const resolved = Date.now();
+    const ttr = Math.max(1, Math.round((resolved - inc.detected) / 1000));
+    const next = [...mttr, ttr].slice(-20);
+    setMttr(next); localStorage.setItem(MTTR_KEY, JSON.stringify(next));
+    return { ...inc, resolved };
+  }));
+
+  const avgMttr = mttr.length ? Math.round(mttr.reduce((a, b) => a + b, 0) / mttr.length) : null;
+  const open = incidents.filter((i) => !i.resolved).length;
+
+  return html`<div class="panel half">
+    <h2>Incidents — self-serve, lower MTTR</h2>
+    <p class="desc">Auto-opens on an SLO breach / failover / rollback, correlates
+      the trigger, proposes a remediation, and tracks MTTR across runs.</p>
+    <div class="statgrid" style=${{ gridTemplateColumns: "repeat(3,1fr)" }}>
+      <${Stat} k="open" v=${open} />
+      <${Stat} k="avg MTTR" v=${avgMttr == null ? "—" : avgMttr + "s"}
+        sub=${`${mttr.length} resolved`} />
+      <${Stat} k="trend" v=${html`<${Spark} points=${mttr} />`} />
+    </div>
+    ${incidents.length === 0 && html`<div class="state">No incidents — goodput within SLO.</div>`}
+    ${incidents.slice(0, 6).map((inc) => html`
+      <div class=${"incident" + (inc.resolved ? " resolved" : "")} key=${inc.id}>
+        <div class="row" style=${{ border: 0, padding: 0 }}>
+          <strong class="grow">${inc.id} · ${inc.trigger.kind}
+            ${inc.trigger.ttft_ms ? html` <span class="muted">TTFT ${fmt(inc.trigger.ttft_ms)}ms vs SLO ${fmt(inc.trigger.slo_ttft_ms)}ms</span>` : ""}</strong>
+          ${inc.resolved
+            ? html`<span class="pill ok">resolved in ${Math.round((inc.resolved - inc.detected) / 1000)}s</span>`
+            : html`<button class="ghost" onClick=${() => resolve(inc.id)}>Resolve</button>`}
+        </div>
+        <div class="muted" style=${{ fontSize: 12 }}>suggested: ${inc.remediation}</div>
+      </div>`)}
+  </div>`;
+}
+
+const Spark = ({ points }) => {
+  if (!points || points.length < 2) return html`<span class="muted" style=${{ fontSize: 13 }}>—</span>`;
+  const w = 80, h = 24, max = Math.max(...points), min = Math.min(...points), span = max - min || 1;
+  const d = points.map((p, i) => `${(i / (points.length - 1)) * w},${h - 2 - ((p - min) / span) * (h - 4)}`).join(" ");
+  return html`<svg width=${w} height=${h} viewBox=${`0 0 ${w} ${h}`} role="img"
+    aria-label="MTTR trend"><polyline points=${d} fill="none"
+    stroke="var(--accent)" stroke-width="1.5" /></svg>`;
+};
+
+// ---- app --------------------------------------------------------------------
+function App() {
+  const [routerUrl, setRouterUrl] = useState(localStorage.getItem("db.router") || "");
+  const [loadTick, setLoadTick] = useState(0);
+  const [injected, setInjected] = useState(0);
+  const api = useApi(routerUrl);
+
+  return html`<div class="wrap">
+    <header class="top">
+      <h1>LLM control surface</h1>
+      <span class="sub">routing · autoscale · placement · reliability — over the router</span>
+      ${(MOCK || !routerUrl) && html`<span class="pill warn">${MOCK ? "mock data" : "no router — mock"}</span>`}
+      <span class="spacer"></span>
+      <a href="index.html" class="ghost" style=${{ textDecoration: "none", padding: "6px 12px",
+        border: "1px solid var(--hairline)", borderRadius: 8, color: "var(--ink)" }}>← pipeline board</a>
+    </header>
+    <div class="toolbar">
+      <input placeholder="router URL e.g. http://localhost:8090" value=${routerUrl}
+        aria-label="router URL" style=${{ minWidth: 280 }}
+        onInput=${(e) => { setRouterUrl(e.target.value); localStorage.setItem("db.router", e.target.value); }} />
+      ${(MOCK || !routerUrl) && html`<button class="ghost" onClick=${() => setLoadTick((t) => t + 120)}>Simulate load</button>`}
+      <button class="ghost" onClick=${() => setInjected((n) => n + 1)}>Inject SLO breach</button>
+    </div>
+    <main class="grid">
+      <${Metrics} api=${api} routerUrl=${routerUrl} loadTick=${loadTick} />
+      <${Placement} api=${api} routerUrl=${routerUrl} />
+      <${Incidents} api=${api} routerUrl=${routerUrl} injected=${injected} />
+    </main>
+    <footer>Every decision is an event (<span class="mono">/v1/events</span>);
+      every policy is editable here and enforced by the router. MTTR persists across runs.</footer>
+  </div>`;
+}
+createRoot(document.getElementById("root")).render(html`<${App} />`);
+</script>
+</body>
+</html>

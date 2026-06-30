@@ -548,6 +548,9 @@ function App() {
           <span class="badge" title="set a token in settings for live data">
             ${MOCK ? "mock data" : "no token — showing mock"}</span>`}
         <span class="spacer"></span>
+        <a href="llm.html" style=${{ textDecoration: "none", padding: "6px 12px",
+          border: "1px solid var(--hairline)", borderRadius: 8, color: "var(--ink)",
+          fontSize: 13 }}>LLM control surface →</a>
         <button class="ghost" onClick=${() => setDrawer(true)}
           aria-haspopup="dialog">Settings</button>
       </header>

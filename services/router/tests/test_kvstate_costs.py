@@ -43,6 +43,19 @@ def test_ledger_reports_llm_metrics():
     assert b["avg_tokens_per_sec"] == 85.0
     assert b["completion_tokens"] == 100
     assert b["usd_per_1m_tokens"] is not None  # $/1M tokens computed
+    assert b["goodput"] == 1.0                 # both met SLO (default)
+
+
+def test_ledger_goodput_tracks_slo_breaches():
+    ledger = CostLedger()
+    ledger.record_llm("llm-sim", "p", est_cost_usd=0.0, cache_hit=False,
+                      ttft_ms=100.0, tokens_per_sec=80.0, prompt_tokens=10,
+                      completion_tokens=10, slo_met=True)
+    ledger.record_llm("llm-sim", "p", est_cost_usd=0.0, cache_hit=False,
+                      ttft_ms=9000.0, tokens_per_sec=80.0, prompt_tokens=10,
+                      completion_tokens=10, slo_met=False)
+    b = ledger.snapshot()["backends"]["llm-sim@p"]
+    assert b["goodput"] == 0.5                 # 1 of 2 met SLO
 
 
 def test_predict_backend_has_null_llm_fields():

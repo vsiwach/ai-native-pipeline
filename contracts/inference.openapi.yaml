@@ -49,6 +49,14 @@ paths:
                   target:
                     type: string
                     enum: [cpu, gpu]
+                  capabilities:
+                    type: array
+                    description: >
+                      Optional. Features a backend/router advertises, e.g.
+                      predict, chat, kv_affinity, autoscale, placement,
+                      failover, release, costs, events.
+                    items:
+                      type: string
   /v1/predict:
     post:
       summary: Run inference (authenticated)

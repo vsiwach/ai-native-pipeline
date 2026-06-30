@@ -137,14 +137,22 @@ class RouterState:
             self.kvstate.dec_pending(choice.replica_id)
         # record what the replica now holds (warm + prefix cached)
         self.kvstate.record_prefix(choice.replica_id, choice.prefix)
+        slo_ttft = tier_rules.get("ttft_ms")
+        slo_met = slo_ttft is None or ttft <= slo_ttft
         self.ledger.record_llm(
             model, choice.provider, est_cost_usd=cost,
             cache_hit=choice.cache_hit or backend_hit, ttft_ms=ttft,
             tokens_per_sec=tps, prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens)
+            completion_tokens=completion_tokens, slo_met=slo_met)
         self.events.emit("route", model=model, replica=choice.replica_id,
                          provider=choice.provider, cache_hit=choice.cache_hit,
                          reason=choice.reason, ttft_ms=ttft)
+        if not slo_met:
+            # feeds the devboard's self-serve incident management
+            self.events.emit("slo_breach", model=model,
+                             replica=choice.replica_id, ttft_ms=round(ttft, 1),
+                             slo_ttft_ms=slo_ttft, tier=tier,
+                             remediation="scale up / reroute / roll back")
         return resp, choice
 
     # ---- core proxy path (shared by live predict and batch worker) ----
@@ -232,7 +240,10 @@ def get_app(registry_path: Path | None = None,
     @app.get("/v1/info")
     def info():
         return {"model": "router", "version": ROUTER_VERSION,
-                "tier": "realtime", "target": "cpu"}
+                "tier": "realtime", "target": "cpu",
+                "capabilities": ["predict", "chat", "kv_affinity", "autoscale",
+                                 "placement", "failover", "release",
+                                 "costs", "events"]}
 
     @app.post("/v1/predict")
     async def predict(request: Request,
@@ -329,6 +340,32 @@ def get_app(registry_path: Path | None = None,
     def events(limit: int = 100, kind: str | None = None):
         return {"events": state.events.recent(limit, kind),
                 "counts": state.events.kinds()}
+
+    # ---- config-as-UX: the policy stays the source of truth; the devboard is
+    # a lens that can read it and propose changes that take effect live. ----
+    @app.get("/v1/policy/placement")
+    def get_placement():
+        return state.placement
+
+    @app.post("/v1/policy/placement")
+    async def set_placement(request: Request):
+        new_policy = await request.json()
+        state.placement = new_policy            # applies to the next request
+        state.events.emit("config_change", target="placement-policy",
+                          pools=[p.get("id") for p in new_policy.get("pools", [])])
+        return {"status": "applied", "pools": len(new_policy.get("pools", []))}
+
+    @app.get("/v1/simulate/route")
+    def simulate_route(region: str | None = None, compliance: str | None = None):
+        """'What would route where' — eligible capacity for a hypothetical
+        request under the CURRENT placement policy, without sending traffic."""
+        from router_app.placement import eligible_pools
+        pools = eligible_pools({"region": region, "compliance": compliance},
+                               state.placement)
+        return {"region": region, "compliance": compliance,
+                "eligible_pools": [{"id": p["id"], "region": p.get("region"),
+                                    "sensitive": "sensitive" in p.get("tags", [])}
+                                   for p in pools]}
 
     @app.post("/v1/batch")
     async def submit_batch(request: Request, model: str = Query(...)):

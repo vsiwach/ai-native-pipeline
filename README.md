@@ -165,7 +165,7 @@ applied to humans and CI.
 | ⑦ | Multi-cloud IaC | `deploy/terraform` | One interface, GCP + AWS implementations |
 | ⑦ | Deploy CI | `.github/workflows/deploy-multicloud.yml` | Plan on PRs, apply via dispatch (OIDC) |
 | ⓧ | Governance | `governance/agent-policy.yaml` + `tools/policy_check.py` | What agents may do |
-| ⓨ | Dashboard | `tools/devboard` | Zero-backend pipeline observability |
+| ⓨ | Dashboard | `tools/devboard` | Zero-backend pipeline board + LLM control surface (metrics, config-as-UX, incidents/MTTR) |
 | ⓨ | Agent tools | `tools/mcp_server.py` | `get_cloud_endpoints`, `run_terraform_plan` |
 
 ### Request lifecycle (runtime)
