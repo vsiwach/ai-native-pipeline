@@ -25,5 +25,16 @@ actions:
     agent_allowed: true
     allowed_refs: refs/heads/main
     reason: agents may publish images only from main, never PR branches
+  canary:
+    agent_allowed: true
+    allowed_envs: staging
+    reason: agents may run canary rollouts in staging only
+  shadow:
+    agent_allowed: true
+    allowed_envs: staging
+    reason: agents may run shadow (mirror) deploys in staging only
+  prod-shift:
+    agent_allowed: false
+    reason: production traffic shifts are human-only — never unguarded by an agent
   push:
     agent_allowed: true

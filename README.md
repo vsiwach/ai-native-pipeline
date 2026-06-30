@@ -158,6 +158,8 @@ applied to humans and CI.
 | ⑤ | Vuln policy | `.grype.yaml` | Fail on *actionable* criticals only |
 | ⑥ | Router | `services/router` | KV/prefix affinity, cold-start-aware autoscaling, region/compliance placement, cache, batch, LLM cost metrics, event log |
 | ⑥ | Placement | `placement-policy.yaml` | Regions + compliance regimes + capacity preference; compliance right-of-way on sensitive capacity |
+| ⑥ | Reliability | `router_app/{health,failover,release}.py` | Stuck-replica eject/recover, region failover, canary/shadow/A-B release engine (warm-up, drain, probe gates, auto-rollback) |
+| ⑥ | Release policy | `release-policy.yaml` | Declarative rollouts; agents may canary/shadow in staging, never an unguarded prod shift |
 | ⑥ | Routing policy | `routing-policy.yaml` | Tiers, cost table, cache, live endpoints |
 | ⑥ | Demo backend | `services/inference` | house-price-reg (vendored, Apache-2.0) |
 | ⑦ | Multi-cloud IaC | `deploy/terraform` | One interface, GCP + AWS implementations |

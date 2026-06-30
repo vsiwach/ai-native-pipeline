@@ -34,6 +34,25 @@ router selects a **replica**, not just a provider, via a layered decision
 cache-hit rate, $/1M tokens**. `/v1/events` streams every route decision (plus
 placement / scale / failover / rollout) for the devboard.
 
+## Reliability + release engine (Phase 9)
+
+- [`health.py`](router_app/health.py) — beyond liveness: **stuck-replica
+  detection**. A replica that answers `/healthz` but stops making token
+  progress within a deadline is ejected and recovers automatically on the next
+  good poll. Unusable replicas are never routed to.
+- [`failover.py`](router_app/failover.py) — region-aware **active-active +
+  fallback** as policy: route to the home region, fail over to the next
+  healthy active region within SLO, fall back to a passive region only when
+  all active regions are down.
+- [`release.py`](router_app/release.py) + [`release-policy.yaml`](../../release-policy.yaml)
+  — a traffic-shifting controller for **canary** (gated % steps with
+  auto-rollback on a failed probe), **shadow** (mirror traffic, client sees
+  stable only), and **A/B**. It warms up the candidate before shifting and
+  drains stable **without cutting in-flight generations** (`can_stop_drained`).
+  `./dev release-demo` runs all three. Governance
+  ([`agent-policy.yaml`](../../governance/agent-policy.yaml)) lets agents run
+  canary/shadow in staging but **blocks any unguarded production shift**.
+
 ## Autoscaling + placement (Phase 8)
 
 - [`autoscaler.py`](router_app/autoscaler.py) — pure control logic over a

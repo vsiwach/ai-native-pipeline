@@ -13,16 +13,25 @@ class EndpointHealth:
     def __init__(self, window: int = 20):
         self.healthy: bool | None = None  # None = never polled (optimistic)
         self.latencies_ms: deque[float] = deque(maxlen=window)
+        self.last_progress: float | None = None  # last token-progress clock
+        self.ejected: bool = False                # stuck → ejected, recoverable
 
     @property
     def usable(self) -> bool:
-        return self.healthy is not False
+        return self.healthy is not False and not self.ejected
 
     @property
     def p50_ms(self) -> float | None:
         if not self.latencies_ms:
             return None
         return statistics.median(self.latencies_ms)
+
+    def stuck(self, now: float, deadline_s: float) -> bool:
+        """A replica generating tokens that stops making progress within the
+        deadline is stuck (hung mid-generation) even if /healthz still answers."""
+        if self.last_progress is None:
+            return False
+        return (now - self.last_progress) > deadline_s
 
 
 class HealthPoller:
@@ -52,6 +61,23 @@ class HealthPoller:
         status.latencies_ms.append(ms)
         status.healthy = True
 
+    def record_progress(self, url: str, now: float) -> None:
+        """Note token progress (called as a replica streams) so stuck
+        detection can tell a slow generation from a hung one."""
+        self.status_for(url).last_progress = now
+
+    def detect_stuck(self, now: float, deadline_s: float) -> list[str]:
+        """Eject replicas hung mid-generation. Returns the ejected urls.
+        Recovery is automatic: a later successful health poll clears it."""
+        ejected = []
+        with self._lock:
+            items = list(self._status.items())
+        for url, status in items:
+            if status.usable and status.stuck(now, deadline_s):
+                status.ejected = True
+                ejected.append(url)
+        return ejected
+
     def poll_once(self) -> None:
         urls = {ep["url"]
                 for eps in self._get_endpoints().values() for ep in eps}
@@ -65,11 +91,15 @@ class HealthPoller:
                 ok = False
             if ok:
                 status.latencies_ms.append((time.monotonic() - start) * 1000)
+                if status.ejected:  # a stuck replica that answers again recovers
+                    status.ejected = False
+                    status.last_progress = None
             status.healthy = ok
 
     def degraded(self) -> bool:
         with self._lock:
-            return any(s.healthy is False for s in self._status.values())
+            return any(s.healthy is False or s.ejected
+                       for s in self._status.values())
 
     def start(self) -> None:
         if self._thread:

@@ -1,0 +1,21 @@
+# Release policy — declarative, safe rollouts (Phase 9). The release engine
+# (router_app/release.py) shifts traffic between a stable and a candidate
+# version under these rules. Governance (agent-policy.yaml) lets agents run
+# canary/shadow in staging but never an unguarded production shift.
+rollouts:
+  default:
+    mode: canary           # canary | shadow | ab
+    steps: [5, 25, 100]    # candidate traffic % per gated step
+    warmup: true           # pre-warm candidate KV before shifting traffic
+    drain: true            # drain stable without cutting in-flight generations
+    probe:                 # success gate evaluated before each step advances
+      metric: ttft_ms
+      max_ms: 800
+      window: 20
+    auto_rollback: true    # a failed probe rolls back automatically
+
+  shadow-eval:
+    mode: shadow           # mirror traffic to candidate; client sees stable
+    steps: [0]
+    warmup: true
+    drain: false

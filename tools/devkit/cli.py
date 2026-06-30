@@ -113,6 +113,12 @@ def cmd_scale_demo(args) -> int:
     return subprocess.run(["python3", str(script)]).returncode
 
 
+def cmd_release_demo(args) -> int:
+    """Run the release-engine simulation (canary, auto-rollback, shadow)."""
+    script = REPO_ROOT / "services/router/scripts/release_demo.py"
+    return subprocess.run(["python3", str(script)]).returncode
+
+
 def cmd_run(args) -> int:
     if not shutil.which("docker"):
         ui.fail("docker not installed")
@@ -213,6 +219,8 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("scale-demo",
                    help="simulate cold-start-aware autoscaling (scale-to-zero + burst)")
+    sub.add_parser("release-demo",
+                   help="simulate the release engine (canary, auto-rollback, shadow)")
 
     args = parser.parse_args(argv)
     if args.command is None:
@@ -231,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
         "run": lambda: cmd_run(args),
         "chat": lambda: cmd_chat(args),
         "scale-demo": lambda: cmd_scale_demo(args),
+        "release-demo": lambda: cmd_release_demo(args),
     }
     return dispatch[args.command]()
 

@@ -57,6 +57,23 @@ class PolicyCheckTest(unittest.TestCase):
         allowed, _ = self._check(action="rm-rf-everything")
         self.assertFalse(allowed)
 
+    def test_agent_canary_in_staging_allowed(self):
+        allowed, _ = self._check(action="canary", env="staging")
+        self.assertTrue(allowed)
+
+    def test_agent_canary_in_production_denied(self):
+        allowed, reason = self._check(action="canary", env="production")
+        self.assertFalse(allowed)
+        self.assertIn("staging", reason)
+
+    def test_agent_unguarded_prod_shift_denied(self):
+        allowed, _ = self._check(action="prod-shift")
+        self.assertFalse(allowed)
+
+    def test_human_prod_shift_allowed(self):
+        allowed, _ = self._check(action="prod-shift", requested_by="vikram")
+        self.assertTrue(allowed)
+
     def test_cli_exit_codes(self):
         self.assertEqual(
             policy_check.main(["--action", "container-publish",
