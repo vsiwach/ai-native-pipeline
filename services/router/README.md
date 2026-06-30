@@ -31,8 +31,22 @@ router selects a **replica**, not just a provider, via a layered decision
 4. **tier preference** — `lowest_cost` / `lowest_latency` as the final tiebreak.
 
 `/v1/costs` reports LLM-native metrics per backend — **TTFT, tokens/sec,
-cache-hit rate, $/1M tokens**. `/v1/events` streams every route decision (and,
-from Phases 8–9, scale / failover / rollout) for the devboard.
+cache-hit rate, $/1M tokens**. `/v1/events` streams every route decision (plus
+placement / scale / failover / rollout) for the devboard.
+
+## Autoscaling + placement (Phase 8)
+
+- [`autoscaler.py`](router_app/autoscaler.py) — pure control logic over a
+  replica lifecycle `cold → warming → warm → draining`: scale-to-zero on idle,
+  a warm pool to hide cold starts, burst headroom, and a predictive pre-warm
+  hook. Every decision is an event. `./dev scale-demo` runs a deterministic
+  scale-to-zero → cold-start-aware burst.
+- [`placement.py`](router_app/placement.py) + [`placement-policy.yaml`](../../placement-policy.yaml)
+  — one policy object (regions, compliance regimes, capacity preference).
+  Layer 1 of replica selection: a compliance-bound request may use **only**
+  matching sensitive capacity (denied ordinary pools) and has **right-of-way**
+  there — preempting non-compliant filler or queuing behind other compliant
+  work. The router emits a `placement` event per governed request.
 
 ```bash
 # affinity ON vs OFF over a bounded-KV fleet (deterministic):

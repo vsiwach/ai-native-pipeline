@@ -27,10 +27,12 @@ image = (
     .copy(f"{PATH}/router_app", "./router_app")
     .copy("inference-registry.yaml", ".")
     .copy("routing-policy.yaml", ".")
+    .copy("placement-policy.yaml", ".")
     .run("useradd --create-home --uid 10001 appuser")
     .user("appuser")
     .env(PORT="8080", REGISTRY_PATH="/srv/inference-registry.yaml",
-         ROUTING_POLICY_PATH="/srv/routing-policy.yaml")
+         ROUTING_POLICY_PATH="/srv/routing-policy.yaml",
+         PLACEMENT_POLICY_PATH="/srv/placement-policy.yaml")
     .expose(8080)
     .healthcheck(
         'python -c "import urllib.request;'

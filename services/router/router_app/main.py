@@ -21,9 +21,11 @@ from router_app import config as cfg
 from router_app.batch import BatchQueue, BatchWorker
 from router_app.cache import TTLCache, cache_key
 from router_app.costs import CostLedger
+from router_app.autoscaler import AutoScaler, AutoscaleConfig
 from router_app.events import EventLog
 from router_app.health import HealthPoller
 from router_app.kvstate import KVState
+from router_app.placement import eligible_pools
 from router_app.policy import (NoHealthyBackend, UnknownModel, resolve_tier,
                                select, select_replica)
 
@@ -64,11 +66,27 @@ class RouterState:
             self.kvstate = KVState(kv_ttl_s=ttl)
         else:
             self.kvstate.kv_ttl_s = ttl
+        self.placement = cfg.load_placement()
+        if getattr(self, "autoscalers", None) is None:
+            self.autoscalers = {}  # model -> AutoScaler (created on first use)
 
-    def proxy_chat(self, model: str, body: dict, headers: dict):
-        """Select a replica with prefix affinity, forward the chat completion,
-        record LLM economics, and return (httpx.Response, ReplicaChoice).
-        Raises UnknownModel / NoHealthyBackend."""
+    def _autoscaler(self, model: str) -> AutoScaler:
+        if model not in self.autoscalers:
+            entry = self.registry.get(model, {})
+            scale_to_zero = str(entry.get("scale_to_zero", "true")) == "true"
+            self.autoscalers[model] = AutoScaler(
+                AutoscaleConfig(
+                    cold_start_s=float(entry.get("cold_start_s", 8.0)),
+                    min_warm=0 if scale_to_zero else 1,
+                    max_replicas=int(entry.get("max_replicas", 3))),
+                emit=lambda kind, **f: self.events.emit(kind, model=model, **f))
+        return self.autoscalers[model]
+
+    def proxy_chat(self, model: str, body: dict, headers: dict,
+                   region: str | None = None, compliance: str | None = None):
+        """Select a replica with placement + prefix affinity, forward the chat
+        completion, record LLM economics, and return (httpx.Response,
+        ReplicaChoice). Raises UnknownModel / NoHealthyBackend."""
         if model not in self.registry:
             raise UnknownModel(model)
         replicas = cfg.replicas_for(self.policy, model)
@@ -80,12 +98,28 @@ class RouterState:
         tier_rules = self.policy["tiers"].get(tier, {})
         affinity = self.policy.get("affinity", {})
 
+        # Layer 1 — placement: which capacity pools may serve this request.
+        # Replicas declare a `pool` only when placement is in use; otherwise the
+        # filter is a no-op (back-compat with the single-pool local demo).
+        placement_filter = None
+        if self.placement.get("pools") and (region or compliance):
+            allowed = {p["id"] for p in eligible_pools(
+                {"region": region, "compliance": compliance}, self.placement)}
+            self.events.emit("placement", model=model, region=region,
+                             compliance=compliance, eligible_pools=sorted(allowed))
+            placement_filter = lambda c: c.get("pool") is None or c["pool"] in allowed
+
+        # autoscale signal: in-flight requests for this model right now
+        pending = sum(self.kvstate.pending(r["id"]) for r in replicas) + 1
+        self._autoscaler(model).step(time.monotonic(), pending)
+
         choice = select_replica(
             prompt, replicas, is_usable=lambda u: self.poller.status_for(u).usable,
             kvstate=self.kvstate, tier_rules=tier_rules,
             cost_of=lambda p: float(self.policy["cost_table"].get(p, 0.0)),
             affinity_cfg=affinity, capacity=int(affinity.get("capacity", 8)),
-            latency_of=lambda u: self.poller.status_for(u).p50_ms)
+            latency_of=lambda u: self.poller.status_for(u).p50_ms,
+            placement_filter=placement_filter)
 
         self.kvstate.inc_pending(choice.replica_id)
         try:
@@ -258,14 +292,17 @@ def get_app(registry_path: Path | None = None,
 
     @app.post("/v1/chat/completions")
     async def chat_completions(request: Request,
-                               model: str = Query(default=None)):
+                               model: str = Query(default=None),
+                               region: str = Query(default=None),
+                               compliance: str = Query(default=None)):
         try:
             body = await request.json()
         except json.JSONDecodeError:
             return _error(400, "invalid_json", "request body must be JSON")
         model = model or body.get("model")
         try:
-            resp, choice = state.proxy_chat(model, body, dict(request.headers))
+            resp, choice = state.proxy_chat(model, body, dict(request.headers),
+                                            region=region, compliance=compliance)
         except UnknownModel:
             return _error(404, "unknown_model",
                           f"model '{model}' is not in inference-registry.yaml",

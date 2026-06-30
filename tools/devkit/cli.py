@@ -107,6 +107,12 @@ def cmd_chat(args) -> int:
     return _chat(args.port, args.prompt, args.model, args.stream)
 
 
+def cmd_scale_demo(args) -> int:
+    """Run the deterministic autoscaling simulation (scale-to-zero + burst)."""
+    script = REPO_ROOT / "services/router/scripts/autoscale_demo.py"
+    return subprocess.run(["python3", str(script)]).returncode
+
+
 def cmd_run(args) -> int:
     if not shutil.which("docker"):
         ui.fail("docker not installed")
@@ -205,6 +211,9 @@ def main(argv: list[str] | None = None) -> int:
     p_chat.add_argument("--model", default="llm-sim")
     p_chat.add_argument("--stream", action="store_true")
 
+    sub.add_parser("scale-demo",
+                   help="simulate cold-start-aware autoscaling (scale-to-zero + burst)")
+
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
@@ -221,6 +230,7 @@ def main(argv: list[str] | None = None) -> int:
         "new": lambda: cmd_new_service(args),
         "run": lambda: cmd_run(args),
         "chat": lambda: cmd_chat(args),
+        "scale-demo": lambda: cmd_scale_demo(args),
     }
     return dispatch[args.command]()
 

@@ -1,0 +1,32 @@
+# Placement policy — one object expressing WHERE workloads may land: region,
+# compliance regime, and capacity preference. The router consults it (Phase 8)
+# as the first layer of replica selection. Compliance-bound workloads get
+# right-of-way on capacity tagged sensitive.
+capacity_preference: [cheapest, lowest_latency, reserved]
+
+compliance:
+  regimes: [hipaa, pci]
+  sensitive_capacity_tags: [sensitive]
+
+# Capacity pools the fleet can place replicas on. `provider` is a cost_table
+# key; `compliance_regimes` lists which regimes a sensitive pool satisfies.
+pools:
+  - id: gcp-us-central1
+    region: us-central1
+    provider: gcp-cloudrun-cpu
+    cold_start_s: 8
+    cost_rank: 1
+    tags: []
+  - id: aws-us-east-1
+    region: us-east-1
+    provider: aws-apprunner-cpu
+    cold_start_s: 12
+    cost_rank: 2
+    tags: []
+  - id: gcp-hipaa-us-central1
+    region: us-central1
+    provider: gcp-cloudrun-cpu
+    cold_start_s: 10
+    cost_rank: 3
+    tags: [sensitive]
+    compliance_regimes: [hipaa]

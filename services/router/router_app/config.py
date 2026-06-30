@@ -26,6 +26,19 @@ def policy_path() -> Path:
         "ROUTING_POLICY_PATH", _default_root() / "routing-policy.yaml"))
 
 
+def placement_path() -> Path:
+    return Path(os.environ.get(
+        "PLACEMENT_POLICY_PATH", _default_root() / "placement-policy.yaml"))
+
+
+def load_placement(path: Path | None = None) -> dict:
+    """Placement policy (Phase 8). Absent file → empty policy (no-op)."""
+    p = path or placement_path()
+    if not p.exists():
+        return {"pools": [], "compliance": {}}
+    return yaml.safe_load(p.read_text()) or {"pools": [], "compliance": {}}
+
+
 def load_registry(path: Path | None = None) -> dict:
     """Returns {model_name: {tier, target, ...}} from the backends section."""
     data = yaml.safe_load((path or registry_path()).read_text()) or {}

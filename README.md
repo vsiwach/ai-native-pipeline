@@ -156,7 +156,8 @@ applied to humans and CI.
 | ④ | Build system | `MODULE.bazel`, `*/BUILD.bazel` | Hermetic Python 3.11, 96 tests |
 | ⑤ | Container CI | `.github/workflows/containers.yml` | Registry-driven matrix → scan → GHCR |
 | ⑤ | Vuln policy | `.grype.yaml` | Fail on *actionable* criticals only |
-| ⑥ | Router | `services/router` | Cost/latency routing + stateful KV/prefix affinity, cache, batch, LLM cost metrics, event log |
+| ⑥ | Router | `services/router` | KV/prefix affinity, cold-start-aware autoscaling, region/compliance placement, cache, batch, LLM cost metrics, event log |
+| ⑥ | Placement | `placement-policy.yaml` | Regions + compliance regimes + capacity preference; compliance right-of-way on sensitive capacity |
 | ⑥ | Routing policy | `routing-policy.yaml` | Tiers, cost table, cache, live endpoints |
 | ⑥ | Demo backend | `services/inference` | house-price-reg (vendored, Apache-2.0) |
 | ⑦ | Multi-cloud IaC | `deploy/terraform` | One interface, GCP + AWS implementations |
