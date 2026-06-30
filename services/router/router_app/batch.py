@@ -3,6 +3,7 @@ the policy's configured concurrency. This is the scale-to-zero story — batch
 traffic tolerates cold backends, so it can wait for the cheapest capacity."""
 
 import json
+import os
 import threading
 import uuid
 from pathlib import Path
@@ -19,12 +20,19 @@ class BatchQueue:
     def _path(self, job_id: str) -> Path:
         return self.dir / f"{job_id}.json"
 
+    def _write_atomic(self, path: Path, job: dict) -> None:
+        """Write via a temp file + rename so a concurrent reader never sees a
+        half-written job (rename is atomic on POSIX)."""
+        tmp = path.with_suffix(f".{uuid.uuid4().hex}.tmp")
+        tmp.write_text(json.dumps(job))
+        os.replace(tmp, path)
+
     def submit(self, model: str, payload: dict, headers: dict) -> str:
         job_id = uuid.uuid4().hex
         job = {"id": job_id, "model": model, "payload": payload,
                "headers": headers, "status": PENDING, "result": None,
                "error": None}
-        self._path(job_id).write_text(json.dumps(job))
+        self._write_atomic(self._path(job_id), job)
         return job_id
 
     def get(self, job_id: str) -> dict | None:
@@ -34,13 +42,17 @@ class BatchQueue:
         return json.loads(path.read_text())
 
     def claim(self) -> dict | None:
-        """Atomically move one pending job to running."""
+        """Atomically move one pending job to running. Tolerates a job file
+        mid-write (skips it this pass; it'll be claimed next time)."""
         with self._lock:
             for path in sorted(self.dir.glob("*.json")):
-                job = json.loads(path.read_text())
+                try:
+                    job = json.loads(path.read_text())
+                except (json.JSONDecodeError, FileNotFoundError):
+                    continue
                 if job["status"] == PENDING:
                     job["status"] = RUNNING
-                    path.write_text(json.dumps(job))
+                    self._write_atomic(path, job)
                     return job
         return None
 
@@ -52,7 +64,7 @@ class BatchQueue:
         job["status"] = FAILED if error else DONE
         job["result"] = result
         job["error"] = error
-        self._path(job_id).write_text(json.dumps(job))
+        self._write_atomic(self._path(job_id), job)
 
 
 class BatchWorker:
