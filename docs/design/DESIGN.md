@@ -1,8 +1,13 @@
 # Devboard v2 — Design Contract
 
-`devboard-mockup.html` (this directory) is the source of truth for layout,
-hierarchy, color, and motion. This document records the rules an implementation
-must follow and the deviations log.
+**Visual source of truth: `refined/Devboard.dc.html` + `refined/README.md`**
+(the "Mission Control Console" handoff, adopted 2026-07-01 — see deviations
+log). `devboard-mockup.html` (this directory) remains the **data-content
+authority**: every data element, endpoint shape, and state behavior it
+describes is binding and must appear in the refined board. Where the two
+disagree on visuals, the refined handoff wins; where they disagree on data
+semantics, this document's reconciliation rules (deviations log) win.
+`refined/support.js` is the prototype's runtime shim only — do not port it.
 
 ## Principles
 1. **Runtime, not deploy-time.** This is a mission-control surface: dense,
@@ -72,3 +77,9 @@ Replay must play back recorded data. Never fabricate a replay.
 | Date | Change | Rationale |
 |---|---|---|
 | 2026-07-01 | A refined devboard design (in progress, Claude design) may supersede this mockup's visual layer when delivered. The refinement may change layout/polish only — every data element, endpoint shape, and state behavior in this mockup remains binding and must appear in the refined board. | Owner instruction, 2026-07-01. |
+| 2026-07-01 | Refined handoff (`refined/`) adopted as the visual standard: new tokens (teal #2FE0C6 / amber #FFB020 / red #FF5257 / violet replay #B08CFF, JetBrains Mono for mono), density strips instead of percentile bars, above/below-the-fold split, vertical canary stepper, animated placement connector. Verified rendering all four states. | Owner delivered the refinement; instruction of 2026-07-01 applies. |
+| 2026-07-01 | **Endpoints stay per `contracts/devboard.openapi.yaml`.** The refined README suggests differently-named feeds (`/v1/slo/rollup`, `/v1/slo/histograms`, `/v1/goodput`, `/v1/cluster/status`, `/v1/placement/decisions`, `/v1/incidents/mttr`). Mapping: hero ← `/v1/metrics/hero`; density strips + goodput ← `/v1/metrics/slo` (optional `hist` field added for the density curves); pool cards ← `/v1/pools`; feed ← `/v1/placement/feed` (SSE); canary ← `/v1/releases/active`; incident lane + MTTR history ← `/v1/incidents`. Topbar cluster pill and MTTR chart are client-side derivations — no new endpoints. | The six-endpoint contract is committed and binding (mission spec); the refined names are a design-side suggestion, not a contract change. |
+| 2026-07-01 | **TTFT SLO of record is p99 < 500ms** (voice tier, per mission + original mock). The refined prototype hard-codes "TTFT ≤ 300ms"; the implementation must render SLO thresholds from API data, not hard-code either value. 300ms may be introduced later as a stretch tier via policy, not via the board. | Mission metrics anchor conflicts with refined copy; data semantics win. |
+| 2026-07-01 | Refined shows different models per pool (GPT-OSS-120B / Qwen3-8B); F1 requires the **same model on both pools** for a fair baseline. Board renders whatever model names the API reports — the two-model look returns naturally in later features if a second model is deployed. | F1 baseline validity. |
+| 2026-07-01 | Refined replay is a simulated 90s loop (prototype only). Production REPLAY must play back a recorded chaos-drill trace (captured in F4/F6) mapped onto the same 90s presentation. | Binding rule from the mission; never fabricate a replay. |
+| 2026-07-01 | Original mock's "LAST ROLLBACK" line is absent from the refined canary card (a rollback note moved into the incident footer). Implementation keeps `last_rollback` in `/v1/releases/active` and renders it under the SLO gate box. | Refined visuals win, but the mock's information content is binding. |

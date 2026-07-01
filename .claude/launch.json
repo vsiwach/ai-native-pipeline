@@ -4,8 +4,26 @@
     {
       "name": "devboard",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8400", "--directory", "tools/devboard"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8400",
+        "--directory",
+        "tools/devboard"
+      ],
       "port": 8400
+    },
+    {
+      "name": "design-ref",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8401",
+        "--directory",
+        "docs/design"
+      ],
+      "port": 8401
     }
   ]
 }

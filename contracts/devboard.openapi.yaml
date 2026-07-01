@@ -237,3 +237,13 @@ components:
         p95: {type: number, description: ms}
         p99: {type: number, description: ms}
         slo: {type: number, description: SLO threshold, ms (TTFT 500 / TPOT 60 for voice)}
+        hist:
+          type: object
+          description: >
+            optional latency histogram over the same window, feeding the
+            refined board's density strips (see docs/design/refined/). counts
+            has one entry per bucket; edges has len(counts)+1 boundaries, ms.
+          required: [edges, counts]
+          properties:
+            edges: {type: array, items: {type: number}}
+            counts: {type: array, items: {type: integer}}
