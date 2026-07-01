@@ -67,7 +67,7 @@ class ServiceTest(unittest.TestCase):
     def test_rejects_bad_engine(self):
         with self.assertRaises(ValueError):
             manifest.service("a", "services/a", "realtime", "cpu",
-                             engine="vllm")
+                             engine="tensorrt")
 
     def test_llm_fields_omitted_when_unset_keeps_entry_byte_stable(self):
         # a non-LLM service must render exactly as before (no new lines)

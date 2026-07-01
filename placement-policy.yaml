@@ -30,3 +30,19 @@ pools:
     cost_rank: 3
     tags: [sensitive]
     compliance_regimes: [hipaa]
+  # baseten-mvp LLM pools. Baseten is the managed/compliant capacity
+  # (HIPAA-eligible), RunPod the cheap best-effort pool. cold_start_s is
+  # replica spin-up, refined per real measurements in F2.
+  - id: baseten-l4
+    region: us-east-1
+    provider: baseten-l4
+    cold_start_s: 45
+    cost_rank: 4
+    tags: [sensitive]
+    compliance_regimes: [hipaa]
+  - id: vllm-l4
+    region: eu-west-1
+    provider: runpod-vllm-l4
+    cold_start_s: 120
+    cost_rank: 2
+    tags: []

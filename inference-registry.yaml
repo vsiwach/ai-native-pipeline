@@ -18,6 +18,16 @@ backends:
     model_id: google/gemma-3-12b-it
     cold_start_s: 8.0
     kv_ttl_s: 300.0
+  qwen3-8b:
+    path: services/qwen3_8b
+    tier: realtime
+    target: gpu
+    max_replicas: 4
+    scale_to_zero: true
+    engine: vllm
+    model_id: Qwen/Qwen3-8B
+    cold_start_s: 25.0
+    kv_ttl_s: 300.0
 
 # Infrastructure services: built and smoke-tested by the same CI matrix,
 # but never routing targets.

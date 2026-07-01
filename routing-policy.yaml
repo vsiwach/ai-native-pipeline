@@ -11,6 +11,11 @@ cost_table: # $/1M requests, maintained by ops — router just reads it
   gcp-cloudrun-cpu: 0.40
   aws-apprunner-cpu: 0.46
   local-docker: 0.10
+  # LLM pools: ranking values for the cost-preference tiebreak. Real
+  # per-request cost is MEASURED (economics headers from the pool's
+  # $/hr share) — these only order the pools, cheapest first.
+  baseten-l4: 1.05
+  runpod-vllm-l4: 0.60
 
 cache: {enabled: true, ttl_s: 300, backend: in_memory} # swap for redis later
 
@@ -29,3 +34,13 @@ endpoints:
   llm-sim:
     - provider: local-docker
       url: http://llm:8080
+  # baseten-mvp: one model, two pools. Same model on both (fair F1
+  # baseline); the replicas are llm_app pool proxies (sim without keys,
+  # live when *_BASE_URL is set on the instance).
+  qwen3-8b:
+    - id: baseten-l4
+      provider: baseten-l4
+      url: http://pool-baseten:8080
+    - id: vllm-l4
+      provider: runpod-vllm-l4
+      url: http://pool-vllm:8080

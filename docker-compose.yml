@@ -28,6 +28,42 @@ services:
       COLD_START_S: "8.0"
       KV_TTL_S: "300.0"
 
+  # baseten-mvp pools: same model, two pools, one llm_app image. Without
+  # *_BASE_URL they run the faithful local sim (no keys, no GPU); export
+  # BASETEN_BASE_URL / VLLM_BASE_URL (+ keys) to go live without rebuilding.
+  pool-baseten:
+    build:
+      context: .
+      dockerfile: services/qwen3_8b/Dockerfile
+    ports:
+      - "8101:8080"
+    environment:
+      ENGINE: baseten
+      MODEL_NAME: qwen3-8b
+      BASETEN_BASE_URL: ${BASETEN_BASE_URL:-}
+      BASETEN_API_KEY: ${BASETEN_API_KEY:-}
+      POOL_USD_PER_HOUR: ${BASETEN_USD_PER_HOUR:-1.05}
+      # sim profile (managed pool: slightly slower decode, pricier)
+      DECODE_MS_PER_TOKEN: "28.0"
+      COLD_START_S: "45.0"
+      USD_PER_1M_COMPLETION: "1.05"
+
+  pool-vllm:
+    build:
+      context: .
+      dockerfile: services/qwen3_8b/Dockerfile
+    ports:
+      - "8102:8080"
+    environment:
+      ENGINE: vllm
+      MODEL_NAME: qwen3-8b
+      VLLM_BASE_URL: ${VLLM_BASE_URL:-}
+      VLLM_API_KEY: ${VLLM_API_KEY:-}
+      POOL_USD_PER_HOUR: ${VLLM_USD_PER_HOUR:-0.60}
+      DECODE_MS_PER_TOKEN: "24.0"
+      COLD_START_S: "120.0"
+      USD_PER_1M_COMPLETION: "0.60"
+
   router:
     build:
       context: .
@@ -38,3 +74,5 @@ services:
       HEALTH_POLL_INTERVAL_S: "5"
     depends_on:
       - inference
+      - pool-baseten
+      - pool-vllm

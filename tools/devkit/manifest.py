@@ -43,7 +43,7 @@ from dataclasses import dataclass, field
 
 VALID_TIERS = ("realtime", "standard", "batch")
 VALID_TARGETS = ("cpu", "gpu")
-VALID_ENGINES = ("max", "sklearn")
+VALID_ENGINES = ("max", "sklearn", "baseten", "vllm")
 
 
 class Image:

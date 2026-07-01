@@ -51,6 +51,14 @@ def get_app(adapter=None) -> FastAPI:
         async def chat_completions(request: Request):
             body = await request.json()
             req = ChatRequest.from_dict(body)
+            if req.stream and hasattr(backend, "stream_raw"):
+                # Live backends stream through untouched — real tokens at
+                # real times. Re-pacing a buffered generation (below) is
+                # only correct for the sim, which models its own timing.
+                return StreamingResponse(
+                    (f"{line}\n\n" for line in backend.stream_raw(req)),
+                    media_type="text/event-stream",
+                    headers={"X-Backend": backend.name})
             gen = backend.generate(req)
             headers = economics_headers(gen, backend.name)
             if req.stream:
