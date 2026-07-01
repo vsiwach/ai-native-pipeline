@@ -9,3 +9,4 @@ bazel-*
 .terraform/
 .terraform.lock.hcl
 .claude/settings.local.json
+.pod-state.json

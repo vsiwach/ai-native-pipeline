@@ -1,0 +1,33 @@
+# Truss config — Baseten primary pool (baseten-mvp mission F1)
+#
+# Deployed with `truss push` from this directory. This wraps the same
+# OpenAI-compatible surface the router's BasetenAdapter expects, serving a
+# Qwen3-8B-class model via vLLM inside the Truss container so both pools run
+# the SAME model for a fair baseline (DESIGN.md deviation 2026-07-01).
+#
+# Verify field names against current truss docs during the live session; any
+# mismatch is a FRICTION_LOG.md entry.
+model_name: qwen3-8b-pool
+description: "ai-native-pipeline primary pool — OpenAI-compat chat, voice-SLO tier"
+python_version: py311
+model_metadata:
+  # surfaced through /v1/info by the adapter
+  tier: realtime
+  target: gpu
+  engine: vllm-truss
+requirements:
+  - vllm==0.9.1
+  - huggingface_hub
+resources:
+  accelerator: L4
+  use_gpu: true
+  cpu: "4"
+  memory: 24Gi
+secrets:
+  # set in Baseten workspace secrets, never in this file
+  hf_access_token: null
+runtime:
+  predict_concurrency: 8
+environment_variables:
+  MODEL_ID: Qwen/Qwen3-8B
+  MAX_MODEL_LEN: "8192"
