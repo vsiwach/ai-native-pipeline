@@ -8,3 +8,4 @@ bazel-*
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+.claude/settings.local.json

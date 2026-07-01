@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(pytest *)",
+      "Bash(bazel *)",
+      "Bash(./dev *)",
+      "Bash(npm *)",
+      "Bash(docker *)",
+      "Bash(curl *)",
+      "Bash(truss *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Write(**)",
+      "Edit(**)",
+      "WebFetch(*)"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf *)",
+      "Read(~/.ssh/**)",
+      "Write(~/.ssh/**)"
+    ]
+  }
+}
