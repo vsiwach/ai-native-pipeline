@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devboard — ai-native-pipeline</title>
+<!--
+  DESIGN REFERENCE / DATA CONTRACT — ai-native-pipeline Devboard v2
+  Single file, zero dependencies, no build step. This file is the source of
+  truth for layout, hierarchy, colors, motion, and the JSON shapes the
+  backend must serve. Each section is annotated with its endpoint.
+  States: healthy | degrading | incident | replay (dev switcher, top right).
+-->
+<style>
+  :root{
+    --bg:#0A0E12; --panel:#10161D; --panel2:#141C25; --line:#1E2933;
+    --txt:#E8EEF2; --dim:#8A9BA8; --micro:#5C6B77;
+    --ok:#2DE0A5; --warn:#F5B841; --bad:#FF5D5D; --accent:#39C4FF;
+    --mono:'SF Mono',ui-monospace,Menlo,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font:14px/1.45 Inter,-apple-system,'Segoe UI',sans-serif;padding:16px 24px;font-variant-numeric:tabular-nums}
+  .micro{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--micro);font-weight:600}
+  .num{font-variant-numeric:tabular-nums}
+  /* top bar */
+  #topbar{display:flex;align-items:center;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  #topbar h1{font-size:15px;font-weight:700;letter-spacing:.04em}
+  #topbar .sep{color:var(--micro)}
+  #clock{font-family:var(--mono);font-size:12px;color:var(--dim);margin-left:auto}
+  .chip{font-size:11px;font-weight:600;letter-spacing:.06em;padding:4px 10px;border:1px solid var(--line);border-radius:3px;background:transparent;color:var(--dim);cursor:pointer}
+  .chip.active{border-color:var(--accent);color:var(--accent)}
+  /* hero — endpoint: /v1/metrics/hero */
+  #hero{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:16px 0}
+  .hero-card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 20px;position:relative;overflow:hidden}
+  .hero-card .val{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:6px 0 2px}
+  .hero-card .sub{font-size:12px;color:var(--dim)}
+  .hero-card svg{position:absolute;right:16px;bottom:12px;opacity:.9}
+  .delta{font-size:12px;font-weight:600}
+  .up{color:var(--ok)}.dn{color:var(--bad)}.wn{color:var(--warn)}
+  /* grid */
+  #grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+  .panel h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--micro);font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between}
+  .panel h2 .tag{color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0}
+  /* SLO strips — endpoint: /v1/metrics/slo */
+  .pool-row{margin-bottom:14px}
+  .pool-row .name{font-family:var(--mono);font-size:12px;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .strip{position:relative;height:26px;background:var(--panel2);border-radius:3px;margin-bottom:6px}
+  .strip .fill{position:absolute;top:0;bottom:0;left:0;border-radius:3px;opacity:.25}
+  .strip .slo{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--bad);opacity:.8}
+  .strip .pmark{position:absolute;top:4px;bottom:4px;width:2px}
+  .strip .lbl{position:absolute;left:8px;top:5px;font-size:11px;color:var(--dim);font-family:var(--mono)}
+  .strip .pval{position:absolute;right:8px;top:5px;font-size:11px;font-family:var(--mono)}
+  /* placement — endpoints: /v1/pools + /v1/placement/feed */
+  #pools{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .pool-card{background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:12px}
+  .pool-card .pname{font-family:var(--mono);font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .kv{display:flex;justify-content:space-between;font-size:12px;margin:3px 0}
+  .kv .k{color:var(--dim)} .kv .v{font-family:var(--mono)}
+  .bar{height:5px;background:#0d1319;border-radius:3px;margin:6px 0 2px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:3px}
+  #feed{height:168px;overflow:hidden;font-family:var(--mono);font-size:11.5px;line-height:1.9}
+  #feed div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--dim)}
+  #feed .rid{color:var(--txt)} #feed .pool-t{color:var(--accent)} #feed .rsn{color:var(--micro)}
+  #feed .row-new{animation:slidein .3s ease} @keyframes slidein{from{opacity:0;transform:translateY(-4px)}to{opacity:1}}
+  /* release + incidents — endpoints: /v1/releases/active + /v1/incidents */
+  #bottom{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:16px;margin-top:16px}
+  .stepper{display:flex;align-items:center;gap:6px;margin:10px 0}
+  .step{flex:1;text-align:center;padding:8px 4px;border:1px solid var(--line);border-radius:4px;font-size:12px;font-family:var(--mono)}
+  .step.pass{border-color:var(--ok);color:var(--ok)} .step.live{border-color:var(--accent);color:var(--accent);animation:pulse 2s infinite}
+  .step.wait{color:var(--micro)} .step.fail{border-color:var(--bad);color:var(--bad)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  .gate{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:6px}
+  .inc-card{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:4px;padding:10px 12px;margin-bottom:8px}
+  .inc-card.live{border-left-color:var(--bad)}
+  .inc-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+  .inc-head .t{font-weight:600} .mttr-badge{font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:3px;background:rgba(45,224,165,.12);color:var(--ok)}
+  .inc-card.live .mttr-badge{background:rgba(255,93,93,.12);color:var(--bad)}
+  .dur{display:flex;height:8px;border-radius:3px;overflow:hidden;margin:6px 0}
+  .dur i{height:100%} .dur .d1{background:#39C4FF} .dur .d2{background:#F5B841} .dur .d3{background:#2DE0A5}
+  .inc-actions{font-size:11px;color:var(--dim);font-family:var(--mono)}
+  .legend{display:flex;gap:14px;font-size:10.5px;color:var(--micro);margin-bottom:8px}
+  .legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:-1px}
+  #replaybar{display:none;align-items:center;gap:12px;margin:10px 0 0;padding:8px 12px;border:1px solid var(--accent);border-radius:4px;font-size:12px;color:var(--accent)}
+  #replaybar .track{flex:1;height:4px;background:var(--panel2);border-radius:2px}#replaybar .track i{display:block;height:100%;background:var(--accent);border-radius:2px;width:0%}
+  footer{margin-top:14px;font-size:11px;color:var(--micro);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>AI-NATIVE PIPELINE</h1><span class="sep">/</span><span class="micro" style="color:var(--dim)">DEVBOARD · PRODUCTION</span>
+  <span id="clock" class="num"></span>
+  <!-- dev-only state switcher; maps to real system states, see DESIGN.md -->
+  <button class="chip active" data-s="healthy">HEALTHY</button>
+  <button class="chip" data-s="degrading">DEGRADING</button>
+  <button class="chip" data-s="incident">INCIDENT</button>
+  <button class="chip" data-s="replay">REPLAY</button>
+</div>
+
+<div id="replaybar"><span>▶ REPLAY — chaos drill 2026-07-14T02:11Z (recorded trace, 90s)</span><div class="track"><i id="rp"></i></div><span id="rt" class="num">0:00</span></div>
+
+<!-- HERO STRIP · GET /v1/metrics/hero
+     shape: { tpot_p99_ms, tpot_slo_ms, cost_per_mtok_usd, cost_delta_pct,
+              mttr_s, mttr_delta_pct, spark: {tpot:[..24], cost:[..24], mttr:[..24]} } -->
+<div id="hero">
+  <div class="hero-card"><div class="micro">TPOT p99 · voice SLO 60ms</div>
+    <div class="val num"><span id="h-tpot">42</span><span style="font-size:18px;color:var(--dim)"> ms</span></div>
+    <div class="sub"><span class="delta up" id="h-tpot-d">▼ 8% · 24h</span> · headroom <span id="h-head">30%</span></div>
+    <svg id="sp1" width="120" height="34"></svg></div>
+  <div class="hero-card"><div class="micro">$ / 1M output tokens · at SLO</div>
+    <div class="val num">$<span id="h-cost">0.83</span></div>
+    <div class="sub"><span class="delta up">▼ 12% vs single-pool</span> · blended 2 pools</div>
+    <svg id="sp2" width="120" height="34"></svg></div>
+  <div class="hero-card"><div class="micro">MTTR · governed incident agent</div>
+    <div class="val num"><span id="h-mttr">47</span><span style="font-size:18px;color:var(--dim)"> s</span></div>
+    <div class="sub"><span class="delta up">▼ 68% vs manual runbook</span> · 10 drills</div>
+    <svg id="sp3" width="120" height="34"></svg></div>
+</div>
+
+<div id="grid">
+  <!-- SLO PANEL · GET /v1/metrics/slo
+       shape: { pools:[{id, health, ttft:{p50,p95,p99,slo}, tpot:{p50,p95,p99,slo},
+                goodput:{points:[{conc,tps}], operating:{conc,tps}}}] } -->
+  <div class="panel"><h2>LATENCY VS SLO <span class="tag">live · 5s window</span></h2>
+    <div id="slo-pools"></div>
+    <div class="micro" style="margin:10px 0 6px">GOODPUT VS CONCURRENCY · operating point marked</div>
+    <svg id="goodput" width="100%" height="92" viewBox="0 0 640 92" preserveAspectRatio="none"></svg>
+  </div>
+  <!-- PLACEMENT · GET /v1/pools + GET /v1/placement/feed (SSE)
+       pool shape: {id, hw, health, util_pct, cost_per_mtok, autoscaler:{replicas,min,max,state}}
+       feed shape: {req, tier, tag, pool, reason, decide_ms, ts} -->
+  <div class="panel"><h2>PLACEMENT <span class="tag">decision feed</span></h2>
+    <div id="pools"></div>
+    <div id="feed"></div>
+  </div>
+</div>
+
+<div id="bottom">
+  <!-- RELEASE · GET /v1/releases/active
+       shape: {version, from, to, steps:[{pct,status,gate:{tpot_p99,verdict}}]} -->
+  <div class="panel"><h2>RELEASE ENGINE <span class="tag" id="rel-tag">canary · qwen3-8b @ v14</span></h2>
+    <div class="stepper" id="stepper"></div>
+    <div class="gate" id="gate">gate: TPOT p99 44ms ≤ 66ms (110% SLO) · PASS · auto-rollback armed</div>
+    <div class="micro" style="margin-top:14px">LAST ROLLBACK</div>
+    <div class="gate">v12 → v11 · 2026-07-12 · slow kernel regression caught at 10% · 3m41s, 0 user errors</div>
+  </div>
+  <!-- INCIDENTS · GET /v1/incidents
+       shape: [{id, title, ts, phase_ms:{detect,diagnose,resolve}, mttr_s,
+                agent:true|false, actions:[..], postmortem_url, live}] -->
+  <div class="panel"><h2>INCIDENTS <span class="tag">agent-governed · prod allowlist: rollback / eject / scale</span></h2>
+    <div class="legend"><span><i style="background:var(--accent)"></i>detect</span><span><i style="background:var(--warn)"></i>diagnose</span><span><i style="background:var(--ok)"></i>resolve</span></div>
+    <div id="incs"></div>
+  </div>
+  <!-- MTTR HISTORY · derived from /v1/incidents -->
+  <div class="panel"><h2>MTTR HISTORY <span class="tag">manual vs agent</span></h2>
+    <svg id="mttr" width="100%" height="150" viewBox="0 0 300 150" preserveAspectRatio="none"></svg>
+    <div class="gate" style="margin-top:8px">manual baseline 148s median · agent 47s median · gap shaded · n=10 scripted drills, traces in benchmarks/raw/</div>
+  </div>
+</div>
+
+<footer><span>ai-native-pipeline · router v2 · pools: baseten-a100 (truss) · vllm-l4 (runpod)</span><span>every number traces to benchmarks/raw/*.csv · SLO-AUDITOR verified</span></footer>
+
+<script>
+/* ============ mock data (canonical shapes — extract to contracts/devboard.openapi.yaml) ============ */
+const rnd=(a,b)=>a+Math.random()*(b-a), rj=n=>Math.round(n*10)/10;
+let STATE='healthy';
+const POOLS=()=>({
+  healthy:[{id:'baseten-a100',hw:'A100·truss',health:98,util:64,cost:1.12,repl:'3/1–6',as:'steady',c:'ok'},
+           {id:'vllm-l4',hw:'L4·runpod',health:97,util:71,cost:0.58,repl:'1/0–2',as:'steady',c:'ok'}],
+  degrading:[{id:'baseten-a100',hw:'A100·truss',health:98,util:82,cost:1.12,repl:'4/1–6',as:'scaling up',c:'ok'},
+           {id:'vllm-l4',hw:'L4·runpod',health:71,util:94,cost:0.58,repl:'1/0–2',as:'saturated',c:'warn'}],
+  incident:[{id:'baseten-a100',hw:'A100·truss',health:96,util:91,cost:1.12,repl:'5/1–6',as:'absorbing spill',c:'ok'},
+           {id:'vllm-l4',hw:'L4·runpod',health:0,util:0,cost:0.58,repl:'0 · EJECTED',as:'agent: eject 02:11:34Z',c:'bad'}],
+})[STATE==='replay'?'incident':STATE];
+const SLO={ttft:{slo:500},tpot:{slo:60}};
+const sloData=()=>({
+  healthy:[{id:'baseten-a100',c:'ok',ttft:[142,301,388],tpot:[24,37,42]},{id:'vllm-l4',c:'ok',ttft:[118,262,344],tpot:[21,33,39]}],
+  degrading:[{id:'baseten-a100',c:'ok',ttft:[150,318,401],tpot:[25,39,44]},{id:'vllm-l4',c:'warn',ttft:[204,451,497],tpot:[31,52,58]}],
+  incident:[{id:'baseten-a100',c:'ok',ttft:[166,352,447],tpot:[27,43,51]},{id:'vllm-l4',c:'bad',ttft:[0,0,0],tpot:[0,0,0]}],
+})[STATE==='replay'?'incident':STATE];
+const NAMES=['voice','voice','agent','voice','agent','batch'];
+const TAGS=['—','—','compliance-EU','—','compliance-EU','—'];
+function feedRow(){
+  const i=Math.floor(rnd(0,NAMES.length)), pools=POOLS();
+  let pool=Math.random()<(STATE==='healthy'?0.45:0.85)?pools[0].id:pools[1].id;
+  let reason=TAGS[i]!=='—'?'right-of-way':(pool==='vllm-l4'?'lowest_cost':'lowest_latency');
+  if(STATE!=='healthy'&&pool==='baseten-a100')reason=STATE==='incident'?'failover-spill':'slo-spill';
+  return {req:'#'+Math.floor(rnd(8000,9999)),tier:NAMES[i],tag:TAGS[i],pool,reason,ms:rj(rnd(4,18))};
+}
+const INCS=()=>{
+  const base=[
+    {t:'vllm-l4 replica stuck after OOM on 8K-context burst',ts:'07-14 02:11Z',d:[6,14,27],mttr:47,agent:true,
+     act:'agent: detected p99 breach → diffed deploy (clean) → replayed req #8241 → ejected replica → spill to baseten-a100 → postmortem drafted',live:STATE==='incident'},
+    {t:'canary v12 slow kernel regression at 10% traffic',ts:'07-12 18:40Z',d:[4,9,38],mttr:51,agent:true,
+     act:'agent: gate TPOT p99 71ms > 66ms → auto-rollback v12→v11 → drain 22s → verified parity',live:false},
+    {t:'baseten-a100 cold-start storm on 0→burst ramp',ts:'07-11 09:03Z',d:[41,63,44],mttr:148,agent:false,
+     act:'manual runbook: paged on-call → dashboard triage → warm-pool resize (baseline drill, agent OFF)',live:false}];
+  return base;
+};
+/* ============ renderers ============ */
+const $=q=>document.querySelector(q);
+function spark(el,vals,color){const w=120,h=34,mx=Math.max(...vals),mn=Math.min(...vals);
+  el.innerHTML='<polyline fill="none" stroke="'+color+'" stroke-width="1.5" points="'+
+  vals.map((v,i)=>(i*(w/(vals.length-1)))+','+(h-4-((v-mn)/(mx-mn||1))*(h-10))).join(' ')+'"/>';}
+function renderSLO(){
+  $('#slo-pools').innerHTML=sloData().map(p=>{
+    const strip=(m,vals,slo,unit)=>{const max=slo*1.35;
+      const pm=(v,c)=>'<span class="pmark" style="left:'+Math.min(96,v/max*100)+'%;background:'+c+'"></span>';
+      return '<div class="strip"><span class="lbl">'+m+'</span>'+
+      '<span class="fill" style="width:'+Math.min(100,vals[2]/max*100)+'%;background:var(--'+p.c+')"></span>'+
+      pm(vals[0],'var(--dim)')+pm(vals[1],'var(--warn)')+pm(vals[2],'var(--txt)')+
+      '<span class="slo" style="left:'+(slo/max*100)+'%"></span>'+
+      '<span class="pval">p50 '+vals[0]+' · p95 '+vals[1]+' · <b>p99 '+vals[2]+unit+'</b> / SLO '+slo+'</span></div>';};
+    return '<div class="pool-row"><div class="name"><span class="dot" style="background:var(--'+p.c+')"></span>'+p.id+
+      (p.ttft[2]===0?' <span style="color:var(--bad)">— EJECTED, zero traffic</span>':'')+'</div>'+
+      strip('TTFT',p.ttft,SLO.ttft.slo,'ms')+strip('TPOT',p.tpot,SLO.tpot.slo,'ms')+'</div>';}).join('');
+  // goodput curve
+  const pts=[];for(let c=1;c<=64;c++){pts.push([c,Math.min(1,c/38)*(c<38?1:38/c*1.12)*100]);}
+  const op=STATE==='healthy'?30:44;
+  $('#goodput').innerHTML='<polyline fill="none" stroke="var(--accent)" stroke-width="1.5" points="'+
+    pts.map(p=>(p[0]/64*640)+','+(88-p[1]*0.8)).join(' ')+'"/>'+
+    '<circle cx="'+(op/64*640)+'" cy="'+(88-Math.min(1,op/38)*(op<38?1:38/op*1.12)*80)+'" r="4" fill="var(--ok)"/>'+
+    '<text x="'+(op/64*640+10)+'" y="'+(84-Math.min(1,op/38)*80)+'" fill="var(--dim)" font-size="10" font-family="monospace">operating: '+op+' conc · SLO-max 38</text>';
+}
+function renderPools(){
+  $('#pools').innerHTML=POOLS().map(p=>'<div class="pool-card"><div class="pname"><span class="dot" style="background:var(--'+p.c+')"></span>'+p.id+' <span style="color:var(--micro);font-weight:400">'+p.hw+'</span></div>'+
+   '<div class="kv"><span class="k">health</span><span class="v">'+p.health+'</span></div>'+
+   '<div class="kv"><span class="k">util</span><span class="v">'+p.util+'%</span></div><div class="bar"><i style="width:'+p.util+'%;background:var(--'+p.c+')"></i></div>'+
+   '<div class="kv"><span class="k">$/1M tok</span><span class="v">$'+p.cost.toFixed(2)+'</span></div>'+
+   '<div class="kv"><span class="k">autoscaler</span><span class="v">'+p.repl+' · '+p.as+'</span></div></div>').join('');
+}
+function pushFeed(){const f=feedRow(),d=document.createElement('div');d.className='row-new';
+  d.innerHTML='<span class="rid">'+f.req+'</span> '+f.tier+(f.tag!=='—'?'/'+f.tag:'')+' → <span class="pool-t">'+f.pool+'</span> <span class="rsn">· '+f.reason+' · '+f.ms+'ms</span>';
+  const feed=$('#feed');feed.prepend(d);while(feed.children.length>8)feed.lastChild.remove();}
+function renderRelease(){
+  const steps={healthy:[['1%','pass'],['10%','pass'],['50%','live'],['100%','wait']],
+    degrading:[['1%','pass'],['10%','live'],['50%','wait'],['100%','wait']],
+    incident:[['1%','pass'],['10%','fail'],['ROLLED BACK','fail'],['—','wait']]}[STATE==='replay'?'incident':STATE];
+  $('#stepper').innerHTML=steps.map(s=>'<div class="step '+s[1]+'">'+s[0]+'</div>').join('');
+  $('#gate').textContent={healthy:'gate: TPOT p99 44ms ≤ 66ms (110% SLO) · PASS · auto-rollback armed',
+    degrading:'gate: TPOT p99 58ms ≤ 66ms · PASS, watching · promotion paused during pool degradation',
+    incident:'gate: pool ejected mid-canary → release engine froze promotion, reverted to v13 · 0 user errors'}[STATE==='replay'?'incident':STATE];
+}
+function renderIncs(){
+  $('#incs').innerHTML=INCS().map(i=>{const tot=i.d[0]+i.d[1]+i.d[2];
+   return '<div class="inc-card'+(i.live?' live':'')+'"><div class="inc-head"><span class="t">'+(i.live?'⦿ LIVE · ':'')+i.t+'</span><span class="mttr-badge">'+(i.live?'resolving…':'MTTR '+i.mttr+'s'+(i.agent?'':' · manual'))+'</span></div>'+
+   '<div class="dur"><i class="d1" style="width:'+(i.d[0]/tot*100)+'%"></i><i class="d2" style="width:'+(i.d[1]/tot*100)+'%"></i><i class="d3" style="width:'+(i.d[2]/tot*100)+'%"></i></div>'+
+   '<div class="inc-actions">'+i.ts+' · '+i.act+'</div></div>';}).join('');
+}
+function renderMTTR(){
+  const manual=[152,138,161,148,143,155,149,140,158,147], agent=[52,49,44,47,51,43,46,48,45,47];
+  const y=v=>140-(v/170*130), x=i=>10+i*(280/9);
+  const line=(vs,c)=>'<polyline fill="none" stroke="'+c+'" stroke-width="1.5" points="'+vs.map((v,i)=>x(i)+','+y(v)).join(' ')+'"/>';
+  const area='<polygon fill="rgba(45,224,165,.08)" points="'+manual.map((v,i)=>x(i)+','+y(v)).join(' ')+' '+agent.slice().reverse().map((v,i)=>x(9-i)+','+y(v)).join(' ')+'"/>';
+  $('#mttr').innerHTML=area+line(manual,'var(--micro)')+line(agent,'var(--ok)')+
+   '<text x="12" y="'+(y(150)-6)+'" fill="var(--micro)" font-size="9" font-family="monospace">manual</text>'+
+   '<text x="12" y="'+(y(47)-6)+'" fill="var(--ok)" font-size="9" font-family="monospace">agent</text>';
+}
+function heroTick(){
+  const t={healthy:[41,44],degrading:[52,58],incident:[48,54],replay:[48,54]}[STATE];
+  $('#h-tpot').textContent=Math.round(rnd(t[0],t[1]));
+  $('#h-cost').textContent=(STATE==='healthy'?rnd(.81,.86):rnd(.95,1.08)).toFixed(2);
+  spark($('#sp1'),Array.from({length:24},()=>rnd(t[0]-4,t[1]+4)),'var(--accent)');
+  spark($('#sp2'),Array.from({length:24},()=>rnd(.8,1.1)),'var(--ok)');
+  spark($('#sp3'),[148,150,146,149,151,148,52,49,47,48,46,47,47,45,48,47,46,47,45,47,48,46,47,47],'var(--ok)');
+}
+function renderAll(){renderSLO();renderPools();renderRelease();renderIncs();renderMTTR();heroTick();}
+/* state switcher + replay */
+let replayT=null;
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');
+  STATE=c.dataset.s;$('#replaybar').style.display=STATE==='replay'?'flex':'none';
+  clearInterval(replayT);
+  if(STATE==='replay'){let s=0;replayT=setInterval(()=>{s=(s+1)%91;$('#rp').style.width=(s/90*100)+'%';
+    $('#rt').textContent='0:'+String(s).padStart(2,'0');},1000);}
+  renderAll();});
+/* clocks + live ticks */
+setInterval(()=>{$('#clock').textContent=new Date().toISOString().slice(0,19).replace('T',' ')+' UTC'},1000);
+setInterval(pushFeed,1400); setInterval(heroTick,2500); setInterval(renderSLO,5000);
+renderAll(); for(let i=0;i<8;i++)pushFeed();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+openapi: 3.0.3
+info:
+  title: Devboard Data Contract
+  version: "1.0"
+  description: >
+    The operator-surface API behind docs/design/devboard-mockup.html. That
+    mockup and docs/design/DESIGN.md are the design source of truth; the JSON
+    shapes here are extracted verbatim from the mockup's annotated mock-data
+    generator and must not drift from it. Served by the router (the only
+    public entrypoint). Every numeric value returned in production mode must
+    trace to benchmarks/raw/*.csv or a live measurement — no fabricated data.
+    Poll cadences (from DESIGN.md): hero 2.5s, slo/pools/releases/incidents
+    5s, placement feed is a stream.
+paths:
+  /v1/metrics/hero:
+    get:
+      summary: Hero strip — TPOT p99 vs SLO, $/1M output tokens, MTTR (poll 2.5s)
+      operationId: metricsHero
+      responses:
+        "200":
+          description: hero metrics with 24h sparklines
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tpot_p99_ms, tpot_slo_ms, cost_per_mtok_usd, cost_delta_pct, mttr_s, mttr_delta_pct, spark]
+                properties:
+                  tpot_p99_ms: {type: number, description: current TPOT p99 across pools, ms}
+                  tpot_slo_ms: {type: number, description: voice SLO for TPOT (60ms)}
+                  tpot_delta_pct: {type: number, description: "TPOT p99 change vs 24h ago, % (negative = improvement)"}
+                  cost_per_mtok_usd: {type: number, description: blended $/1M output tokens at SLO}
+                  cost_delta_pct: {type: number, description: "cost change vs single-pool baseline, % (negative = cheaper)"}
+                  mttr_s: {type: number, description: median MTTR with incident agent, seconds}
+                  mttr_delta_pct: {type: number, description: "MTTR change vs manual-runbook baseline, % (negative = faster)"}
+                  spark:
+                    type: object
+                    description: 24 hourly points per hero card
+                    required: [tpot, cost, mttr]
+                    properties:
+                      tpot: {type: array, items: {type: number}, minItems: 24, maxItems: 24}
+                      cost: {type: array, items: {type: number}, minItems: 24, maxItems: 24}
+                      mttr: {type: array, items: {type: number}, minItems: 24, maxItems: 24}
+  /v1/metrics/slo:
+    get:
+      summary: Per-pool TTFT/TPOT percentiles vs SLO + goodput curve (poll 5s)
+      operationId: metricsSlo
+      responses:
+        "200":
+          description: latency-vs-SLO panel data, 5s window
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pools]
+                properties:
+                  pools:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, health, ttft, tpot]
+                      properties:
+                        id: {type: string, example: baseten-a100}
+                        health: {type: number, description: 0-100 health score; 0 = ejected/zero traffic}
+                        status: {type: string, enum: [ok, warn, bad], description: render tier (dot/fill color)}
+                        ttft: {$ref: "#/components/schemas/PercentilesVsSlo"}
+                        tpot: {$ref: "#/components/schemas/PercentilesVsSlo"}
+                        goodput:
+                          type: object
+                          description: >
+                            goodput (SLO-passing throughput) vs concurrency; the
+                            mockup renders one curve with the operating point and
+                            SLO-max concurrency marked.
+                          required: [points, operating]
+                          properties:
+                            points:
+                              type: array
+                              items:
+                                type: object
+                                required: [conc, tps]
+                                properties:
+                                  conc: {type: number}
+                                  tps: {type: number}
+                            operating:
+                              type: object
+                              required: [conc, tps]
+                              properties:
+                                conc: {type: number}
+                                tps: {type: number}
+                            slo_max_conc: {type: number, description: highest concurrency still meeting SLO}
+  /v1/pools:
+    get:
+      summary: Pool cards — health, utilization, cost, autoscaler state (poll 5s)
+      operationId: pools
+      responses:
+        "200":
+          description: one card per pool
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pools]
+                properties:
+                  pools:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, hw, health, util_pct, cost_per_mtok, autoscaler]
+                      properties:
+                        id: {type: string, example: vllm-l4}
+                        hw: {type: string, example: "L4·runpod", description: hardware · provider label}
+                        health: {type: number, description: 0-100; 0 = ejected}
+                        status: {type: string, enum: [ok, warn, bad]}
+                        util_pct: {type: number, description: 0-100 utilization}
+                        cost_per_mtok: {type: number, description: $/1M output tokens for this pool}
+                        autoscaler:
+                          type: object
+                          required: [replicas, min, max, state]
+                          properties:
+                            replicas: {type: integer}
+                            min: {type: integer}
+                            max: {type: integer}
+                            state:
+                              type: string
+                              description: human-readable autoscaler state
+                              example: scaling up
+                              # observed vocabulary: steady | scaling up | saturated |
+                              # absorbing spill | "agent: eject <ts>" (free text allowed)
+  /v1/placement/feed:
+    get:
+      summary: Streaming placement decisions (SSE), newest first on the board
+      operationId: placementFeed
+      responses:
+        "200":
+          description: >
+            text/event-stream; each event's data field is one JSON decision.
+            The board keeps the 8 newest rows.
+          content:
+            text/event-stream:
+              schema:
+                type: object
+                required: [req, tier, pool, reason, decide_ms, ts]
+                properties:
+                  req: {type: string, example: "#8241", description: short request id}
+                  tier: {type: string, enum: [voice, agent, batch], description: workload SLO tier}
+                  tag: {type: string, nullable: true, example: compliance-EU, description: compliance tag; null/absent when untagged}
+                  pool: {type: string, example: baseten-a100, description: pool the request was placed on}
+                  reason:
+                    type: string
+                    description: why this pool won
+                    example: lowest_latency
+                    # canonical vocabulary: right-of-way | lowest_cost | lowest_latency |
+                    # slo-spill | failover-spill (extensible as policies grow)
+                  decide_ms: {type: number, description: placement decision latency, ms}
+                  ts: {type: string, format: date-time}
+  /v1/releases/active:
+    get:
+      summary: Active release — canary stepper + gate verdicts (poll 5s)
+      operationId: releasesActive
+      responses:
+        "200":
+          description: current rollout state; steps render as the stepper
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [version, from, to, steps]
+                properties:
+                  version: {type: string, example: v14, description: version being rolled out}
+                  from: {type: string, example: v13}
+                  to: {type: string, example: v14}
+                  strategy: {type: string, example: canary}
+                  model: {type: string, example: qwen3-8b}
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      required: [pct, status]
+                      properties:
+                        pct: {type: string, example: "10%", description: "traffic step label; free text on terminal states (e.g. ROLLED BACK)"}
+                        status: {type: string, enum: [pass, live, wait, fail]}
+                        gate:
+                          type: object
+                          properties:
+                            tpot_p99: {type: number, description: TPOT p99 measured at this step, ms}
+                            threshold_ms: {type: number, description: gate threshold (110% of SLO)}
+                            verdict: {type: string, enum: [PASS, FAIL]}
+                  last_rollback:
+                    type: object
+                    description: most recent rollback, shown under the stepper
+                    properties:
+                      from: {type: string, example: v12}
+                      to: {type: string, example: v11}
+                      ts: {type: string, format: date-time}
+                      reason: {type: string, example: slow kernel regression caught at 10%}
+                      duration_s: {type: number}
+                      user_errors: {type: integer, description: user-visible errors during rollback (target 0)}
+  /v1/incidents:
+    get:
+      summary: Incident timeline + MTTR data (poll 5s; MTTR chart derives from this)
+      operationId: incidents
+      responses:
+        "200":
+          description: newest-first incident list; agent=false rows are manual-runbook baselines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, title, ts, phase_ms, mttr_s, agent, actions, live]
+                  properties:
+                    id: {type: string}
+                    title: {type: string, example: vllm-l4 replica stuck after OOM on 8K-context burst}
+                    ts: {type: string, format: date-time}
+                    phase_ms:
+                      type: object
+                      required: [detect, diagnose, resolve]
+                      properties:
+                        detect: {type: number}
+                        diagnose: {type: number}
+                        resolve: {type: number}
+                    mttr_s: {type: number, description: detect+diagnose+resolve, seconds}
+                    agent: {type: boolean, description: true = incident agent handled it; false = manual runbook (baseline)}
+                    actions:
+                      type: array
+                      items: {type: string}
+                      description: ordered action log (agent or human steps)
+                    postmortem_url: {type: string, nullable: true}
+                    live: {type: boolean, description: true while the incident is still resolving}
+components:
+  schemas:
+    PercentilesVsSlo:
+      type: object
+      required: [p50, p95, p99, slo]
+      properties:
+        p50: {type: number, description: ms}
+        p95: {type: number, description: ms}
+        p99: {type: number, description: ms}
+        slo: {type: number, description: SLO threshold, ms (TTFT 500 / TPOT 60 for voice)}
