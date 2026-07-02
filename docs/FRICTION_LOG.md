@@ -211,3 +211,18 @@ python_version/quantization compatibility at config-push time instead of
 (L4: scheduler never placed; T4: host-RAM OOM crash-loop; H100: engine build
 failed, cause invisible) — while the hosted Model APIs served the same
 workload with zero provisioning the same day. That contrast IS the PM story.
+
+### 13. GPU families are org-gated, discovered only at push
+**Doing:** 4th dedicated attempt — custom vLLM Truss targeting `A10Gx8x32`,
+picked straight from the public instance-type reference (1 GPU, 32 GiB host
+RAM, $0.02424/min — the documented sweet spot for an 8B AWQ model).
+**Happened:** `truss push` rejected it: "Feature unavailable: The GPU type
+'A10G' is not supported for your organization. Please contact Baseten
+support." Nothing in the docs' instance table, the console, or config
+validation marks which families a workspace can actually use; the gate
+surfaces only after packaging and uploading. **Cost:** one wasted push
+cycle; retargeted to `T4x8x32`. **Workaround:** trial-and-error per family
+(T4 known-good for this org). **Product could:** expose allowed instance
+types via API/console (the management API's instance-types endpoint would be
+the natural place), annotate the docs table, and validate at `truss push`
+config-check time before upload.
