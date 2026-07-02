@@ -153,3 +153,61 @@ footgun. **Workaround:** use `truss push --watch` for iteration, publish
 explicitly when ready. **Product could:** keep development-by-default for a
 model's first push, or prompt "publish or development?" on an account's
 first deploy.
+
+### 10. Model APIs: tight per-model rate limits, no Retry-After, quota only visible in the console
+**Doing:** chaos drills against two router pools backed by the same hosted
+Model API (`zai-org/GLM-4.7`), ~1.3 aggregate rps of 1-token requests.
+**Happened:** 28 of 40 requests returned 429 (evidence:
+`benchmarks/raw/rate_limit_glm47_20260702-183916.csv`, one row per request
+with status + latency; an earlier unrecorded probe measured 25/40) with an
+empty rate-limit header set — no `Retry-After`, no `X-RateLimit-*` — and the
+only quota surface is the console's "Requests (/h)" column, which the API
+itself never reports.
+Worse, the limit is per model per workspace, so two pools that look
+independent to a router are secretly coupled: quarantining pool A and
+spilling to pool B spends the SAME quota, and the incident agent's
+verification probes then compete with the spilled traffic — recovery probes
+kept timing out and quarantines stuck until traffic stopped. **Cost:** three
+drill-suite runs misdiagnosed as agent bugs; ~40 minutes. **Workaround:**
+drill at ≤0.5 rps against live pools, run repeatable MTTR evidence on the
+sim, slow probe cadence after escalation. **Product could:** return
+`Retry-After` + `X-RateLimit-Remaining` on 429s, expose the hourly quota via
+API, and document that Model API limits are per-model-per-workspace (shared
+across all callers).
+
+### 11. Model APIs: reasoning deltas and a jittery /v1/models make naive OpenAI clients misbehave
+**Doing:** pointing an OpenAI-compatible adapter at `inference.baseten.co`.
+**Happened:** (a) reasoning models (gpt-oss-120b, GLM-5.2) stream
+`delta.reasoning`/`delta.reasoning_content` before any `delta.content` — a
+client that only watches `content` sees an empty completion at small
+`max_tokens` and never latches TTFT; (b) `GET /v1/models` intermittently
+takes >5s, so using it as a health probe (the obvious OpenAI-ism) flaps —
+pools got marked down while chat was serving fine. **Cost:** one measurement
+bug (TTFT never latched) and a class of false pool-down incidents in drills.
+**Workaround:** count reasoning deltas as first-token for TTFT; treat the
+listing as config (snapshot it) and never as a liveness signal. **Product
+could:** document reasoning-delta streaming on the Model API page and serve
+/v1/models from a cache with a latency SLO.
+
+### 12. BUILD_FAILED is a dead end via API — build logs are console-only
+**Doing:** third dedicated-deploy attempt (deployment `qz47j5o`, Engine-Builder
+path, H100, TRT-LLM fp8_kv build of Qwen3-8B) failed with status
+`BUILD_FAILED`. The failure email says "view the logs for more information."
+**Happened:** the management API has no build-log surface:
+`GET /v1/models/{id}/deployments/{id}/logs` returns `{"logs": []}` for a
+build-failed deployment (runtime logs of a thing that never ran), and no
+`build_logs`/`builds` endpoint exists. The only diagnostics live behind the
+web console. For a CI/CD-driven flow (this repo's whole premise) a failed
+build is therefore un-triageable programmatically — you can detect
+BUILD_FAILED via status polling but not WHY. **Cost:** third failed deploy
+cycle on this SKU path; likely causes (py313 unsupported by the engine
+builder? fp8_kv × Qwen3 combo?) are unconfirmable without a human clicking
+the console. **Workaround:** none via API; a human reads the console logs.
+**Product could:** expose build logs in the management API (or at minimum a
+`failure_reason` field on the deployment object) and validate
+python_version/quantization compatibility at config-push time instead of
+30 minutes into a build.
+**Scorecard for the dedicated path: 3 attempts, 3 distinct failure layers**
+(L4: scheduler never placed; T4: host-RAM OOM crash-loop; H100: engine build
+failed, cause invisible) — while the hosted Model APIs served the same
+workload with zero provisioning the same day. That contrast IS the PM story.

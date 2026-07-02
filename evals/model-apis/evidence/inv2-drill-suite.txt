@@ -1,0 +1,31 @@
+drill 'latency' → pool model-api-a via http://localhost:8096 (model glm-4.7)
+  [   0.00s] load_start   2.0 rps streaming, model=glm-4.7
+  [   4.04s] inject       {"latency_ms": 2600.0, "error_rate": 0.0}
+  [  45.91s] detected     INC-0005: model-api-a breaching serving SLO — 100% of recent requests
+  [  45.91s] quarantined  traffic spilled to healthy pool
+  [  45.94s] cleared      fault removed — agent must now verify
+  [  52.02s] resolved     MTTR 8.1s (agent=True)
+  evidence: benchmarks/raw/chaos_drill_latency_20260702-164328.csv  +  benchmarks/raw/chaos_drills.csv
+cooldown 35.0s (agent anti-flap window)…
+drill 'errors' → pool model-api-a via http://localhost:8096 (model glm-4.7)
+  [   0.00s] load_start   2.0 rps streaming, model=glm-4.7
+  [   4.04s] inject       {"latency_ms": 0.0, "error_rate": 0.9}
+  [  17.29s] detected     INC-0006: model-api-a breaching serving SLO — 71% of recent requests
+  [  17.29s] quarantined  traffic spilled to healthy pool
+  [  17.30s] cleared      fault removed — agent must now verify
+  [  25.44s] resolved     MTTR 8.1s (agent=True)
+  evidence: benchmarks/raw/chaos_drill_errors_20260702-164455.csv  +  benchmarks/raw/chaos_drills.csv
+cooldown 35.0s (agent anti-flap window)…
+drill 'combo' → pool model-api-a via http://localhost:8096 (model glm-4.7)
+  [   0.00s] load_start   2.0 rps streaming, model=glm-4.7
+  [   4.04s] inject       {"latency_ms": 2600.0, "error_rate": 0.5}
+  [  15.03s] detected     INC-0007: model-api-a breaching serving SLO — 50% of recent requests
+  [  15.03s] quarantined  traffic spilled to healthy pool
+  [  15.06s] cleared      fault removed — agent must now verify
+  [  22.68s] resolved     MTTR 8.1s (agent=True)
+  evidence: benchmarks/raw/chaos_drill_combo_20260702-164555.csv  +  benchmarks/raw/chaos_drills.csv
+
+MTTR summary:
+  latency  detect 45.91s  quarantine 45.91s  mttr 8.1s
+  errors   detect 17.29s  quarantine 17.29s  mttr 8.1s
+  combo    detect 15.03s  quarantine 15.03s  mttr 8.1s

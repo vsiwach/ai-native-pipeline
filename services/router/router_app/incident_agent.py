@@ -42,6 +42,8 @@ class Case:
     phase: str = "diagnose"         # diagnose -> resolve (store phases)
     quarantined: bool = False
     probes_passed: int = 0
+    probes_failed: int = 0          # consecutive; resets on a pass
+    escalated: bool = False
     next_probe_at: float = 0.0
     resolved_at: float | None = None
 
@@ -56,6 +58,9 @@ class AgentConfig:
     # single-token probe must answer within the voice TTFT SLO — a pool
     # carrying +600ms injected latency can never pass verification
     probe_slo_ms: float = 500.0
+    # a fault the allowlist can't fix (probes keep failing) escalates to a
+    # human ONCE, loudly — the agent keeps the quarantine and keeps probing
+    escalate_after_failures: int = 5
 
 
 class IncidentAgentLogic:
@@ -73,7 +78,17 @@ class IncidentAgentLogic:
         for sig in signals:
             case = self.cases.get(sig.pool_id)
             if case is None:
-                effects.extend(self._maybe_open(now, sig, healthy_pools))
+                opened = self._maybe_open(now, sig, healthy_pools)
+                # `healthy_pools` was a tick-start snapshot: a quarantine we
+                # just issued reduces it NOW, so two pools breaching in the
+                # same tick can never both be quarantined (that would take
+                # the whole service down — the exact failure the last-pool
+                # guard exists to prevent). Quarantining an already-unusable
+                # pool removes no capacity, so it doesn't decrement.
+                if sig.usable and any(e["op"] == "quarantine"
+                                      for e in opened):
+                    healthy_pools -= 1
+                effects.extend(opened)
             else:
                 effects.extend(self._work_case(now, case, sig))
         return effects
@@ -93,13 +108,17 @@ class IncidentAgentLogic:
               and sig.breach_rate >= cfg.breach_rate_threshold):
             kind, title, detect = (
                 "slo_breach",
-                f"{sig.pool_id} breaching voice SLO — "
+                f"{sig.pool_id} breaching serving SLO — "
                 f"{sig.breach_rate:.0%} of recent requests",
                 f"detected SLO breach rate {sig.breach_rate:.0%} "
                 f"over {sig.samples} requests on {sig.pool_id}")
         else:
             return []
-        if healthy_pools <= 1:
+        # The guard protects the pools that would be LEFT: a sick pool that
+        # is already unusable (health-down) contributes nothing, so
+        # quarantining it costs nothing — count the others only.
+        others_usable = healthy_pools - (1 if sig.usable else 0)
+        if others_usable < 1:
             # quarantining the last pool would take the service down — a
             # bigger problem than a breach. Open the incident, act cautious.
             title += " · last healthy pool, quarantine withheld"
@@ -110,7 +129,7 @@ class IncidentAgentLogic:
             {"op": "act", "pool_id": sig.pool_id, "action": detect,
              "phase": "diagnose"},
         ]
-        if healthy_pools > 1:
+        if others_usable >= 1:
             case.quarantined = True
             case.phase = "resolve"
             effects.append({"op": "quarantine", "pool_id": sig.pool_id,
@@ -135,9 +154,13 @@ class IncidentAgentLogic:
                 # until health returns, nothing to do this tick
                 pass
             return effects
-        # slo_breach: probe the sick pool directly until it behaves
+        # slo_breach: probe the sick pool directly until it behaves. After
+        # escalation the case is a human's; slow-poll so a stuck quarantine
+        # doesn't hammer (and further rate-limit) the upstream for hours.
         if now >= case.next_probe_at:
-            case.next_probe_at = now + self.config.probe_interval_s
+            interval = self.config.probe_interval_s * (
+                5 if case.escalated else 1)
+            case.next_probe_at = now + interval
             effects.append({"op": "probe", "pool_id": case.pool_id,
                             "url": sig.url})
         return effects
@@ -153,12 +176,26 @@ class IncidentAgentLogic:
                     "phase": "resolve"}]
         if ok:
             case.probes_passed += 1
+            case.probes_failed = 0
             if case.probes_passed >= self.config.probes_to_reinstate:
                 effects.extend(self._reinstate_and_resolve(
                     now, case, None,
                     f"{case.probes_passed} consecutive probes within SLO"))
         else:
             case.probes_passed = 0
+            case.probes_failed += 1
+            if (case.probes_failed >= self.config.escalate_after_failures
+                    and not case.escalated):
+                # nothing in the allowlist fixes this fault — page a human,
+                # once, and keep the quarantine + probe loop running
+                case.escalated = True
+                effects.append({"op": "escalate", "pool_id": pool_id})
+                effects.append({"op": "act", "pool_id": pool_id,
+                                "action": f"escalating to on-call — "
+                                          f"{case.probes_failed} consecutive "
+                                          "probes failed; quarantine held, "
+                                          "beyond agent allowlist",
+                                "phase": "resolve"})
         return effects
 
     def _reinstate_and_resolve(self, now, case, sig, why) -> list[dict]:
@@ -193,6 +230,14 @@ class IncidentAgentRunner:
         model = self.state.devboard_model()
         if model is None:
             return [], 0
+        # verification probes are judged against the SLO of the tier the
+        # watched model actually serves — a hosted-API pool on the standard
+        # tier (TTFT 2000ms) can never pass a hard-coded 500ms voice probe,
+        # which would leave every quarantine stuck forever
+        tier = self.state.registry.get(model, {}).get("tier", "realtime")
+        tier_rules = self.state.policy["tiers"].get(tier, {})
+        self.logic.config.probe_slo_ms = float(
+            tier_rules.get("ttft_ms") or 500.0)
         replicas = cfg.replicas_for(self.state.policy, model)
         samples = self.state.metrics.window(15.0, now=None)
         by_replica = {}
@@ -238,6 +283,10 @@ class IncidentAgentRunner:
                     self.state.poller.status_for(url).quarantined = False
                 self.state.events.emit("agent_action", action="reinstate",
                                        pool=pool)
+            elif e["op"] == "escalate":
+                self.state.events.emit("agent_escalation", pool=pool,
+                                       reason="probes failing beyond "
+                                              "allowlist remedies")
             elif e["op"] == "probe":
                 ok, ms = self.probe(e["url"])
                 self.execute(now, self.logic.record_probe(now, pool, ok, ms))
@@ -259,19 +308,31 @@ class IncidentAgentRunner:
         return None
 
     def probe(self, url: str) -> tuple[bool, float]:
-        """Direct small completion against the sick pool; pass = answered
-        within the probe SLO."""
+        """Direct 1-token STREAMING completion against the sick pool; pass =
+        first token within the probe SLO. The SLO is defined on TTFT, so the
+        probe measures TTFT — timing a full non-stream completion would
+        punish decode + upstream variance the SLO never promised (live
+        hosted APIs routinely finish 1-token completions slower than their
+        TTFT, which left quarantines stuck forever)."""
         import time as _t
         import httpx
-        body = {"model": "probe", "max_tokens": 1,
+        # probe with the model the board watches — a multi-model pool (the
+        # Model API mux) resolves it exactly; "probe" would hit its default
+        model = self.state.devboard_model() or "probe"
+        body = {"model": model, "max_tokens": 1, "stream": True,
                 "messages": [{"role": "user", "content": "probe"}]}
+        slo_ms = self.logic.config.probe_slo_ms
         start = _t.monotonic()
         try:
-            resp = httpx.post(f"{url}/v1/chat/completions", json=body,
-                              timeout=self.logic.config.probe_slo_ms / 1000)
-            ms = (_t.monotonic() - start) * 1000
-            return (resp.status_code == 200
-                    and ms <= self.logic.config.probe_slo_ms), ms
+            with httpx.stream("POST", f"{url}/v1/chat/completions",
+                              json=body, timeout=slo_ms / 1000) as resp:
+                if resp.status_code != 200:
+                    return False, (_t.monotonic() - start) * 1000
+                for line in resp.iter_lines():
+                    if line.startswith("data:"):
+                        ms = (_t.monotonic() - start) * 1000
+                        return ms <= slo_ms, ms
+            return False, (_t.monotonic() - start) * 1000
         except httpx.HTTPError:
             return False, (_t.monotonic() - start) * 1000
 

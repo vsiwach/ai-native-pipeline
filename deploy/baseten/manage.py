@@ -95,6 +95,62 @@ def cmd_logs(args):
     print(json.dumps(_call("GET", path), indent=2))
 
 
+MODEL_API_BASE = "https://inference.baseten.co"
+
+
+def _alias(name: str) -> str:
+    """Registry-friendly alias from the marketing name: 'Kimi K2.7 Code' ->
+    'kimi-k2.7-code'. Aliases are what the router routes on."""
+    return name.strip().lower().replace(" ", "-")
+
+
+def cmd_catalog(args):
+    """Snapshot Baseten's hosted Model APIs into the catalog the platform
+    consumes (deploy/baseten/model-apis.json). Every model/price in the
+    catalog traces to this GET — the provenance rule, applied to config."""
+    url = f"{MODEL_API_BASE}/v1/models"
+    req = urllib.request.Request(
+        url, headers={"Authorization": f"Bearer {_key()}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            listing = json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        sys.exit(f"GET {url} -> HTTP {e.code}: "
+                 f"{e.read().decode(errors='replace')[:300]}")
+    models = []
+    for m in sorted(listing.get("data", []), key=lambda m: m["id"]):
+        pricing = m.get("pricing", {})
+        models.append({
+            "alias": _alias(m.get("name", m["id"])),
+            "slug": m["id"],
+            "name": m.get("name", m["id"]),
+            "context_length": m.get("context_length"),
+            "max_completion_tokens": m.get("max_completion_tokens"),
+            # per-token prices arrive in $/token; store $/1M tokens, the unit
+            # the economics layer and the devboard speak
+            "usd_per_1m_prompt": round(float(pricing.get("prompt", 0)) * 1e6, 4),
+            "usd_per_1m_completion": round(
+                float(pricing.get("completion", 0)) * 1e6, 4),
+            "supported_features": m.get("supported_features", []),
+        })
+    catalog = {
+        "source": f"GET {url}",
+        "fetched_at": args.fetched_at,
+        "base_url": MODEL_API_BASE,
+        "models": models,
+    }
+    out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "model-apis.json")
+    with open(out, "w") as f:
+        json.dump(catalog, f, indent=2)
+        f.write("\n")
+    print(f"wrote {out}: {len(models)} models")
+    for m in models:
+        print(f"  {m['alias']:22s} {m['slug']:45s} "
+              f"${m['usd_per_1m_prompt']}/M in  "
+              f"${m['usd_per_1m_completion']}/M out")
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -125,6 +181,12 @@ def main(argv=None):
     l.add_argument("deployment_id")
     l.add_argument("--model-id", required=True)
     l.set_defaults(fn=cmd_logs)
+
+    c = sub.add_parser("catalog", help="refresh model-apis.json from the "
+                                       "live Model APIs listing")
+    c.add_argument("--fetched-at", required=True,
+                   help="ISO timestamp recorded in the catalog (provenance)")
+    c.set_defaults(fn=cmd_catalog)
 
     args = p.parse_args(argv)
     args.fn(args)

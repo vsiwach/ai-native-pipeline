@@ -1,0 +1,10 @@
+=== ROUTER unknown model 'gpt-99-turbo' ===
+{"error":{"code":"unknown_model","message":"model 'gpt-99-turbo' is not in inference-registry.yaml","model":"gpt-99-turbo"}}
+HTTP 404
+
+=== POOL model-api-a (127.0.0.1:8103) DIRECT unknown model 'gpt-99-turbo' ===
+{"id":"chatcmpl-sim-276145431641","object":"chat.completion","model":"openai-gpt-120b","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes"},"finish_reason":"stop"}],"usage":{"prompt_tokens":2,"completion_tokens":4,"total_tokens":6}}
+HTTP 200
+
+=== POOL healthz after direct unknown-model call ===
+{"status":"ok"}

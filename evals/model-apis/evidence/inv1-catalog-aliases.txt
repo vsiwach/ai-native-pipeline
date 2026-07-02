@@ -1,0 +1,33 @@
+=== POST /v1/chat/completions model=glm-5.2 (non-stream) ===
+{"id":"chatcmpl-sim-994344469250","object":"chat.completion","model":"glm-5.2","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes warm already latency prompts is and dominates cache"},"finish_reason":"stop"}],"usage":{"prompt_tokens":6,"completion_tokens":12,"total_tokens":18}}
+HTTP 200
+
+=== POST /v1/chat/completions model=kimi-k2.7-code (non-stream) ===
+{"id":"chatcmpl-sim-836740234022","object":"chat.completion","model":"kimi-k2.7-code","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes warm already latency prompts is and dominates cache"},"finish_reason":"stop"}],"usage":{"prompt_tokens":8,"completion_tokens":12,"total_tokens":20}}
+HTTP 200
+
+=== POST /v1/chat/completions model=deepseek-v4-pro (non-stream) ===
+{"id":"chatcmpl-sim-974242006205","object":"chat.completion","model":"deepseek-v4-pro","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes warm already latency prompts is and dominates cache"},"finish_reason":"stop"}],"usage":{"prompt_tokens":8,"completion_tokens":12,"total_tokens":20}}
+HTTP 200
+
+=== POST /v1/chat/completions model=glm-4.7 (non-stream) ===
+{"id":"chatcmpl-sim-804101498142","object":"chat.completion","model":"glm-4.7","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes warm already latency prompts is and dominates cache"},"finish_reason":"stop"}],"usage":{"prompt_tokens":6,"completion_tokens":12,"total_tokens":18}}
+HTTP 200
+
+=== POST /v1/chat/completions model=nemotron-ultra (non-stream) ===
+{"id":"chatcmpl-sim-663274039880","object":"chat.completion","model":"nemotron-ultra","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes warm already latency prompts is and dominates cache"},"finish_reason":"stop"}],"usage":{"prompt_tokens":8,"completion_tokens":12,"total_tokens":20}}
+HTTP 200
+
+=== POST /v1/chat/completions model=openai-gpt-120b (non-stream) ===
+{"id":"chatcmpl-sim-588822342570","object":"chat.completion","model":"openai-gpt-120b","choices":[{"index":0,"message":{"role":"assistant","content":"less drops serves prefixes warm already latency prompts is and dominates cache"},"finish_reason":"stop"}],"usage":{"prompt_tokens":8,"completion_tokens":12,"total_tokens":20}}
+HTTP 200
+
+=== POST /v1/chat/completions model=glm-5.2 stream=true (first 8 SSE lines) ===
+data: {"id": "chatcmpl-sim-643235377897", "object": "chat.completion.chunk", "model": "glm-5.2", "choices": [{"index": 0, "delta": {"role": "assistant"}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-sim-643235377897", "object": "chat.completion.chunk", "model": "glm-5.2", "choices": [{"index": 0, "delta": {"content": "less"}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-sim-643235377897", "object": "chat.completion.chunk", "model": "glm-5.2", "choices": [{"index": 0, "delta": {"content": " drops"}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-sim-643235377897", "object": "chat.completion.chunk", "model": "glm-5.2", "choices": [{"index": 0, "delta": {"content": " serves"}, "finish_reason": null}]}
+

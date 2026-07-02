@@ -1,0 +1,100 @@
+injected on http://127.0.0.1:8103: {'latency_ms': 2600.0, 'error_rate': 0.0}
+16:47:51
+16:48:59
+--- escalation events ---
+{"events":[{"seq":537,"ts":1783025337.0769851,"kind":"agent_escalation","pool":"model-api-a","reason":"probes failing beyond allowlist remedies"}],"counts":{"scale":9,"route":368,"config_change":14,"slo_breach":72,"incident_open":9,"incident_action":46,"agent_action":15,"incident_resolved":8,"agent_escalation":1}}--- live incident ---
+{
+ "id": "INC-0008",
+ "title": "model-api-a breaching serving SLO \u2014 100% of recent requests",
+ "ts": 1783025314.858509,
+ "phase_ms": {
+  "detect": 0.1,
+  "diagnose": 0.0,
+  "resolve": 24537.5
+ },
+ "mttr_s": 24.5,
+ "agent": true,
+ "actions": [
+  "detected SLO breach rate 100% over 6 requests on model-api-a",
+  "quarantined model-api-a; traffic spills to healthy pools",
+  "probe failed (2027ms)",
+  "probe failed (2032ms)",
+  "probe failed (2024ms)",
+  "probe failed (2028ms)",
+  "probe failed (2025ms)",
+  "escalating to on-call \u2014 5 consecutive probes failed; quarantine held, beyond agent allowlist"
+ ],
+ "postmortem_url": null,
+ "live": true
+}
+--- probe cadence from event log (ts, action) ---
+1783025320.9 probe failed (2027ms) 
+1783025320.9 probe passed (33ms)   (+0.0s)
+1783025325.0 probe failed (2032ms)   (+4.0s)
+1783025325.0 probe passed (30ms)   (+0.0s)
+1783025329.0 probe failed (2024ms)   (+4.0s)
+1783025333.1 probe failed (2028ms)   (+4.0s)
+1783025337.1 probe failed (2025ms)   (+4.0s)
+1783025337.1 escalating to on-call — 5 consecutive probes failed; quarantine held, beyond agent allowlist   (+0.0s)
+1783025341.1 probe failed (2027ms)   (+4.0s)
+1783025357.2 probe failed (2030ms)   (+16.1s)
+1783025373.2 probe failed (2028ms)   (+16.1s)
+--- clearing fault 16:50:51 ---
+cleared on http://127.0.0.1:8103: {'latency_ms': 0.0, 'error_rate': 0.0}
+--- INC-0008 resolved 16:51:26 ---
+[
+ {
+  "id": "INC-0009",
+  "title": "model-api-b breaching serving SLO \u2014 100% of recent requests \u00b7 last healthy pool, quarantine withheld",
+  "ts": 1783025314.858679,
+  "phase_ms": {
+   "detect": 0.0,
+   "diagnose": 6065.0,
+   "resolve": 4067.2
+  },
+  "mttr_s": 10.1,
+  "agent": true,
+  "actions": [
+   "detected SLO breach rate 100% over 6 requests on model-api-b",
+   "probe passed (33ms)",
+   "probe passed (30ms)"
+  ],
+  "postmortem_url": "/v1/incidents?focus=model-api-b",
+  "live": false
+ },
+ {
+  "id": "INC-0008",
+  "title": "model-api-a breaching serving SLO \u2014 100% of recent requests",
+  "ts": 1783025314.858509,
+  "phase_ms": {
+   "detect": 0.1,
+   "diagnose": 0.0,
+   "resolve": 168756.1
+  },
+  "mttr_s": 168.8,
+  "agent": true,
+  "actions": [
+   "detected SLO breach rate 100% over 6 requests on model-api-a",
+   "quarantined model-api-a; traffic spills to healthy pools",
+   "probe failed (2027ms)",
+   "probe failed (2032ms)",
+   "probe failed (2024ms)",
+   "probe failed (2028ms)",
+   "probe failed (2025ms)",
+   "escalating to on-call \u2014 5 consecutive probes failed; quarantine held, beyond agent allowlist",
+   "probe failed (2027ms)",
+   "probe failed (2030ms)",
+   "probe failed (2028ms)",
+   "probe failed (2021ms)",
+   "probe failed (2032ms)",
+   "probe failed (2027ms)",
+   "probe failed (2026ms)",
+   "probe failed (2029ms)",
+   "probe passed (23ms)",
+   "probe passed (29ms)",
+   "reinstated model-api-a \u2014 2 consecutive probes within SLO"
+  ],
+  "postmortem_url": "/v1/incidents?focus=model-api-a",
+  "live": false
+ }
+]

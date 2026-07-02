@@ -1,0 +1,5 @@
+t_rel_s,event,detail
+0.0,load_start,"3.0 rps streaming, model=glm-4.7"
+4.32,inject,"{""latency_ms"": 2600.0, ""error_rate"": 0.0}"
+16.07,detected,"INC-0001: model-api-a down — health probe failing, traffic spilled · last healthy pool, quarantine withheld"
+20.87,resolved,MTTR 4.0s (agent=True)

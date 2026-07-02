@@ -1,0 +1,7 @@
+t_rel_s,event,detail
+0.0,load_start,"2.0 rps streaming, model=glm-4.7"
+4.02,inject,"{""latency_ms"": 2600.0, ""error_rate"": 0.0}"
+18.76,detected,INC-0001: model-api-a breaching serving SLO — 60% of recent requests
+18.76,quarantined,traffic spilled to healthy pool
+18.79,cleared,fault removed — agent must now verify
+25.41,resolved,MTTR 8.1s (agent=True)

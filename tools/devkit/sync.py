@@ -9,8 +9,9 @@ router reads is a generated projection of those declarations.
     ./dev sync --dockerfiles   print the Dockerfile each manifest's image renders
 
 A service is discovered if services/<name>/service.py defines a module-level
-`SERVICE` (a manifest.Service). Services without a manifest are skipped, so this
-can be adopted one service at a time.
+`SERVICE` (a manifest.Service) or `SERVICES` (a list of them — one manifest
+expanding a whole model catalog, e.g. services/model_apis). Services without a
+manifest are skipped, so this can be adopted one service at a time.
 """
 
 import importlib.util
@@ -37,10 +38,14 @@ def discover(repo_root: Path) -> list[Service]:
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         svc = getattr(module, "SERVICE", None)
+        many = getattr(module, "SERVICES", None)
         if isinstance(svc, Service):
             found.append(svc)
+        elif isinstance(many, (list, tuple)) and \
+                all(isinstance(s, Service) for s in many) and many:
+            found.extend(many)
         else:
-            ui.warn(f"{service_py.relative_to(repo_root)}: no SERVICE defined — skipped")
+            ui.warn(f"{service_py.relative_to(repo_root)}: no SERVICE(S) defined — skipped")
     return found
 
 

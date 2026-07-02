@@ -94,7 +94,7 @@ class RouterState:
         configured = os.environ.get("DEVBOARD_MODEL")
         if configured:
             return configured
-        for engines in (("baseten", "vllm"), ("max",)):
+        for engines in (("baseten", "vllm"), ("baseten-api",), ("max",)):
             for name, entry in self.registry.items():
                 if entry.get("engine") in engines and \
                         self.policy["endpoints"].get(name):
@@ -114,9 +114,12 @@ class RouterState:
         return self.autoscalers[model]
 
     def _select_for_chat(self, model: str, body: dict,
-                         region: str | None, compliance: str | None):
+                         region: str | None, compliance: str | None,
+                         exclude: set | None = None):
         """Shared selection for the chat paths: placement + affinity +
-        autoscale signal. Returns (choice, tier, tier_rules, decide_ms,
+        autoscale signal. `exclude` drops replica ids already tried this
+        request so 5xx failover can't re-pick the same sick pool through
+        prefix affinity. Returns (choice, tier, tier_rules, decide_ms,
         prompt). Raises UnknownModel / NoHealthyBackend."""
         if model not in self.registry:
             raise UnknownModel(model)
@@ -139,6 +142,10 @@ class RouterState:
             self.events.emit("placement", model=model, region=region,
                              compliance=compliance, eligible_pools=sorted(allowed))
             placement_filter = lambda c: c.get("pool") is None or c["pool"] in allowed
+        if exclude:
+            base_filter = placement_filter
+            placement_filter = lambda c: c["id"] not in exclude and (
+                base_filter is None or base_filter(c))
 
         # autoscale signal: in-flight requests for this model right now
         pending = sum(self.kvstate.pending(r["id"]) for r in replicas) + 1
@@ -196,37 +203,70 @@ class RouterState:
                              slo_tpot_ms=slo_tpot, tier=tier,
                              remediation="scale up / reroute / roll back")
 
+    def _chat_attempts(self, model: str) -> int:
+        return max(1, len(self.policy["endpoints"].get(model, [])))
+
     def proxy_chat(self, model: str, body: dict, headers: dict,
                    region: str | None = None, compliance: str | None = None):
         """Non-streaming chat: forward, record LLM economics, return
-        (httpx.Response, ReplicaChoice). Raises UnknownModel /
+        (httpx.Response, ReplicaChoice). A replica that can't be reached is
+        marked unhealthy and the NEXT one is tried (failover, like
+        /v1/predict always had) — one sick pool never becomes a client 502
+        while a healthy pool exists. Raises UnknownModel /
         NoHealthyBackend."""
-        choice, tier, tier_rules, decide_ms, _ = self._select_for_chat(
-            model, body, region, compliance)
-        self.kvstate.inc_pending(choice.replica_id)
-        try:
-            fwd = {k: v for k, v in headers.items()
-                   if k.lower() in FORWARDED_HEADERS}
-            resp = httpx.post(f"{choice.url}/v1/chat/completions", json=body,
-                              headers=fwd, timeout=120)
-            ttft = float(resp.headers.get("X-TTFT-Ms", 0.0))
-            decode_ms = float(resp.headers.get("X-Decode-Ms", 0.0))
-            tps = float(resp.headers.get("X-Tokens-Per-Sec", 0.0))
-            cost = float(resp.headers.get("X-Est-Cost", 0.0))
-            prompt_tokens = int(resp.headers.get("X-Prompt-Tokens", 0))
-            completion_tokens = int(resp.headers.get("X-Completion-Tokens", 0))
-            backend_hit = resp.headers.get("X-Cache") == "hit"
-        finally:
-            self.kvstate.dec_pending(choice.replica_id)
-        # record what the replica now holds (warm + prefix cached)
-        self.kvstate.record_prefix(choice.replica_id, choice.prefix)
-        self._record_chat(model, choice, tier, tier_rules, decide_ms,
-                          ttft=ttft, decode_ms=decode_ms, tps=tps, cost=cost,
-                          prompt_tokens=prompt_tokens,
-                          completion_tokens=completion_tokens,
-                          backend_hit=backend_hit, tag=compliance,
-                          http_ok=resp.status_code < 500)
-        return resp, choice
+        last_error: Exception | None = None
+        last_resp = last_choice = None
+        tried: set = set()
+        for _ in range(self._chat_attempts(model)):
+            choice, tier, tier_rules, decide_ms, _ = self._select_for_chat(
+                model, body, region, compliance, exclude=tried)
+            self.kvstate.inc_pending(choice.replica_id)
+            try:
+                fwd = {k: v for k, v in headers.items()
+                       if k.lower() in FORWARDED_HEADERS}
+                try:
+                    resp = httpx.post(f"{choice.url}/v1/chat/completions",
+                                      json=body, headers=fwd, timeout=120)
+                except httpx.HTTPError as exc:
+                    self.poller.mark_unhealthy(choice.url)
+                    self.events.emit("failover", model=model,
+                                     replica=choice.replica_id,
+                                     error=str(exc))
+                    tried.add(choice.replica_id)
+                    last_error = exc
+                    continue
+                ttft = float(resp.headers.get("X-TTFT-Ms", 0.0))
+                decode_ms = float(resp.headers.get("X-Decode-Ms", 0.0))
+                tps = float(resp.headers.get("X-Tokens-Per-Sec", 0.0))
+                cost = float(resp.headers.get("X-Est-Cost", 0.0))
+                prompt_tokens = int(resp.headers.get("X-Prompt-Tokens", 0))
+                completion_tokens = int(
+                    resp.headers.get("X-Completion-Tokens", 0))
+                backend_hit = resp.headers.get("X-Cache") == "hit"
+            finally:
+                self.kvstate.dec_pending(choice.replica_id)
+            # record what the replica now holds (warm + prefix cached)
+            self.kvstate.record_prefix(choice.replica_id, choice.prefix)
+            # 429 is an SLO violation by definition (the pool is refusing
+            # capacity) — it must feed breach detection, not hide under
+            # "http_ok" (FRICTION_LOG #10 made this failure mode invisible)
+            self._record_chat(model, choice, tier, tier_rules, decide_ms,
+                              ttft=ttft, decode_ms=decode_ms, tps=tps,
+                              cost=cost, prompt_tokens=prompt_tokens,
+                              completion_tokens=completion_tokens,
+                              backend_hit=backend_hit, tag=compliance,
+                              http_ok=resp.status_code < 500
+                              and resp.status_code != 429)
+            if resp.status_code < 500:
+                return resp, choice
+            # backend 5xx: the sample is recorded against the sick pool —
+            # now try a different replica instead of punting to the client
+            tried.add(choice.replica_id)
+            last_resp, last_choice = resp, choice
+        if last_resp is not None:
+            return last_resp, last_choice   # every replica 5xx'd: be honest
+        raise NoHealthyBackend(f"{model}: all replicas failed "
+                               f"({last_error})")
 
     def proxy_chat_stream(self, model: str, body: dict, headers: dict,
                           region: str | None = None,
@@ -236,23 +276,49 @@ class RouterState:
         buffering (client TTFT ≈ backend TTFT). Economics come from backend
         headers when present (sim), else are measured here and costed from
         the provider's $/1M-output-token entry in cost_table (live pools)."""
-        choice, tier, tier_rules, decide_ms, _ = self._select_for_chat(
-            model, body, region, compliance)
         fwd = {k: v for k, v in headers.items()
                if k.lower() in FORWARDED_HEADERS}
-        self.kvstate.inc_pending(choice.replica_id)
         # Open the upstream response BEFORE returning so its headers (the
         # sim's economics) can be forwarded on our own response; the body
-        # still streams token by token through the generator below.
-        t0 = time.monotonic()
-        ctx = httpx.stream("POST", f"{choice.url}/v1/chat/completions",
-                           json=body, headers=fwd, timeout=120)
-        try:
-            upstream = ctx.__enter__()
-        except httpx.HTTPError:
-            self.kvstate.dec_pending(choice.replica_id)
-            self.poller.mark_unhealthy(choice.url)
-            raise NoHealthyBackend(f"{choice.url} unreachable")
+        # still streams token by token through the generator below. A replica
+        # failing at connect is marked unhealthy and the next one is tried —
+        # failover happens while the stream is still uncommitted.
+        tried: set = set()
+        for _ in range(self._chat_attempts(model)):
+            choice, tier, tier_rules, decide_ms, _ = self._select_for_chat(
+                model, body, region, compliance, exclude=tried)
+            self.kvstate.inc_pending(choice.replica_id)
+            t0 = time.monotonic()
+            ctx = httpx.stream("POST", f"{choice.url}/v1/chat/completions",
+                               json=body, headers=fwd, timeout=120)
+            try:
+                upstream = ctx.__enter__()
+            except httpx.HTTPError as exc:
+                self.kvstate.dec_pending(choice.replica_id)
+                self.poller.mark_unhealthy(choice.url)
+                self.events.emit("failover", model=model,
+                                 replica=choice.replica_id, error=str(exc))
+                tried.add(choice.replica_id)
+                continue
+            if upstream.status_code >= 500:
+                # stream not yet committed to the client — record the breach
+                # against this pool and try another replica
+                ctx.__exit__(None, None, None)
+                self.kvstate.dec_pending(choice.replica_id)
+                self._record_chat(model, choice, tier, tier_rules, decide_ms,
+                                  ttft=0.0, decode_ms=0.0, tps=0.0, cost=0.0,
+                                  prompt_tokens=0, completion_tokens=0,
+                                  backend_hit=False, tag=compliance,
+                                  http_ok=False)
+                self.events.emit("failover", model=model,
+                                 replica=choice.replica_id,
+                                 error=f"upstream {upstream.status_code}")
+                tried.add(choice.replica_id)
+                continue
+            break
+        else:
+            raise NoHealthyBackend(f"{model}: all replicas unreachable "
+                                   "or failing")
         hdrs = upstream.headers
 
         def stream():
@@ -300,9 +366,10 @@ class RouterState:
                     completion_tokens=completion_tokens,
                     backend_hit=hdrs.get("X-Cache") == "hit",
                     tag=compliance,
-                    http_ok=upstream.status_code < 500)
+                    http_ok=upstream.status_code < 500
+                    and upstream.status_code != 429)
 
-        return stream(), choice, hdrs
+        return stream(), choice, hdrs, upstream.status_code
 
     # ---- core proxy path (shared by live predict and batch worker) ----
 
@@ -468,13 +535,16 @@ def get_app(registry_path: Path | None = None,
         except json.JSONDecodeError:
             return _error(400, "invalid_json", "request body must be JSON")
         model = model or body.get("model")
+        from fastapi.concurrency import run_in_threadpool
         try:
             if body.get("stream"):
                 # tokens flow as the backend emits them; bookkeeping happens
-                # when the stream closes (inside the generator)
-                gen, choice, up_hdrs = state.proxy_chat_stream(
-                    model, body, dict(request.headers),
-                    region=region, compliance=compliance)
+                # when the stream closes (inside the generator). Selection +
+                # the blocking upstream connect run OFF the event loop — a
+                # slow pool must never stall every other request + /healthz.
+                gen, choice, up_hdrs, up_status = await run_in_threadpool(
+                    state.proxy_chat_stream, model, body,
+                    dict(request.headers), region, compliance)
                 out_headers = {"X-Backend": choice.provider,
                                "X-Replica": choice.replica_id,
                                "X-Route-Reason": choice.reason}
@@ -485,8 +555,7 @@ def get_app(registry_path: Path | None = None,
                         out_headers[h] = up_hdrs[h]
                 return StreamingResponse(
                     gen, media_type="text/event-stream",
-                    headers=out_headers)
-            from fastapi.concurrency import run_in_threadpool
+                    status_code=up_status, headers=out_headers)
             resp, choice = await run_in_threadpool(
                 state.proxy_chat, model, body, dict(request.headers),
                 region, compliance)
@@ -515,8 +584,16 @@ def get_app(registry_path: Path | None = None,
         media = resp.headers.get("content-type", "application/json")
         if media.startswith("text/event-stream"):
             return Response(content=resp.content, media_type=media,
+                            status_code=resp.status_code, headers=headers)
+        try:
+            payload = resp.json()
+        except ValueError:
+            payload = {"error": {"type": "backend_error",
+                                 "message": resp.text[:300]}}
+        # the backend's status IS the client's status — a 5xx/429 must
+        # never be laundered into a 200 (staff-skeptic finding)
+        return JSONResponse(content=payload, status_code=resp.status_code,
                             headers=headers)
-        return JSONResponse(content=resp.json(), headers=headers)
 
     @app.get("/v1/events")
     def events(limit: int = 100, kind: str | None = None):

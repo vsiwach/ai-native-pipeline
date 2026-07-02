@@ -45,11 +45,14 @@ def get_app(adapter=None) -> FastAPI:
             chaos["error_rate"] = float(body.get("error_rate", 0.0))
             return chaos
 
-    def _chaos_gate():
-        """Returns an error response, or None to proceed."""
+    async def _chaos_gate():
+        """Returns an error response, or None to proceed. The latency sleep
+        is async: injected latency delays THIS request the way a slow model
+        does — it must never block the event loop and take the whole pool
+        (including /healthz) down with it."""
         if chaos["latency_ms"] > 0:
-            import time as _t
-            _t.sleep(chaos["latency_ms"] / 1000.0)
+            import asyncio as _a
+            await _a.sleep(chaos["latency_ms"] / 1000.0)
         if chaos["error_rate"] > 0:
             import random as _r
             if _r.random() < chaos["error_rate"]:
@@ -76,10 +79,21 @@ def get_app(adapter=None) -> FastAPI:
         return models_body(backend.models())
 
     if "chat" in caps:
+        def _upstream_error_response(err) -> JSONResponse:
+            """UpstreamError -> a REAL error status (429 stays 429; everything
+            else surfaces as 502) with a structured body, so the router's
+            failover and the incident agent see the failure — never a 200."""
+            status = 429 if err.status == 429 else 502
+            return JSONResponse(
+                {"error": {"type": err.kind, "message": str(err),
+                           "upstream_status": err.status}},
+                status_code=status)
+
         @app.post("/v1/chat/completions")
         async def chat_completions(request: Request):
+            from llm_app.openai_compat import UpstreamError
             body = await request.json()
-            injected = _chaos_gate()
+            injected = await _chaos_gate()
             if injected is not None:
                 return injected
             req = ChatRequest.from_dict(body)
@@ -87,11 +101,33 @@ def get_app(adapter=None) -> FastAPI:
                 # Live backends stream through untouched — real tokens at
                 # real times. Re-pacing a buffered generation (below) is
                 # only correct for the sim, which models its own timing.
+                # Pull the FIRST line before committing to a 200: an upstream
+                # that fails at connect becomes a real error status instead
+                # of an empty event stream. The pull is blocking network I/O
+                # (urllib) — it runs in the threadpool so a slow upstream
+                # can't stall the event loop (and /healthz with it).
+                from fastapi.concurrency import run_in_threadpool
+                lines = backend.stream_raw(req)
+                try:
+                    first = await run_in_threadpool(next, lines, None)
+                except UpstreamError as err:
+                    return _upstream_error_response(err)
+
+                def replay():
+                    if first is not None:
+                        yield f"{first}\n\n"
+                    for line in lines:
+                        yield f"{line}\n\n"
                 return StreamingResponse(
-                    (f"{line}\n\n" for line in backend.stream_raw(req)),
-                    media_type="text/event-stream",
+                    replay(), media_type="text/event-stream",
                     headers={"X-Backend": backend.name})
-            gen = backend.generate(req)
+            try:
+                # generate() blocks on upstream I/O (live adapters) — keep
+                # the event loop free
+                from fastapi.concurrency import run_in_threadpool
+                gen = await run_in_threadpool(backend.generate, req)
+            except UpstreamError as err:
+                return _upstream_error_response(err)
             headers = economics_headers(gen, backend.name)
             if req.stream:
                 return StreamingResponse(

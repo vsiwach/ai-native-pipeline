@@ -27,6 +27,17 @@ def build_adapter() -> BackendAdapter:
         return MaxContainer(name, base_url=os.environ["MAX_BASE_URL"],
                             model_id=os.environ.get("MODEL_ID"))
 
+    if engine == "baseten-api":
+        # Baseten hosted Model APIs: one mux pool serves the whole catalog.
+        # Live when BASETEN_API_BASE_URL is set (key required, same *_BASE_URL
+        # gate as the other pools — tests and keyless dev get per-model sims
+        # carrying the catalog's real per-token prices).
+        from llm_app.mux import build_model_api_mux
+        return build_model_api_mux(
+            name, base_url=os.environ.get("BASETEN_API_BASE_URL"),
+            catalog_path=os.environ.get("MODEL_API_CATALOG"),
+            default_alias=os.environ.get("MODEL_API_DEFAULT"))
+
     if engine in ("baseten", "vllm"):
         # Live pool when its base URL is configured; otherwise the same
         # surface via the local sim with pool-tuned economics, so the whole

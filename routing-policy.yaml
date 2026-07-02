@@ -17,6 +17,9 @@ cost_table: # $/1M requests, maintained by ops — router just reads it
   # $/hr share) — these only order the pools, cheapest first.
   baseten-l4: 1.05
   runpod-vllm-l4: 0.60
+  # Hosted Model APIs: per-token billed; ranking value only (real cost is
+  # measured per request from the catalog's per-token prices).
+  baseten-model-api: 3.00
 
 cache: {enabled: true, ttl_s: 300, backend: in_memory} # swap for redis later
 
@@ -47,3 +50,83 @@ endpoints:
       provider: runpod-vllm-l4
       pool: vllm-l4
       url: http://pool-vllm:8080
+  # Baseten hosted Model APIs (catalog: deploy/baseten/model-apis.json).
+  # Every alias is served by BOTH mux proxy replicas — quarantine one
+  # (chaos drills) and traffic spills to the other, same upstream.
+  deepseek-v4-pro:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  kimi-k2.5:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  kimi-k2.6:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  kimi-k2.7-code:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  nemotron-ultra:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  nemotron-super:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  openai-gpt-120b:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  glm-4.7:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  glm-5:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  glm-5.1:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080
+  glm-5.2:
+    - id: model-api-a
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    - id: model-api-b
+      provider: baseten-model-api
+      url: http://pool-model-api-b:8080

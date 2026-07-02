@@ -96,5 +96,50 @@ class PoolDownRecoveryTest(unittest.TestCase):
         self.assertEqual(ops(effects), ["reinstate", "act", "resolve"])
 
 
+class SameTickRaceTest(unittest.TestCase):
+    def test_two_pools_breaching_same_tick_never_both_quarantined(self):
+        """The healthy count is a tick-start snapshot; without live
+        decrementing, a chaos blast on every pool would quarantine ALL of
+        them in one tick and zero the service."""
+        logic = IncidentAgentLogic(AgentConfig())
+        effects = logic.step(
+            0.0, [sig("vllm-l4", breach=1.0), sig("baseten-l4", breach=1.0)],
+            healthy_pools=2)
+        quarantined = [e["pool_id"] for e in effects
+                       if e["op"] == "quarantine"]
+        self.assertEqual(quarantined, ["vllm-l4"])   # first only
+        self.assertFalse(logic.cases["baseten-l4"].quarantined)
+        # both incidents still opened — nothing failed silently
+        self.assertEqual(len([e for e in effects if e["op"] == "open"]), 2)
+
+
+class EscalationTest(unittest.TestCase):
+    def test_persistent_probe_failures_escalate_once(self):
+        cfg = AgentConfig(escalate_after_failures=3)
+        logic = IncidentAgentLogic(cfg)
+        logic.step(0.0, [sig(breach=1.0), sig("baseten-l4")], 2)
+        for i in range(2):
+            e = logic.record_probe(float(i), "vllm-l4", ok=False,
+                                   latency_ms=900)
+            self.assertNotIn("escalate", ops(e))
+        e3 = logic.record_probe(9.0, "vllm-l4", ok=False, latency_ms=900)
+        self.assertIn("escalate", ops(e3))
+        # escalation fires exactly once; quarantine + probing continue
+        e4 = logic.record_probe(12.0, "vllm-l4", ok=False, latency_ms=900)
+        self.assertNotIn("escalate", ops(e4))
+        self.assertTrue(logic.cases["vllm-l4"].quarantined)
+
+    def test_recovery_after_escalation_still_resolves(self):
+        cfg = AgentConfig(escalate_after_failures=2, probes_to_reinstate=2)
+        logic = IncidentAgentLogic(cfg)
+        logic.step(0.0, [sig(breach=1.0), sig("baseten-l4")], 2)
+        logic.record_probe(1.0, "vllm-l4", ok=False, latency_ms=900)
+        logic.record_probe(2.0, "vllm-l4", ok=False, latency_ms=900)
+        logic.record_probe(3.0, "vllm-l4", ok=True, latency_ms=40)
+        e = logic.record_probe(4.0, "vllm-l4", ok=True, latency_ms=45)
+        self.assertIn("resolve", ops(e))
+        self.assertNotIn("vllm-l4", logic.cases)
+
+
 if __name__ == "__main__":
     unittest.main()

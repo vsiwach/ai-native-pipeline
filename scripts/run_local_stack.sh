@@ -12,12 +12,16 @@ cd "$(dirname "$0")/.."
 ROUTER_PORT="${1:-8090}"
 BASETEN_PORT=8101
 VLLM_PORT=8102
+MODEL_API_A_PORT=8103
+MODEL_API_B_PORT=8104
 WORK="$(mktemp -d)"
 trap 'kill 0 2>/dev/null' EXIT INT TERM
 
 # routing policy with localhost pool URLs (repo policy uses compose hostnames)
 sed "s|http://pool-baseten:8080|http://127.0.0.1:${BASETEN_PORT}|; \
-     s|http://pool-vllm:8080|http://127.0.0.1:${VLLM_PORT}|" \
+     s|http://pool-vllm:8080|http://127.0.0.1:${VLLM_PORT}|; \
+     s|http://pool-model-api-a:8080|http://127.0.0.1:${MODEL_API_A_PORT}|; \
+     s|http://pool-model-api-b:8080|http://127.0.0.1:${MODEL_API_B_PORT}|" \
     routing-policy.yaml > "$WORK/routing-policy.yaml"
 
 echo "· pool baseten-l4 (sim unless BASETEN_BASE_URL set) :${BASETEN_PORT}"
@@ -33,6 +37,20 @@ echo "· pool vllm-l4    (sim unless VLLM_BASE_URL set)    :${VLLM_PORT}"
   VLLM_BASE_URL="${VLLM_BASE_URL:-}" POOL_USD_PER_HOUR="${VLLM_USD_PER_HOUR:-0.60}" \
   python3 -m uvicorn llm_app.main:app --host 127.0.0.1 \
   --port "$VLLM_PORT" --log-level error) &
+
+# Baseten hosted Model APIs — one mux proxy serves the whole catalog
+# (deploy/baseten/model-apis.json). Two replicas so quarantine can spill.
+# Live upstream when BASETEN_API_BASE_URL is exported (needs BASETEN_API_KEY),
+# e.g.  export BASETEN_API_BASE_URL=https://inference.baseten.co
+for P in "a:${MODEL_API_A_PORT}" "b:${MODEL_API_B_PORT}"; do
+  SUFFIX="${P%%:*}"; PORT="${P##*:}"
+  echo "· pool model-api-${SUFFIX} (sim unless BASETEN_API_BASE_URL set) :${PORT}"
+  (cd services/llm && CHAOS_ENABLED=1 ENGINE=baseten-api MODEL_NAME=model-apis \
+    BASETEN_API_BASE_URL="${BASETEN_API_BASE_URL:-}" \
+    MODEL_API_DEFAULT="${MODEL_API_DEFAULT:-}" \
+    python3 -m uvicorn llm_app.main:app --host 127.0.0.1 \
+    --port "$PORT" --log-level error) &
+done
 
 sleep 1
 echo "· router + devboard + incident agent                :${ROUTER_PORT}"
