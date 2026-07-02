@@ -167,6 +167,13 @@ applied to humans and CI.
 | ⓧ | Governance | `governance/agent-policy.yaml` + `tools/policy_check.py` | What agents may do |
 | ⓨ | Dashboard | `tools/devboard` | Zero-backend pipeline board + LLM control surface (metrics, config-as-UX, incidents/MTTR) |
 | ⓨ | Agent tools | `tools/mcp_server.py` | `get_cloud_endpoints`, `run_terraform_plan` |
+| ⑧ Baseten MVP | Pool adapters | `services/llm/llm_app/openai_compat.py` | BasetenAdapter (Truss) + VllmAdapter (RunPod) — measured TTFT/decode/$, sim fallback without keys |
+| ⑧ | Two-pool model | `services/qwen3_8b` | One model, two pools (`baseten-l4`, `vllm-l4`); same llm_app image, env-flipped live |
+| ⑧ | Deploy tooling | `deploy/baseten`, `deploy/runpod` | `truss push` scaffold + management CLI; RunPod pod lifecycle with committed spend ledger + $40 budget guard |
+| ⑧ | Devboard v3 | `/devboard` on the router + `contracts/devboard.openapi.yaml` | Mission-control surface (docs/design/refined/); six live endpoints, no fabricated values |
+| ⑧ | Benchmarks | `benchmarks/` | Harness + summarizer; every displayed number traces to `benchmarks/raw/*.csv` (SLO-AUDITOR) |
+| ⑧ | Chaos | `tools/chaos.py` | CHAOS-AGENT arsenal: inject latency/5xx, kill pool, exhaust concurrency, deactivate Baseten |
+| ⑧ | Eval agents | `.claude/agents/` | SLO-AUDITOR, CHAOS-AGENT, STAFF-SKEPTIC — all three gate every feature (`evals/<feature>/`) |
 
 ### Request lifecycle (runtime)
 

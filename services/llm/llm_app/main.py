@@ -29,6 +29,35 @@ def get_app(adapter=None) -> FastAPI:
     app.state.backend = backend
     caps = backend.capabilities()
 
+    # Fault injection for chaos drills (tools/chaos.py). Env-gated: absent
+    # CHAOS_ENABLED=1, no chaos routes exist and the hot path is untouched.
+    chaos = {"latency_ms": 0.0, "error_rate": 0.0}
+    app.state.chaos = chaos
+    if os.environ.get("CHAOS_ENABLED") == "1":
+        @app.get("/chaos")
+        def chaos_get():
+            return chaos
+
+        @app.post("/chaos")
+        async def chaos_set(request: Request):
+            body = await request.json()
+            chaos["latency_ms"] = float(body.get("latency_ms", 0.0))
+            chaos["error_rate"] = float(body.get("error_rate", 0.0))
+            return chaos
+
+    def _chaos_gate():
+        """Returns an error response, or None to proceed."""
+        if chaos["latency_ms"] > 0:
+            import time as _t
+            _t.sleep(chaos["latency_ms"] / 1000.0)
+        if chaos["error_rate"] > 0:
+            import random as _r
+            if _r.random() < chaos["error_rate"]:
+                return JSONResponse(
+                    {"error": {"type": "chaos_injected_5xx"}},
+                    status_code=500)
+        return None
+
     @app.get("/healthz")
     def healthz():
         return backend.healthz()
@@ -50,6 +79,9 @@ def get_app(adapter=None) -> FastAPI:
         @app.post("/v1/chat/completions")
         async def chat_completions(request: Request):
             body = await request.json()
+            injected = _chaos_gate()
+            if injected is not None:
+                return injected
             req = ChatRequest.from_dict(body)
             if req.stream and hasattr(backend, "stream_raw"):
                 # Live backends stream through untouched — real tokens at

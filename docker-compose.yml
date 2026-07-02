@@ -40,6 +40,7 @@ services:
     environment:
       ENGINE: baseten
       MODEL_NAME: qwen3-8b
+      CHAOS_ENABLED: "1"   # dev stack is chaos-ready (tools/chaos.py)
       BASETEN_BASE_URL: ${BASETEN_BASE_URL:-}
       BASETEN_API_KEY: ${BASETEN_API_KEY:-}
       POOL_USD_PER_HOUR: ${BASETEN_USD_PER_HOUR:-1.05}
@@ -57,6 +58,7 @@ services:
     environment:
       ENGINE: vllm
       MODEL_NAME: qwen3-8b
+      CHAOS_ENABLED: "1"
       VLLM_BASE_URL: ${VLLM_BASE_URL:-}
       VLLM_API_KEY: ${VLLM_API_KEY:-}
       POOL_USD_PER_HOUR: ${VLLM_USD_PER_HOUR:-0.60}
