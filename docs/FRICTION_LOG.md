@@ -40,6 +40,51 @@ var, keeping env as the source of truth (chmod 600). **Product could:** have
 the key is right there — or at least say "found BASETEN_API_KEY; run
 `truss login --api-key $BASETEN_API_KEY` to use it."
 
+### 6. First deploy hung ~30 min then went INACTIVE — no capacity, no signal
+**Doing:** first `truss push` of Qwen3-8B (fp16) on the default L4. **Happened:**
+build succeeded, then the deploy sat in `DEPLOYING` with **0 replicas and no
+container/model logs for ~30 minutes**, then flipped to `INACTIVE` — never
+served a request. Root cause: Baseten's L4 SKU is a **2× L4 instance**
+(`L4:2x24x96`), so a config asking for 1 GPU still needs a scarce 2-GPU node
+to be scheduled; that scheduling never happened and the platform silently
+gave up. **Cost:** ~30 min of dead waiting and a lot of trust — this is the
+single worst moment in the whole exercise, and it's on the capability the
+platform markets hardest (fast, reliable inference). **Signal quality:** the
+status API only says `DEPLOYING`/`INACTIVE`; there is no "waiting for
+capacity," no queue position, no ETA, no "we couldn't place your 2×L4." A
+user cannot tell "slow" from "stuck" from "doomed." **Workaround:** abandon
+the 2×L4 path entirely; redeploy a **quantized** Qwen3-8B (`Qwen/Qwen3-8B-AWQ`,
+int4 ~6GB) on a **single T4** — a common, well-stocked SKU that schedules in
+minutes. **Product could (this is the PM headline):** (a) surface capacity/
+scheduling state as first-class deploy status with an ETA or a "no capacity,
+try GPU X" nudge; (b) never let a deploy die silently — INACTIVE with no
+error is the worst outcome; (c) make single-GPU L4 a real option so an 8B
+model doesn't require a 2-GPU node. The gap between the marketing ("deploy on
+H100s and top-tier hardware") and this first-run experience is the exact
+thing an infra PM exists to close.
+
+### 7. Single-T4 scheduled fast but OOM-crashed on load — fixed-SKU RAM trap
+**Doing:** redeploy after #6, this time int4-AWQ Qwen3-8B on a single T4 to
+dodge the 2×L4 scheduling hang. **Happened:** the T4 node scheduled in ~1 min
+(great — the single-GPU SKU is well-stocked), the container started, then
+`model.load()` crash-looped: "Exception while loading model … **Killed** …
+Inference server crashed, restarting." Repeated `Killed` = host OOM: the
+`T4x4x16` SKU pairs the GPU with only **16 GiB of system RAM**, and loading
+even a ~6 GB quantized 8B spikes host memory past that during weight
+materialization. **The trap:** Baseten's GPU SKUs bundle a FIXED amount of
+system RAM you can't raise independently — T4 = 16 GiB (too little to load an
+8B), and the next step up (L4) is the 2-GPU node that wouldn't schedule (#6).
+There's no "T4 + more RAM" option. **Cost:** another ~10 min and a second dead
+deploy; a crash-looping deploy also holds a live GPU, so I deactivated it
+immediately to avoid billing. **Product could:** (a) let system RAM be sized
+independently of the GPU, or publish per-SKU RAM prominently so you can tell
+an 8B won't load on a 16 GiB-RAM box BEFORE deploying; (b) pre-flight the
+model's memory footprint against the chosen instance and warn at push time
+("Qwen3-8B needs ~Xgb host RAM; T4x4x16 has 16 — pick A10G"); (c) surface OOM
+as a clear deploy error, not an opaque restart loop. Two deploys, two
+different fixed-SKU walls — this is the core infra-PM problem: the hardware
+menu doesn't match the shape of real models.
+
 ### 3. Truss config internals moved between minor versions
 **Doing:** validating `config.yaml` before spending on a push. **Happened:**
 `TrussConfig` is documented/blogged as `truss.truss_config` but in 0.18.17

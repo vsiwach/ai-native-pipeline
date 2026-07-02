@@ -18,16 +18,17 @@ model_metadata:
 requirements:
   - vllm==0.9.1
   - huggingface_hub
+# Single T4 (16GB) + int4 AWQ Qwen3-8B (~6GB) — a well-stocked single-GPU SKU
+# that schedules in minutes. Baseten's L4 is a 2x-GPU instance whose scheduling
+# hung for 30 min (see FRICTION_LOG #6); T4 avoids the 2-GPU node entirely.
 resources:
-  accelerator: L4
+  accelerator: T4
   use_gpu: true
-  cpu: "4"
-  memory: 24Gi
-# No secrets: Qwen3-8B is open-weight (Apache-2.0), so no HF token is needed.
-# A gated model would add `secrets: {hf_access_token: null}` here AND require
-# the secret be set in the Baseten workspace, or the push fails.
+# No secrets: Qwen3-8B(-AWQ) is open-weight (Apache-2.0), no HF token needed.
 runtime:
-  predict_concurrency: 8
+  predict_concurrency: 4
 environment_variables:
-  MODEL_ID: Qwen/Qwen3-8B
-  MAX_MODEL_LEN: "8192"
+  MODEL_ID: Qwen/Qwen3-8B-AWQ
+  MAX_MODEL_LEN: "4096"     # T4 16GB: leave headroom for the KV cache
+  QUANTIZATION: awq
+  DTYPE: float16            # T4 is Turing (no bf16); AWQ kernels want fp16

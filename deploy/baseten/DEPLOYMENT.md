@@ -9,8 +9,10 @@ First live deploy: 2026-07-02 (F1 primary pool).
 | deployment id | `wno2dv0` |
 | endpoint base | `https://model-qrj78jv3.api.baseten.co` |
 | logs | https://app.baseten.co/models/qrj78jv3/logs/wno2dv0 |
-| instance | L4:2x24x96 (2× L4, 48GiB VRAM) — note: 2× not 1× |
-| autoscaling | min 0 / max 1 · concurrency 8 · scale_down_delay 900s |
+| instance (attempt 1) | L4:2x24x96 (2× L4) — hung 30 min scheduling, went INACTIVE (FRICTION #6) |
+| instance (attempt 2) | T4x4x16 (1× T4, 16GiB RAM) — OOM crash-loop on load, deactivated (FRICTION #7) |
+| status | NOT live — both deploys failed on Baseten SKU fit; deploy wno2dv0 INACTIVE, w52ym5j deactivated |
+| next SKU to try | A10G or A100 (single GPU, more host RAM) — or pivot live pool to RunPod |
 
 ## Cost control
 - min_replica 0 → idle cost \$0; but a 900s (15 min) idle tail bills after

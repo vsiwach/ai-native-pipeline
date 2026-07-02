@@ -29,11 +29,18 @@ class Model:
         hf_token = self._secrets.get("hf_access_token")
         if hf_token:
             os.environ["HF_TOKEN"] = hf_token
+        # Optional quantization/dtype for small single-GPU SKUs (T4 + AWQ).
+        extra = {}
+        if os.environ.get("QUANTIZATION"):
+            extra["quantization"] = os.environ["QUANTIZATION"]
+        if os.environ.get("DTYPE"):
+            extra["dtype"] = os.environ["DTYPE"]
         self._engine = AsyncLLMEngine.from_engine_args(
             AsyncEngineArgs(
                 model=self._model_id,
                 max_model_len=int(os.environ.get("MAX_MODEL_LEN", "8192")),
                 gpu_memory_utilization=0.90,
+                **extra,
             )
         )
 
