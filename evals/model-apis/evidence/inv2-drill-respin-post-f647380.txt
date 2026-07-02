@@ -1,0 +1,11 @@
+drill 'latency' → pool model-api-a via http://localhost:8096 (model glm-4.7)
+  [   0.00s] load_start   2.0 rps streaming, model=glm-4.7
+  [   4.03s] inject       {"latency_ms": 2600.0, "error_rate": 0.0}
+  [  16.17s] detected     INC-0006: model-api-a breaching serving SLO — 50% of recent requests
+  [  16.17s] quarantined  traffic spilled to healthy pool
+  [  16.20s] cleared      fault removed — agent must now verify
+  [  24.32s] resolved     MTTR 8.1s (agent=True)
+  evidence: benchmarks/raw/chaos_drill_latency_20260702-185334.csv  +  benchmarks/raw/chaos_drills.csv
+
+MTTR summary:
+  latency  detect 16.17s  quarantine 16.17s  mttr 8.1s

@@ -23,3 +23,4 @@ stamp,scenario,pool,model,latency_ms,error_rate,agent,detected_s,quarantined_s,c
 20260702-164455,errors,model-api-a,glm-4.7,0.0,0.9,True,17.29,17.29,17.3,8.1,True,36,0
 20260702-164555,combo,model-api-a,glm-4.7,2600.0,0.5,True,15.03,15.03,15.06,8.1,True,21,0
 20260702-184106,errors,model-api-a,glm-4.7,0.0,0.9,True,4.54,4.54,4.56,8.1,True,15,0
+20260702-185334,latency,model-api-a,glm-4.7,2600.0,0.0,True,16.17,16.17,16.2,8.1,True,19,0
