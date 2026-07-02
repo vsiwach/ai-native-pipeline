@@ -61,6 +61,16 @@ app.baseten.co billing. **Product could:** surface billing status at
 `truss login`/`whoami` ("logged in; no payment method — deploys will be
 rejected") so the gap is caught before building/uploading, and make the
 error link straight to the billing page.
+**Follow-up:** the workspace then received a "You've got free credits! …
+deploy a dedicated model on H100s" promo email. Retried the push — SAME
+`add a payment method` error. Free credits do NOT satisfy the
+payment-method gate for dedicated deployments; a card is still required
+first. This is a real expectation mismatch: the growth email invites you
+to deploy, but the platform blocks it until billing is set up, with no
+hint in the email or the error that credits ≠ deploy access. **Product
+could:** either let credits unlock dedicated deploys, or make the credits
+email say "add a payment method to activate your credits for dedicated
+deployments."
 
 ### 5. `truss push` default changed from development to published deployment
 **Doing:** the same first push. **Happened:** truss announced "Deploying as a
