@@ -85,6 +85,31 @@ as a clear deploy error, not an opaque restart loop. Two deploys, two
 different fixed-SKU walls — this is the core infra-PM problem: the hardware
 menu doesn't match the shape of real models.
 
+### 8. RunPod payment flow stalls, and credits (not just a card) are required
+**Doing:** funding RunPod to launch the second pool. **Happened:** the "Add
+payment method" dialog hung on "Processing…" with "Your payment method was
+added but is taking longer than expected to appear" — for TWO different cards
+(Visa, then Amex), stuck each time. And even once a card is on file, RunPod is
+**prepaid**: `clientBalance` stayed 0 until credits were explicitly purchased,
+so a card alone can't launch a pod. **Cost:** ~30 min of retrying a broken
+dialog + confusion over "card added but balance still 0." **Workaround:** wait
+out the sync, then buy credits (balance went to $40). **Product could:** make
+the payment-method confirmation reliable/idempotent, and state up front that a
+positive prepaid balance — not just a card — is required to launch pods.
+
+### 9. RunPod's API is split: REST for pods, GraphQL for catalog/balance
+**Doing:** picking a GPU and provisioning via the REST API. **Happened:** the
+GPU catalog and account balance are **not** in the REST API (`GET
+/v1/gpus` 404s with a spec error), only in the legacy **GraphQL** API
+(`gpuTypes`, `myself.clientBalance`), while pod create/list IS REST
+(`rest.runpod.io/v1/pods`). You must speak two APIs to do one task. Then the
+REST create-pod schema rejected `dockerArgs` ("not in input schema") — the
+correct field is **`dockerStartCmd`** (an array appended to the image
+entrypoint), which differs from older docs/examples. **Cost:** two failed
+calls + a GraphQL detour. **Workaround:** GraphQL for catalog/balance, REST
+for pods, `dockerStartCmd` array for container args. **Product could:** unify
+on one API surface and align the create-pod field names with the docs.
+
 ### 3. Truss config internals moved between minor versions
 **Doing:** validating `config.yaml` before spending on a push. **Happened:**
 `TrussConfig` is documented/blogged as `truss.truss_config` but in 0.18.17

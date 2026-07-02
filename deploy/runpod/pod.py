@@ -107,21 +107,26 @@ def cmd_up(args):
         sys.exit(f"pod state file exists ({STATE}) — one pod only; run `down` first.")
 
     body = {
-        "name": "ai-native-vllm-l4",
+        "name": "ai-native-vllm-pool",
         "imageName": "vllm/vllm-openai:latest",
         "gpuTypeIds": [args.gpu],
         "gpuCount": 1,
-        "cloudType": "COMMUNITY",
-        "containerDiskInGb": 40,
+        "cloudType": args.cloud,
+        "containerDiskInGb": args.disk,
         "volumeInGb": 0,
         "ports": ["8000/http"],
-        "dockerStartCmd": [],
-        "dockerArgs": (
-            f"--model {args.model} --max-model-len 8192 "
-            "--gpu-memory-utilization 0.90 --disable-log-requests"
-        ),
-        "env": {"HF_TOKEN": os.environ.get("HF_TOKEN", "")},
+        # vllm/vllm-openai has an ENTRYPOINT (the OpenAI api_server); the REST
+        # API's field is `dockerStartCmd` (array), appended as the container
+        # args. Small context to fit a 24GB card safely.
+        "dockerStartCmd": [
+            "--model", args.model,
+            "--max-model-len", str(args.max_model_len),
+            "--gpu-memory-utilization", "0.92",
+            "--disable-log-requests",
+        ],
     }
+    if os.environ.get("HF_TOKEN"):
+        body["env"] = {"HF_TOKEN": os.environ["HF_TOKEN"]}
     print(f"about to create pod: gpu={args.gpu} model={args.model} "
           f"(≤${args.max_hourly}/hr, est {args.est_hours}h, projected total ${projected:.2f})")
     if not args.yes:
@@ -180,10 +185,13 @@ def main(argv=None):
     sub = p.add_subparsers(dest="cmd", required=True)
 
     u = sub.add_parser("up")
-    u.add_argument("--gpu", default="NVIDIA L4")
+    u.add_argument("--gpu", default="NVIDIA GeForce RTX 4090")
     u.add_argument("--model", default="Qwen/Qwen3-8B")
-    u.add_argument("--est-hours", type=float, default=2.0)
-    u.add_argument("--max-hourly", type=float, default=0.60)
+    u.add_argument("--max-model-len", type=int, default=4096)
+    u.add_argument("--cloud", default="SECURE", choices=["SECURE", "COMMUNITY"])
+    u.add_argument("--disk", type=int, default=60)
+    u.add_argument("--est-hours", type=float, default=3.0)
+    u.add_argument("--max-hourly", type=float, default=0.70)
     u.add_argument("--yes", action="store_true")
     u.set_defaults(fn=cmd_up)
 
