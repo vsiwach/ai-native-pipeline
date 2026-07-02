@@ -242,3 +242,23 @@ set, not just the top-level dep. **Product could:** import the model class
 during BUILD (a 5-second smoke that would have failed fast and cheap), or
 resolve/lock requirements at push time and show the diff vs the last
 successful deploy.
+
+### 15. A failed first deploy poisons the production environment pointer
+**Doing:** repushing the dependency-pinned truss (w52yvzr) after q86yjdy
+DEPLOY_FAILED. **Happened:** the console/email said the new deployment was
+ACTIVE and logs said "Deploy was a success" — but
+`/environments/production/predict` kept returning
+`500 "Model is unhealthy"`, because `production_deployment_id` still pointed
+at the DEAD q86yjdy: the first-ever push had claimed the production
+environment, failed, and kept the pointer; the successful fix did not take
+over. Nothing in the push output, status API, or failure email mentions
+that production is now serving a corpse — the working deployment answers
+only on its deployment-scoped URL until you explicitly
+`promote`. **Cost:** ~10 min of "ACTIVE but unhealthy" confusion straight
+after a hard-won first success. **Workaround:**
+`manage.py promote w52yvzr --model-id 3ydn1e43 --yes`, then the env URL
+serves (warm TTFT ~330ms, TPOT ~34ms/tok on T4x8x32 — inside the voice
+SLO). **Product could:** never leave an environment pointing at a
+DEPLOY_FAILED deployment when a newer ACTIVE one exists (or at least flag it
+in `truss push` output: "note: production still serves failed q86yjdy —
+promote to switch").

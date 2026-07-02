@@ -12,6 +12,18 @@
       "start_ts": 1783017892.851115,
       "usd_per_hr": 0.5,
       "end_ts": 1783025323.0460072
+    },
+    {
+      "what": "runpod NVIDIA GeForce RTX 4090 pod 52kl80uyvdywe3",
+      "start_ts": 1783033604.59955,
+      "usd_per_hr": 0.7,
+      "end_ts": 1783035091.779924
+    },
+    {
+      "what": "runpod NVIDIA GeForce RTX 4090 pod 7798nqwes35026",
+      "start_ts": 1783035093.503989,
+      "usd_per_hr": 0.7,
+      "end_ts": null
     }
   ]
 }
