@@ -44,6 +44,8 @@ class OpenAICompatAdapter(BackendAdapter):
     auth_required = False
     send_stream_usage = False      # vLLM supports stream_options include_usage
     backend_label = "openai-compat"
+    chat_path = "/v1/chat/completions"   # Baseten custom Truss overrides -> /predict
+    health_path = "/v1/models"           # None => cheap always-ok liveness
 
     def __init__(self, name: str, base_url: str, model_id: str | None = None,
                  usd_per_hour: float = 0.0, timeout_s: float = 120.0,
@@ -88,7 +90,7 @@ class OpenAICompatAdapter(BackendAdapter):
 
     def _sse_events(self, request: ChatRequest):
         """Yield parsed JSON chunks from the upstream SSE stream."""
-        url = f"{self.base_url}/v1/chat/completions"
+        url = f"{self.base_url}{self.chat_path}"
         for line in self._opener(url, self._payload(request, stream=True),
                                  self._headers(), self.timeout_s):
             if not line.startswith("data:"):
@@ -158,7 +160,7 @@ class OpenAICompatAdapter(BackendAdapter):
 
     def stream_raw(self, request: ChatRequest):
         """Pass-through SSE for streaming clients (used by the HTTP layer)."""
-        url = f"{self.base_url}/v1/chat/completions"
+        url = f"{self.base_url}{self.chat_path}"
         done = False
         for line in self._opener(url, self._payload(request, stream=True),
                                  self._headers(), self.timeout_s):
@@ -171,9 +173,15 @@ class OpenAICompatAdapter(BackendAdapter):
             yield "data: [DONE]"
 
     def healthz(self) -> dict:
+        # health_path=None: the pool endpoint has no cheap health route (or
+        # pinging it would wake a scaled-to-zero replica and cost money), so
+        # report the proxy's own liveness — real backend failures surface on
+        # actual requests and the router ejects on those.
+        if self.health_path is None:
+            return {"status": "ok"}
         try:
-            req = urllib.request.Request(f"{self.base_url}/v1/models",
-                                         headers=self._headers())
+            req = urllib.request.Request(
+                f"{self.base_url}{self.health_path}", headers=self._headers())
             with urllib.request.urlopen(req, timeout=5) as resp:
                 return {"status": "ok" if resp.status == 200 else "down"}
         except Exception:  # noqa: BLE001 — health probe must never raise
@@ -181,13 +189,23 @@ class OpenAICompatAdapter(BackendAdapter):
 
 
 class BasetenAdapter(OpenAICompatAdapter):
-    """Truss-deployed model on Baseten (primary pool). Auth: Api-Key header."""
+    """Truss-deployed model on Baseten (primary pool).
+
+    A custom Truss model.py is invoked at `/environments/production/predict`
+    (Bearer auth), NOT an OpenAI `/v1/chat/completions` — that path is
+    Engine-Builder only. base_url is the env-scoped endpoint, e.g.
+    https://model-<id>.api.baseten.co/environments/production . The model.py
+    speaks OpenAI request/response JSON and streams SSE `data:` lines, so the
+    inherited SSE machinery works once chat_path points at /predict.
+    """
 
     engine = "baseten"
     auth_env = "BASETEN_API_KEY"
-    auth_scheme = "Api-Key"
+    auth_scheme = "Bearer"          # Baseten model invocation prefers Bearer
     auth_required = True
     backend_label = "baseten-truss"
+    chat_path = "/predict"
+    health_path = None              # no cheap health route; don't wake on poll
 
 
 class VllmAdapter(OpenAICompatAdapter):

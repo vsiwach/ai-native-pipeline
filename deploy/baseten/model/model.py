@@ -58,13 +58,27 @@ class Model:
 
         if stream:
             async def gen():
+                # Yield OpenAI-style SSE `data:` lines. Baseten streams these
+                # bytes straight through, so the router's BasetenAdapter (which
+                # parses `data:` lines) measures real TTFT/TPOT. A trailing
+                # usage chunk carries token counts; then [DONE].
                 sent = 0
+                n_out = 0
                 async for out in results:
                     text = out.outputs[0].text
+                    n_out = len(out.outputs[0].token_ids)
                     delta, sent = text[sent:], len(text)
                     if delta:
-                        yield self._chunk(req_id, created, {"content": delta})
-                yield self._chunk(req_id, created, {}, finish="stop")
+                        yield self._sse(self._chunk(
+                            req_id, created, {"content": delta}))
+                n_in = len(out.prompt_token_ids) if 'out' in dir() else 0
+                yield self._sse(self._chunk(req_id, created, {}, finish="stop"))
+                yield self._sse({"id": req_id, "object": "chat.completion.chunk",
+                                 "choices": [],
+                                 "usage": {"prompt_tokens": n_in,
+                                           "completion_tokens": n_out,
+                                           "total_tokens": n_in + n_out}})
+                yield "data: [DONE]\n\n"
             return gen()
 
         final = None
@@ -109,3 +123,8 @@ class Model:
             "model": self._model_id,
             "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
         }
+
+    @staticmethod
+    def _sse(obj):
+        import json as _json
+        return f"data: {_json.dumps(obj)}\n\n"

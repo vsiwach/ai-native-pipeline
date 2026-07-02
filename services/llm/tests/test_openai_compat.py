@@ -105,7 +105,7 @@ class MeasuredEconomicsTest(unittest.TestCase):
 
 
 class AuthTest(unittest.TestCase):
-    def test_baseten_requires_key_and_uses_api_key_scheme(self):
+    def test_baseten_requires_key_uses_bearer_and_predict_path(self):
         with mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop("BASETEN_API_KEY", None)
             with self.assertRaises(ValueError):
@@ -113,11 +113,24 @@ class AuthTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {"BASETEN_API_KEY": "sk-test"}):
             clock = FakeClock()
             opener = make_opener(clock, [(0.0, "data: [DONE]")])
-            adapter = BasetenAdapter("qwen3-8b", base_url="http://b",
-                                     clock=clock, opener=opener)
+            adapter = BasetenAdapter(
+                "qwen3-8b",
+                base_url="https://model-x.api.baseten.co/environments/production",
+                clock=clock, opener=opener)
             adapter.generate(request())
             self.assertEqual(opener.calls[0]["headers"]["Authorization"],
-                             "Api-Key sk-test")
+                             "Bearer sk-test")
+            # custom Truss is invoked at /predict, not /v1/chat/completions
+            self.assertTrue(opener.calls[0]["url"].endswith("/predict"))
+
+    def test_baseten_healthz_never_wakes_the_pool(self):
+        # health_path is None -> report proxy liveness, never ping Baseten
+        # (a poll must not wake a scaled-to-zero replica and bill for it)
+        with mock.patch.dict(os.environ, {"BASETEN_API_KEY": "k"}):
+            adapter = BasetenAdapter(
+                "qwen3-8b",
+                base_url="https://model-x.api.baseten.co/environments/production")
+            self.assertEqual(adapter.healthz(), {"status": "ok"})
 
     def test_vllm_key_optional_bearer_when_present(self):
         clock = FakeClock()
