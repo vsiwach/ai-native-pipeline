@@ -159,15 +159,16 @@ class RouterState:
                      decide_ms: float, *, ttft: float, decode_ms: float,
                      tps: float, cost: float, prompt_tokens: int,
                      completion_tokens: int, backend_hit: bool,
-                     tag: str | None) -> None:
+                     tag: str | None, http_ok: bool = True) -> None:
         """One bookkeeping path for both chat modes: ledger, metrics window,
-        route/breach events."""
+        route/breach events. A 5xx from the backend is an SLO violation by
+        definition — the incident agent keys off these samples."""
         tpot = round(decode_ms / completion_tokens, 2) if completion_tokens \
             else 0.0
         slo_ttft = tier_rules.get("ttft_ms")
         slo_tpot = tier_rules.get("tpot_ms")
-        ttft_ok = slo_ttft is None or ttft <= slo_ttft
-        tpot_ok = slo_tpot is None or tpot <= slo_tpot
+        ttft_ok = http_ok and (slo_ttft is None or ttft <= slo_ttft)
+        tpot_ok = http_ok and (slo_tpot is None or tpot <= slo_tpot)
         self.ledger.record_llm(
             model, choice.provider, est_cost_usd=cost,
             cache_hit=choice.cache_hit or backend_hit, ttft_ms=ttft,
@@ -223,7 +224,8 @@ class RouterState:
                           ttft=ttft, decode_ms=decode_ms, tps=tps, cost=cost,
                           prompt_tokens=prompt_tokens,
                           completion_tokens=completion_tokens,
-                          backend_hit=backend_hit, tag=compliance)
+                          backend_hit=backend_hit, tag=compliance,
+                          http_ok=resp.status_code < 500)
         return resp, choice
 
     def proxy_chat_stream(self, model: str, body: dict, headers: dict,
@@ -297,7 +299,8 @@ class RouterState:
                     prompt_tokens=int(hdrs.get("X-Prompt-Tokens", 0) or 0),
                     completion_tokens=completion_tokens,
                     backend_hit=hdrs.get("X-Cache") == "hit",
-                    tag=compliance)
+                    tag=compliance,
+                    http_ok=upstream.status_code < 500)
 
         return stream(), choice, hdrs
 
@@ -374,6 +377,14 @@ def get_app(registry_path: Path | None = None,
     if start_background:
         state.poller.start()
         state.worker.start()
+        # Governed incident agent (quarantine/probe/reinstate/resolve only).
+        # INCIDENT_AGENT=0 runs manual-baseline drills — the MTTR contrast.
+        if os.environ.get("INCIDENT_AGENT", "1") == "1":
+            from router_app.incident_agent import IncidentAgentRunner
+            state.incident_agent = IncidentAgentRunner(
+                state, interval_s=float(
+                    os.environ.get("INCIDENT_AGENT_INTERVAL_S", "2")))
+            state.incident_agent.start()
         try:  # SIGHUP hot-reload (unavailable in some test harnesses)
             signal.signal(signal.SIGHUP, lambda *_: state.reload())
         except ValueError:
@@ -653,6 +664,46 @@ def get_app(registry_path: Path | None = None,
     @app.get("/v1/incidents")
     def incidents():
         return state.incidents.snapshot()
+
+    # Dev-mode chaos controls: the devboard's state switcher triggers REAL
+    # fault injection through here (pool /chaos hooks, env-gated on the
+    # pools). GET reports which pools accept chaos; POST forwards.
+    @app.get("/v1/dev/chaos")
+    def dev_chaos_capabilities():
+        ctx = _board_ctx()
+        if ctx is None:
+            return {"pools": []}
+        out = []
+        for rep in ctx[1]:
+            try:
+                r = httpx.get(f"{rep['url']}/chaos", timeout=2)
+                out.append({"id": rep["id"], "capable": r.status_code == 200,
+                            "state": r.json() if r.status_code == 200 else None})
+            except httpx.HTTPError:
+                out.append({"id": rep["id"], "capable": False, "state": None})
+        return {"pools": out}
+
+    @app.post("/v1/dev/chaos")
+    async def dev_chaos(request: Request):
+        body = await request.json()
+        ctx = _board_ctx()
+        if ctx is None:
+            return _error(404, "no_model", "no LLM model configured")
+        targets = [r for r in ctx[1]
+                   if body.get("pool_id") in (None, r["id"])]
+        results = {}
+        for rep in targets:
+            try:
+                r = httpx.post(f"{rep['url']}/chaos", json={
+                    "latency_ms": body.get("latency_ms", 0),
+                    "error_rate": body.get("error_rate", 0)}, timeout=3)
+                results[rep["id"]] = r.json()
+            except httpx.HTTPError as exc:
+                results[rep["id"]] = {"error": str(exc)}
+        state.events.emit("config_change", target="chaos-injection",
+                          **{k: body.get(k) for k in
+                             ("pool_id", "latency_ms", "error_rate")})
+        return results
 
     # Dev surface for the incident agent + chaos drills (not in the board's
     # read contract): open / act / resolve.

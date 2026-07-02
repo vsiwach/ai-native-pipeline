@@ -15,10 +15,15 @@ class EndpointHealth:
         self.latencies_ms: deque[float] = deque(maxlen=window)
         self.last_progress: float | None = None  # last token-progress clock
         self.ejected: bool = False                # stuck → ejected, recoverable
+        # Incident-agent quarantine: STICKY — a successful health poll does
+        # NOT clear it (a latency-poisoned pool answers /healthz fine); only
+        # the agent lifts it after verification probes pass.
+        self.quarantined: bool = False
 
     @property
     def usable(self) -> bool:
-        return self.healthy is not False and not self.ejected
+        return self.healthy is not False and not self.ejected \
+            and not self.quarantined
 
     @property
     def p50_ms(self) -> float | None:
@@ -98,7 +103,7 @@ class HealthPoller:
 
     def degraded(self) -> bool:
         with self._lock:
-            return any(s.healthy is False or s.ejected
+            return any(s.healthy is False or s.ejected or s.quarantined
                        for s in self._status.values())
 
     def start(self) -> None:

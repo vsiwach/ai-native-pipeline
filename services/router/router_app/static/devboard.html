@@ -188,10 +188,10 @@ body{background:var(--bg);color:var(--txt);font:13px/1.5 var(--sans);
     <span id="clock" class="mono">--:--:-- UTC</span>
     <span id="dev">
       <span class="lbl">DEV</span>
-      <button class="on" id="b-healthy" title="live telemetry">HEALTHY</button>
-      <button disabled title="arms when tools/chaos.py latency injection is wired (F4)">DEGRADING</button>
-      <button disabled title="arms when chaos kill + incident agent are wired (F6)">INCIDENT</button>
-      <button disabled title="arms when a recorded chaos-drill trace exists — replay is never simulated">REPLAY 90s</button>
+      <button class="on" id="b-healthy" title="clear all fault injection — live telemetry">HEALTHY</button>
+      <button disabled id="b-degrading" title="requires chaos-capable pools (CHAOS_ENABLED=1)">DEGRADING</button>
+      <button disabled id="b-incident" title="requires chaos-capable pools (CHAOS_ENABLED=1)">INCIDENT</button>
+      <button disabled id="b-replay" title="arms when a recorded chaos-drill trace exists — replay is never simulated">REPLAY 90s</button>
     </span>
   </div>
 
@@ -536,6 +536,39 @@ async function incidents(){
       </div>`;}).join("");
   mttrChart(incs);
 }
+
+/* ---- dev switcher: REAL fault injection via /v1/dev/chaos ----
+   HEALTHY clears; DEGRADING = +600ms latency on the cheap pool;
+   INCIDENT = 100% 5xx on it. States then DERIVE from live telemetry —
+   the pill/pools go amber/red because the system is actually degraded,
+   and the incident agent resolves it for real. */
+let chaosPool=null;
+async function armSwitcher(){
+  try{
+    const d=await j("/v1/dev/chaos");
+    const capable=d.pools.filter(p=>p.capable);
+    if(!capable.length)return;
+    chaosPool=(capable.find(p=>p.id.includes("vllm"))||capable[0]).id;
+    ["b-degrading","b-incident"].forEach(id=>{
+      const b=$("#"+id);b.disabled=false;
+      b.title=`inject real faults into ${chaosPool}`;});
+  }catch(e){}
+}
+function setActive(btn){
+  document.querySelectorAll("#dev button").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+}
+async function injectChaos(body){
+  await fetch("/v1/dev/chaos",{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+}
+$("#b-healthy").onclick=async e=>{setActive(e.target);
+  await injectChaos({latency_ms:0,error_rate:0})};
+$("#b-degrading").onclick=async e=>{setActive(e.target);
+  await injectChaos({pool_id:chaosPool,latency_ms:600,error_rate:0})};
+$("#b-incident").onclick=async e=>{setActive(e.target);
+  await injectChaos({pool_id:chaosPool,latency_ms:0,error_rate:1.0})};
+armSwitcher();
 
 /* ---- schedulers (poll cadences per DESIGN.md) ---- */
 const safe=f=>()=>f().catch(()=>{});
