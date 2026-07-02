@@ -62,19 +62,41 @@ def _post(url, body):
         sys.exit(f"POST {url} -> {e.reason}")
 
 
+def _chaos_surface(args):
+    """Two audited injection surfaces:
+    pool-direct (--target http://pool:PORT -> POST {target}/chaos) or
+    router dev  (--router http://router:PORT --pool-id X ->
+                 POST {router}/v1/dev/chaos with pool_id) — same surface the
+    incident agent watches, so router-mode is preferred for invariant attacks.
+    """
+    if getattr(args, "pool_id", None):
+        if not getattr(args, "router", None):
+            sys.exit("--pool-id requires --router")
+        return f"{args.router}/v1/dev/chaos", {"pool_id": args.pool_id}
+    if not args.target:
+        sys.exit("need --target (pool-direct) or --router + --pool-id")
+    return f"{args.target}/chaos", {}
+
+
 def cmd_inject(args):
-    out = _post(f"{args.target}/chaos",
-                {"latency_ms": args.latency_ms, "error_rate": args.error_rate})
-    print(f"injected on {args.target}: {out}")
+    url, extra = _chaos_surface(args)
+    out = _post(url, {**extra, "latency_ms": args.latency_ms,
+                      "error_rate": args.error_rate})
+    print(f"injected on {url}"
+          f"{' pool=' + args.pool_id if extra else ''}: {out}")
 
 
 def cmd_clear(args):
-    out = _post(f"{args.target}/chaos", {"latency_ms": 0, "error_rate": 0})
-    print(f"cleared on {args.target}: {out}")
+    url, extra = _chaos_surface(args)
+    out = _post(url, {**extra, "latency_ms": 0, "error_rate": 0})
+    print(f"cleared on {url}"
+          f"{' pool=' + args.pool_id if extra else ''}: {out}")
 
 
 def cmd_status(args):
-    with urllib.request.urlopen(f"{args.target}/chaos", timeout=5) as resp:
+    url = (f"{args.router}/v1/dev/chaos" if getattr(args, "pool_id", None)
+           or not args.target else f"{args.target}/chaos")
+    with urllib.request.urlopen(url, timeout=5) as resp:
         print(resp.read().decode())
 
 
@@ -307,14 +329,18 @@ def main(argv=None):
     sub = p.add_subparsers(dest="cmd", required=True)
 
     i = sub.add_parser("inject")
-    i.add_argument("--target", required=True)
+    i.add_argument("--target", help="pool base URL (pool-direct mode)")
+    i.add_argument("--router", help="router base URL (router dev-chaos mode)")
+    i.add_argument("--pool-id", help="pool id for router dev-chaos mode")
     i.add_argument("--latency-ms", type=float, default=0.0)
     i.add_argument("--error-rate", type=float, default=0.0)
     i.set_defaults(fn=cmd_inject)
 
     for name, fn in (("clear", cmd_clear), ("status", cmd_status)):
         c = sub.add_parser(name)
-        c.add_argument("--target", required=True)
+        c.add_argument("--target", help="pool base URL (pool-direct mode)")
+        c.add_argument("--router", help="router base URL")
+        c.add_argument("--pool-id", help="pool id for router dev-chaos mode")
         c.set_defaults(fn=fn)
 
     k = sub.add_parser("kill")

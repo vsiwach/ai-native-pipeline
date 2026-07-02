@@ -1,0 +1,1972 @@
+[
+ {
+  "file": "pages/000-ai-tools.md",
+  "title": "AI tools",
+  "url": "https://docs.baseten.co/ai-tools"
+ },
+ {
+  "file": "pages/001-cancel-a-queued-async-request.md",
+  "title": "Cancel a queued async request.",
+  "url": "https://docs.baseten.co/api-reference/cancel-a-queued-async-request"
+ },
+ {
+  "file": "pages/002-get-the-status-of-an-async-request.md",
+  "title": "Get the status of an async request.",
+  "url": "https://docs.baseten.co/api-reference/get-the-status-of-an-async-request"
+ },
+ {
+  "file": "pages/003-asynchronously-call-a-named-environment-of-a-chain.md",
+  "title": "Asynchronously call a named environment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-a-named-environment-of-a-chain"
+ },
+ {
+  "file": "pages/004-asynchronously-call-a-named-environment-of-a-model.md",
+  "title": "Asynchronously call a named environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-a-named-environment-of-a-model"
+ },
+ {
+  "file": "pages/005-asynchronously-call-a-specific-deployment-of-a-chain.md",
+  "title": "Asynchronously call a specific deployment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-a-specific-deployment-of-a-chain"
+ },
+ {
+  "file": "pages/006-asynchronously-call-a-specific-deployment-of-a-model.md",
+  "title": "Asynchronously call a specific deployment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-a-specific-deployment-of-a-model"
+ },
+ {
+  "file": "pages/007-asynchronously-call-the-development-deployment-of-a-chain.md",
+  "title": "Asynchronously call the development deployment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-the-development-deployment-of-a-chain"
+ },
+ {
+  "file": "pages/008-asynchronously-call-the-development-deployment-of-a-model.md",
+  "title": "Asynchronously call the development deployment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-the-development-deployment-of-a-model"
+ },
+ {
+  "file": "pages/009-asynchronously-call-the-production-environment-of-a-chain.md",
+  "title": "Asynchronously call the production environment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-the-production-environment-of-a-chain"
+ },
+ {
+  "file": "pages/010-asynchronously-call-the-production-environment-of-a-model.md",
+  "title": "Asynchronously call the production environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/asynchronously-call-the-production-environment-of-a-model"
+ },
+ {
+  "file": "pages/011-call-a-specific-chain-deployment-by-deployment-id.md",
+  "title": "Call a specific chain deployment by deployment ID.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-a-specific-chain-deployment-by-deployment-id"
+ },
+ {
+  "file": "pages/012-call-a-specific-deployment-of-a-model-by-deployment-id.md",
+  "title": "Call a specific deployment of a model by deployment ID.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-a-specific-deployment-of-a-model-by-deployment-id"
+ },
+ {
+  "file": "pages/013-call-the-chain-deployment-associated-with-a-specified-enviro.md",
+  "title": "Call the chain deployment associated with a specified environment.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-the-chain-deployment-associated-with-a-specified-environment"
+ },
+ {
+  "file": "pages/014-call-the-development-deployment-of-a-chain.md",
+  "title": "Call the development deployment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-the-development-deployment-of-a-chain"
+ },
+ {
+  "file": "pages/015-call-the-development-deployment-of-a-model.md",
+  "title": "Call the development deployment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-the-development-deployment-of-a-model"
+ },
+ {
+  "file": "pages/016-call-the-model-deployment-associated-with-a-specified-enviro.md",
+  "title": "Call the model deployment associated with a specified environment.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-the-model-deployment-associated-with-a-specified-environment"
+ },
+ {
+  "file": "pages/017-call-the-production-environment-of-a-chain.md",
+  "title": "Call the production environment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-the-production-environment-of-a-chain"
+ },
+ {
+  "file": "pages/018-call-the-production-environment-of-a-model.md",
+  "title": "Call the production environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/call-the-production-environment-of-a-model"
+ },
+ {
+  "file": "pages/019-get-async-queue-status-for-a-named-environment.md",
+  "title": "Get async queue status for a named environment.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/get-async-queue-status-for-a-named-environment"
+ },
+ {
+  "file": "pages/020-get-async-queue-status-for-a-specific-deployment.md",
+  "title": "Get async queue status for a specific deployment.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/get-async-queue-status-for-a-specific-deployment"
+ },
+ {
+  "file": "pages/021-get-async-queue-status-for-the-development-deployment.md",
+  "title": "Get async queue status for the development deployment.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/get-async-queue-status-for-the-development-deployment"
+ },
+ {
+  "file": "pages/022-get-async-queue-status-for-the-production-environment.md",
+  "title": "Get async queue status for the production environment.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/get-async-queue-status-for-the-production-environment"
+ },
+ {
+  "file": "pages/023-wake-a-named-environment-of-a-model.md",
+  "title": "Wake a named environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/wake-a-named-environment-of-a-model"
+ },
+ {
+  "file": "pages/024-wake-a-specific-deployment-of-a-model-by-deployment-id.md",
+  "title": "Wake a specific deployment of a model by deployment ID.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/wake-a-specific-deployment-of-a-model-by-deployment-id"
+ },
+ {
+  "file": "pages/025-wake-the-development-deployment-of-a-model.md",
+  "title": "Wake the development deployment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/wake-the-development-deployment-of-a-model"
+ },
+ {
+  "file": "pages/026-wake-the-production-environment-of-a-model.md",
+  "title": "Wake the production environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/non-regional/wake-the-production-environment-of-a-model"
+ },
+ {
+  "file": "pages/027-asynchronously-call-a-regional-environment-of-a-chain.md",
+  "title": "Asynchronously call a regional environment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/regional/asynchronously-call-a-regional-environment-of-a-chain"
+ },
+ {
+  "file": "pages/028-asynchronously-call-a-regional-environment-of-a-model.md",
+  "title": "Asynchronously call a regional environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/regional/asynchronously-call-a-regional-environment-of-a-model"
+ },
+ {
+  "file": "pages/029-call-a-regional-environment-of-a-chain.md",
+  "title": "Call a regional environment of a chain.",
+  "url": "https://docs.baseten.co/api-reference/regional/call-a-regional-environment-of-a-chain"
+ },
+ {
+  "file": "pages/030-call-a-regional-environment-of-a-model.md",
+  "title": "Call a regional environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/regional/call-a-regional-environment-of-a-model"
+ },
+ {
+  "file": "pages/031-get-async-queue-status-for-a-regional-environment.md",
+  "title": "Get async queue status for a regional environment.",
+  "url": "https://docs.baseten.co/api-reference/regional/get-async-queue-status-for-a-regional-environment"
+ },
+ {
+  "file": "pages/032-wake-a-regional-environment-of-a-model.md",
+  "title": "Wake a regional environment of a model.",
+  "url": "https://docs.baseten.co/api-reference/regional/wake-a-regional-environment-of-a-model"
+ },
+ {
+  "file": "pages/033-how-baseten-works.md",
+  "title": "How Baseten works",
+  "url": "https://docs.baseten.co/concepts/howbasetenworks"
+ },
+ {
+  "file": "pages/034-why-baseten.md",
+  "title": "Why Baseten",
+  "url": "https://docs.baseten.co/concepts/whybaseten"
+ },
+ {
+  "file": "pages/035-cold-starts.md",
+  "title": "Cold starts",
+  "url": "https://docs.baseten.co/deployment/autoscaling/cold-starts"
+ },
+ {
+  "file": "pages/036-autoscaling.md",
+  "title": "Autoscaling",
+  "url": "https://docs.baseten.co/deployment/autoscaling/overview"
+ },
+ {
+  "file": "pages/037-request-lifecycle.md",
+  "title": "Request lifecycle",
+  "url": "https://docs.baseten.co/deployment/autoscaling/request-lifecycle"
+ },
+ {
+  "file": "pages/038-traffic-patterns.md",
+  "title": "Traffic patterns",
+  "url": "https://docs.baseten.co/deployment/autoscaling/traffic-patterns"
+ },
+ {
+  "file": "pages/039-ci-cd.md",
+  "title": "CI/CD",
+  "url": "https://docs.baseten.co/deployment/ci-cd"
+ },
+ {
+  "file": "pages/040-concepts.md",
+  "title": "Concepts",
+  "url": "https://docs.baseten.co/deployment/concepts"
+ },
+ {
+  "file": "pages/041-deployments.md",
+  "title": "Deployments",
+  "url": "https://docs.baseten.co/deployment/deployments"
+ },
+ {
+  "file": "pages/042-environments.md",
+  "title": "Environments",
+  "url": "https://docs.baseten.co/deployment/environments"
+ },
+ {
+  "file": "pages/043-regional-environments.md",
+  "title": "Regional environments",
+  "url": "https://docs.baseten.co/deployment/regional-environments"
+ },
+ {
+  "file": "pages/044-resources.md",
+  "title": "Resources",
+  "url": "https://docs.baseten.co/deployment/resources"
+ },
+ {
+  "file": "pages/045-rolling-deployments.md",
+  "title": "Rolling deployments",
+  "url": "https://docs.baseten.co/deployment/rolling-deployments"
+ },
+ {
+  "file": "pages/046-binary-i-o.md",
+  "title": "Binary I/O",
+  "url": "https://docs.baseten.co/development/chain/binaryio"
+ },
+ {
+  "file": "pages/047-concepts.md",
+  "title": "Concepts",
+  "url": "https://docs.baseten.co/development/chain/concepts"
+ },
+ {
+  "file": "pages/048-deploy.md",
+  "title": "Deploy",
+  "url": "https://docs.baseten.co/development/chain/deploy"
+ },
+ {
+  "file": "pages/049-architecture-and-design.md",
+  "title": "Architecture and design",
+  "url": "https://docs.baseten.co/development/chain/design"
+ },
+ {
+  "file": "pages/050-engine-builder-llm-models.md",
+  "title": "Engine Builder LLM models",
+  "url": "https://docs.baseten.co/development/chain/engine-builder-models"
+ },
+ {
+  "file": "pages/051-error-handling.md",
+  "title": "Error handling",
+  "url": "https://docs.baseten.co/development/chain/errorhandling"
+ },
+ {
+  "file": "pages/052-your-first-chain.md",
+  "title": "Your first Chain",
+  "url": "https://docs.baseten.co/development/chain/getting-started"
+ },
+ {
+  "file": "pages/053-invocation.md",
+  "title": "Invocation",
+  "url": "https://docs.baseten.co/development/chain/invocation"
+ },
+ {
+  "file": "pages/054-local-development.md",
+  "title": "Local development",
+  "url": "https://docs.baseten.co/development/chain/localdev"
+ },
+ {
+  "file": "pages/055-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/development/chain/overview"
+ },
+ {
+  "file": "pages/056-streaming.md",
+  "title": "Streaming",
+  "url": "https://docs.baseten.co/development/chain/streaming"
+ },
+ {
+  "file": "pages/057-truss-integration.md",
+  "title": "Truss integration",
+  "url": "https://docs.baseten.co/development/chain/stub"
+ },
+ {
+  "file": "pages/058-subclassing.md",
+  "title": "Subclassing",
+  "url": "https://docs.baseten.co/development/chain/subclassing"
+ },
+ {
+  "file": "pages/059-watch.md",
+  "title": "Watch",
+  "url": "https://docs.baseten.co/development/chain/watch"
+ },
+ {
+  "file": "pages/060-baseten-delivery-network.md",
+  "title": "Baseten Delivery Network",
+  "url": "https://docs.baseten.co/development/model/bdn"
+ },
+ {
+  "file": "pages/061-build-your-model.md",
+  "title": "Build your model",
+  "url": "https://docs.baseten.co/development/model/build-your-first-model"
+ },
+ {
+  "file": "pages/062-configuration.md",
+  "title": "Configuration",
+  "url": "https://docs.baseten.co/development/model/configuration"
+ },
+ {
+  "file": "pages/063-custom-docker-containers.md",
+  "title": "Custom Docker containers",
+  "url": "https://docs.baseten.co/development/model/custom-server"
+ },
+ {
+  "file": "pages/064-dependencies.md",
+  "title": "Dependencies",
+  "url": "https://docs.baseten.co/development/model/dependencies"
+ },
+ {
+  "file": "pages/065-deploy-and-iterate.md",
+  "title": "Deploy and iterate",
+  "url": "https://docs.baseten.co/development/model/deploy-and-iterate"
+ },
+ {
+  "file": "pages/066-access-model-environments.md",
+  "title": "Access model environments",
+  "url": "https://docs.baseten.co/development/model/environments"
+ },
+ {
+  "file": "pages/067-grpc.md",
+  "title": "gRPC",
+  "url": "https://docs.baseten.co/development/model/grpc"
+ },
+ {
+  "file": "pages/068-health-checks.md",
+  "title": "Health checks",
+  "url": "https://docs.baseten.co/development/model/health-checks"
+ },
+ {
+  "file": "pages/069-cached-weights.md",
+  "title": "Cached weights",
+  "url": "https://docs.baseten.co/development/model/model-cache"
+ },
+ {
+  "file": "pages/070-the-model-class.md",
+  "title": "The Model class",
+  "url": "https://docs.baseten.co/development/model/model-class"
+ },
+ {
+  "file": "pages/071-develop-a-model-on-baseten.md",
+  "title": "Develop a model on Baseten",
+  "url": "https://docs.baseten.co/development/model/overview"
+ },
+ {
+  "file": "pages/072-performance-optimization.md",
+  "title": "Performance optimization",
+  "url": "https://docs.baseten.co/development/model/performance-optimization"
+ },
+ {
+  "file": "pages/073-runtime-caching.md",
+  "title": "Runtime caching",
+  "url": "https://docs.baseten.co/development/model/runtime-caching"
+ },
+ {
+  "file": "pages/074-secrets.md",
+  "title": "Secrets",
+  "url": "https://docs.baseten.co/development/model/secrets"
+ },
+ {
+  "file": "pages/075-streaming-and-endpoints.md",
+  "title": "Streaming and endpoints",
+  "url": "https://docs.baseten.co/development/model/streaming-and-endpoints"
+ },
+ {
+  "file": "pages/076-websockets.md",
+  "title": "WebSockets",
+  "url": "https://docs.baseten.co/development/model/websockets"
+ },
+ {
+  "file": "pages/077-bei-bert.md",
+  "title": "BEI-Bert",
+  "url": "https://docs.baseten.co/engines/bei/bei-bert"
+ },
+ {
+  "file": "pages/078-configuration-reference.md",
+  "title": "Configuration reference",
+  "url": "https://docs.baseten.co/engines/bei/bei-reference"
+ },
+ {
+  "file": "pages/079-named-entity-recognition.md",
+  "title": "Named entity recognition",
+  "url": "https://docs.baseten.co/engines/bei/ner"
+ },
+ {
+  "file": "pages/080-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/engines/bei/overview"
+ },
+ {
+  "file": "pages/081-advanced-features-for-bis-llm.md",
+  "title": "Advanced features for BIS-LLM",
+  "url": "https://docs.baseten.co/engines/bis-llm/advanced-features"
+ },
+ {
+  "file": "pages/082-configuration-reference.md",
+  "title": "Configuration reference",
+  "url": "https://docs.baseten.co/engines/bis-llm/bis-llm-config"
+ },
+ {
+  "file": "pages/083-migrate-from-engine-builder-llm.md",
+  "title": "Migrate from Engine-Builder-LLM",
+  "url": "https://docs.baseten.co/engines/bis-llm/migrate-from-v1"
+ },
+ {
+  "file": "pages/084-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/engines/bis-llm/overview"
+ },
+ {
+  "file": "pages/085-custom-engine-builder.md",
+  "title": "Custom engine builder",
+  "url": "https://docs.baseten.co/engines/engine-builder-llm/custom-engine-builder"
+ },
+ {
+  "file": "pages/086-configuration-reference.md",
+  "title": "Configuration reference",
+  "url": "https://docs.baseten.co/engines/engine-builder-llm/engine-builder-config"
+ },
+ {
+  "file": "pages/087-speculative-decoding.md",
+  "title": "Speculative decoding",
+  "url": "https://docs.baseten.co/engines/engine-builder-llm/lookahead-decoding"
+ },
+ {
+  "file": "pages/088-lora-support.md",
+  "title": "LoRA support",
+  "url": "https://docs.baseten.co/engines/engine-builder-llm/lora-support"
+ },
+ {
+  "file": "pages/089-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/engines/engine-builder-llm/overview"
+ },
+ {
+  "file": "pages/090-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/engines/index"
+ },
+ {
+  "file": "pages/091-autoscaling-engines.md",
+  "title": "Autoscaling engines",
+  "url": "https://docs.baseten.co/engines/performance-concepts/autoscaling-engines"
+ },
+ {
+  "file": "pages/092-deploy-from-cloud-storage.md",
+  "title": "Deploy from cloud storage",
+  "url": "https://docs.baseten.co/engines/performance-concepts/cloud-storage-deployment"
+ },
+ {
+  "file": "pages/093-quantization-guide.md",
+  "title": "Quantization guide",
+  "url": "https://docs.baseten.co/engines/performance-concepts/quantization-guide"
+ },
+ {
+  "file": "pages/094-serve-embeddings-with-bei.md",
+  "title": "Serve embeddings with BEI",
+  "url": "https://docs.baseten.co/examples/bei"
+ },
+ {
+  "file": "pages/095-transcribe-audio-with-chains.md",
+  "title": "Transcribe audio with Chains",
+  "url": "https://docs.baseten.co/examples/chains-audio-transcription"
+ },
+ {
+  "file": "pages/096-build-a-rag-pipeline-with-chains.md",
+  "title": "Build a RAG pipeline with Chains",
+  "url": "https://docs.baseten.co/examples/chains-build-rag"
+ },
+ {
+  "file": "pages/097-create-a-model-with-the-rest-api.md",
+  "title": "Create a model with the REST API",
+  "url": "https://docs.baseten.co/examples/create-a-model-with-rest"
+ },
+ {
+  "file": "pages/098-customize-a-model.md",
+  "title": "Customize a model",
+  "url": "https://docs.baseten.co/examples/customize-a-model"
+ },
+ {
+  "file": "pages/099-deploy-a-hugging-face-model.md",
+  "title": "Deploy a Hugging Face model",
+  "url": "https://docs.baseten.co/examples/deploy-a-hugging-face-model"
+ },
+ {
+  "file": "pages/100-build-and-deploy-an-llm.md",
+  "title": "Build and deploy an LLM",
+  "url": "https://docs.baseten.co/examples/deploy-a-llm"
+ },
+ {
+  "file": "pages/101-deploy-your-first-model.md",
+  "title": "Deploy your first model",
+  "url": "https://docs.baseten.co/examples/deploy-your-first-model"
+ },
+ {
+  "file": "pages/102-deploy-a-dockerized-model.md",
+  "title": "Deploy a Dockerized model",
+  "url": "https://docs.baseten.co/examples/docker"
+ },
+ {
+  "file": "pages/103-generate-images-with-flux.md",
+  "title": "Generate images with Flux",
+  "url": "https://docs.baseten.co/examples/image-generation"
+ },
+ {
+  "file": "pages/104-qwen3-embedding.md",
+  "title": "Qwen3 Embedding",
+  "url": "https://docs.baseten.co/examples/models/embedding/qwen3-embedding"
+ },
+ {
+  "file": "pages/105-qwen3-reranker.md",
+  "title": "Qwen3 Reranker",
+  "url": "https://docs.baseten.co/examples/models/embedding/qwen3-reranker"
+ },
+ {
+  "file": "pages/106-flux-1.md",
+  "title": "FLUX.1",
+  "url": "https://docs.baseten.co/examples/models/image-gen/flux1"
+ },
+ {
+  "file": "pages/107-gemma-4.md",
+  "title": "Gemma 4",
+  "url": "https://docs.baseten.co/examples/models/llm/gemma-4"
+ },
+ {
+  "file": "pages/108-glm-4-7.md",
+  "title": "GLM-4.7",
+  "url": "https://docs.baseten.co/examples/models/llm/glm-4.7"
+ },
+ {
+  "file": "pages/109-glm-5.md",
+  "title": "GLM-5",
+  "url": "https://docs.baseten.co/examples/models/llm/glm-5"
+ },
+ {
+  "file": "pages/110-gpt-oss.md",
+  "title": "GPT-OSS",
+  "url": "https://docs.baseten.co/examples/models/llm/gpt-oss"
+ },
+ {
+  "file": "pages/111-holo-3-1.md",
+  "title": "Holo 3.1",
+  "url": "https://docs.baseten.co/examples/models/llm/holo-3.1"
+ },
+ {
+  "file": "pages/112-laguna.md",
+  "title": "Laguna",
+  "url": "https://docs.baseten.co/examples/models/llm/laguna"
+ },
+ {
+  "file": "pages/113-llama-3-1.md",
+  "title": "Llama 3.1",
+  "url": "https://docs.baseten.co/examples/models/llm/llama-3.1"
+ },
+ {
+  "file": "pages/114-llama-3-2.md",
+  "title": "Llama 3.2",
+  "url": "https://docs.baseten.co/examples/models/llm/llama-3.2"
+ },
+ {
+  "file": "pages/115-llama-3-3.md",
+  "title": "Llama 3.3",
+  "url": "https://docs.baseten.co/examples/models/llm/llama-3.3"
+ },
+ {
+  "file": "pages/116-llama-4.md",
+  "title": "Llama 4",
+  "url": "https://docs.baseten.co/examples/models/llm/llama-4"
+ },
+ {
+  "file": "pages/117-minimax-m2-5.md",
+  "title": "MiniMax M2.5",
+  "url": "https://docs.baseten.co/examples/models/llm/minimax-m2.5"
+ },
+ {
+  "file": "pages/118-nemotron-3.md",
+  "title": "Nemotron 3",
+  "url": "https://docs.baseten.co/examples/models/llm/nemotron-3"
+ },
+ {
+  "file": "pages/119-qwen3.md",
+  "title": "Qwen3",
+  "url": "https://docs.baseten.co/examples/models/llm/qwen3"
+ },
+ {
+  "file": "pages/120-qwen3-vl.md",
+  "title": "Qwen3-VL",
+  "url": "https://docs.baseten.co/examples/models/llm/qwen3-vl"
+ },
+ {
+  "file": "pages/121-qwen3-5.md",
+  "title": "Qwen3.5",
+  "url": "https://docs.baseten.co/examples/models/llm/qwen3.5"
+ },
+ {
+  "file": "pages/122-qwen3-6.md",
+  "title": "Qwen3.6",
+  "url": "https://docs.baseten.co/examples/models/llm/qwen3.6"
+ },
+ {
+  "file": "pages/123-qwen3-asr.md",
+  "title": "Qwen3-ASR",
+  "url": "https://docs.baseten.co/examples/models/transcription/qwen3-asr"
+ },
+ {
+  "file": "pages/124-voxtral.md",
+  "title": "Voxtral",
+  "url": "https://docs.baseten.co/examples/models/transcription/voxtral"
+ },
+ {
+  "file": "pages/125-deploy-llms-with-ollama.md",
+  "title": "Deploy LLMs with Ollama",
+  "url": "https://docs.baseten.co/examples/ollama"
+ },
+ {
+  "file": "pages/126-build-with-baseten.md",
+  "title": "Build with Baseten",
+  "url": "https://docs.baseten.co/examples/overview"
+ },
+ {
+  "file": "pages/127-deploy-llms-with-sglang.md",
+  "title": "Deploy LLMs with SGLang",
+  "url": "https://docs.baseten.co/examples/sglang"
+ },
+ {
+  "file": "pages/128-stream-llm-responses.md",
+  "title": "Stream LLM responses",
+  "url": "https://docs.baseten.co/examples/streaming"
+ },
+ {
+  "file": "pages/129-add-system-packages.md",
+  "title": "Add system packages",
+  "url": "https://docs.baseten.co/examples/system-packages"
+ },
+ {
+  "file": "pages/130-deploy-llms-with-tensorrt-llm.md",
+  "title": "Deploy LLMs with TensorRT-LLM",
+  "url": "https://docs.baseten.co/examples/tensorrt-llm"
+ },
+ {
+  "file": "pages/131-generate-speech-with-kokoro.md",
+  "title": "Generate speech with Kokoro",
+  "url": "https://docs.baseten.co/examples/text-to-speech"
+ },
+ {
+  "file": "pages/132-deploy-llms-with-vllm.md",
+  "title": "Deploy LLMs with vLLM",
+  "url": "https://docs.baseten.co/examples/vllm"
+ },
+ {
+  "file": "pages/133-manage-groups-and-api-keys.md",
+  "title": "Manage groups and API keys",
+  "url": "https://docs.baseten.co/frontier-gateway/api-keys"
+ },
+ {
+  "file": "pages/134-billing-webhooks.md",
+  "title": "Billing webhooks",
+  "url": "https://docs.baseten.co/frontier-gateway/billing-webhooks"
+ },
+ {
+  "file": "pages/135-call-your-model.md",
+  "title": "Call your model",
+  "url": "https://docs.baseten.co/frontier-gateway/calling-your-model"
+ },
+ {
+  "file": "pages/136-manage-endpoints.md",
+  "title": "Manage endpoints",
+  "url": "https://docs.baseten.co/frontier-gateway/endpoints"
+ },
+ {
+  "file": "pages/137-get-started.md",
+  "title": "Get started",
+  "url": "https://docs.baseten.co/frontier-gateway/get-started"
+ },
+ {
+  "file": "pages/138-baseten-frontier-gateway.md",
+  "title": "Baseten Frontier Gateway",
+  "url": "https://docs.baseten.co/frontier-gateway/overview"
+ },
+ {
+  "file": "pages/139-rate-and-usage-limits.md",
+  "title": "Rate and usage limits",
+  "url": "https://docs.baseten.co/frontier-gateway/rate-limits"
+ },
+ {
+  "file": "pages/140-async-inference.md",
+  "title": "Async inference",
+  "url": "https://docs.baseten.co/inference/async"
+ },
+ {
+  "file": "pages/141-call-your-model.md",
+  "title": "Call your model",
+  "url": "https://docs.baseten.co/inference/calling-your-model"
+ },
+ {
+  "file": "pages/142-inference-errors.md",
+  "title": "Inference errors",
+  "url": "https://docs.baseten.co/inference/errors"
+ },
+ {
+  "file": "pages/143-function-calling.md",
+  "title": "Function calling",
+  "url": "https://docs.baseten.co/inference/function-calling"
+ },
+ {
+  "file": "pages/144-configure-http-clients.md",
+  "title": "Configure HTTP clients",
+  "url": "https://docs.baseten.co/inference/http-client-configuration"
+ },
+ {
+  "file": "pages/145-integrations.md",
+  "title": "Integrations",
+  "url": "https://docs.baseten.co/inference/integrations"
+ },
+ {
+  "file": "pages/146-json-mode.md",
+  "title": "JSON mode",
+  "url": "https://docs.baseten.co/inference/json-mode"
+ },
+ {
+  "file": "pages/147-deprecation.md",
+  "title": "Deprecation",
+  "url": "https://docs.baseten.co/inference/model-apis/deprecation"
+ },
+ {
+  "file": "pages/148-model-apis.md",
+  "title": "Model APIs",
+  "url": "https://docs.baseten.co/inference/model-apis/overview"
+ },
+ {
+  "file": "pages/149-rate-limits-and-budgets.md",
+  "title": "Rate limits and budgets",
+  "url": "https://docs.baseten.co/inference/model-apis/rate-limits-and-budgets"
+ },
+ {
+  "file": "pages/150-reasoning.md",
+  "title": "Reasoning",
+  "url": "https://docs.baseten.co/inference/model-apis/reasoning"
+ },
+ {
+  "file": "pages/151-vision.md",
+  "title": "Vision",
+  "url": "https://docs.baseten.co/inference/model-apis/vision"
+ },
+ {
+  "file": "pages/152-model-i-o-in-binary.md",
+  "title": "Model I/O in binary",
+  "url": "https://docs.baseten.co/inference/output-format/binary"
+ },
+ {
+  "file": "pages/153-model-i-o-with-files.md",
+  "title": "Model I/O with files",
+  "url": "https://docs.baseten.co/inference/output-format/files"
+ },
+ {
+  "file": "pages/154-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/inference/overview"
+ },
+ {
+  "file": "pages/155-performance-client.md",
+  "title": "Performance client",
+  "url": "https://docs.baseten.co/inference/performance-client"
+ },
+ {
+  "file": "pages/156-ssh-access.md",
+  "title": "SSH access",
+  "url": "https://docs.baseten.co/inference/ssh"
+ },
+ {
+  "file": "pages/157-streaming.md",
+  "title": "Streaming",
+  "url": "https://docs.baseten.co/inference/streaming"
+ },
+ {
+  "file": "pages/158-structured-outputs.md",
+  "title": "Structured outputs",
+  "url": "https://docs.baseten.co/inference/structured-outputs"
+ },
+ {
+  "file": "pages/159-concepts.md",
+  "title": "Concepts",
+  "url": "https://docs.baseten.co/loops/concepts"
+ },
+ {
+  "file": "pages/160-loops.md",
+  "title": "Loops",
+  "url": "https://docs.baseten.co/loops/overview"
+ },
+ {
+  "file": "pages/161-quickstart.md",
+  "title": "Quickstart",
+  "url": "https://docs.baseten.co/loops/quickstart"
+ },
+ {
+  "file": "pages/162-supported-base-models.md",
+  "title": "Supported base models",
+  "url": "https://docs.baseten.co/loops/supported-models"
+ },
+ {
+  "file": "pages/163-tinker-compatibility.md",
+  "title": "Tinker compatibility",
+  "url": "https://docs.baseten.co/loops/tinker-compatibility"
+ },
+ {
+  "file": "pages/164-export-to-datadog.md",
+  "title": "Export to Datadog",
+  "url": "https://docs.baseten.co/observability/export-metrics/datadog"
+ },
+ {
+  "file": "pages/165-export-to-grafana-cloud.md",
+  "title": "Export to Grafana Cloud",
+  "url": "https://docs.baseten.co/observability/export-metrics/grafana"
+ },
+ {
+  "file": "pages/166-export-to-new-relic.md",
+  "title": "Export to New Relic",
+  "url": "https://docs.baseten.co/observability/export-metrics/new-relic"
+ },
+ {
+  "file": "pages/167-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/observability/export-metrics/overview"
+ },
+ {
+  "file": "pages/168-export-to-prometheus.md",
+  "title": "Export to Prometheus",
+  "url": "https://docs.baseten.co/observability/export-metrics/prometheus"
+ },
+ {
+  "file": "pages/169-metrics-support-matrix.md",
+  "title": "Metrics support matrix",
+  "url": "https://docs.baseten.co/observability/export-metrics/supported-metrics"
+ },
+ {
+  "file": "pages/170-status-and-health.md",
+  "title": "Status and health",
+  "url": "https://docs.baseten.co/observability/health"
+ },
+ {
+  "file": "pages/171-logs.md",
+  "title": "Logs",
+  "url": "https://docs.baseten.co/observability/logs"
+ },
+ {
+  "file": "pages/172-metrics.md",
+  "title": "Metrics",
+  "url": "https://docs.baseten.co/observability/metrics"
+ },
+ {
+  "file": "pages/173-secure-model-inference.md",
+  "title": "Secure model inference",
+  "url": "https://docs.baseten.co/observability/security"
+ },
+ {
+  "file": "pages/174-tracing.md",
+  "title": "Tracing",
+  "url": "https://docs.baseten.co/observability/tracing"
+ },
+ {
+  "file": "pages/175-access-control.md",
+  "title": "Access control",
+  "url": "https://docs.baseten.co/organization/access"
+ },
+ {
+  "file": "pages/176-api-keys.md",
+  "title": "API keys",
+  "url": "https://docs.baseten.co/organization/api-keys"
+ },
+ {
+  "file": "pages/177-audit-logs.md",
+  "title": "Audit logs",
+  "url": "https://docs.baseten.co/organization/audit-logs"
+ },
+ {
+  "file": "pages/178-billing-and-usage.md",
+  "title": "Billing and usage",
+  "url": "https://docs.baseten.co/organization/billing"
+ },
+ {
+  "file": "pages/179-openid-connect-oidc-authentication.md",
+  "title": "OpenID Connect (OIDC) authentication",
+  "url": "https://docs.baseten.co/organization/oidc"
+ },
+ {
+  "file": "pages/180-organization-settings.md",
+  "title": "Organization settings",
+  "url": "https://docs.baseten.co/organization/overview"
+ },
+ {
+  "file": "pages/181-restricted-environments.md",
+  "title": "Restricted environments",
+  "url": "https://docs.baseten.co/organization/restricted-environments"
+ },
+ {
+  "file": "pages/182-secrets.md",
+  "title": "Secrets",
+  "url": "https://docs.baseten.co/organization/secrets"
+ },
+ {
+  "file": "pages/183-sso-and-scim.md",
+  "title": "SSO and SCIM",
+  "url": "https://docs.baseten.co/organization/sso-and-scim"
+ },
+ {
+  "file": "pages/184-teams.md",
+  "title": "Teams",
+  "url": "https://docs.baseten.co/organization/teams"
+ },
+ {
+  "file": "pages/185-baseten-overview.md",
+  "title": "Baseten overview",
+  "url": "https://docs.baseten.co/overview"
+ },
+ {
+  "file": "pages/186-quickstart.md",
+  "title": "Quickstart",
+  "url": "https://docs.baseten.co/quickstart"
+ },
+ {
+  "file": "pages/187-truss-push-github-action.md",
+  "title": "Truss Push GitHub Action",
+  "url": "https://docs.baseten.co/reference/ci/github-action"
+ },
+ {
+  "file": "pages/188-baseten-api.md",
+  "title": "baseten api",
+  "url": "https://docs.baseten.co/reference/cli/baseten/api"
+ },
+ {
+  "file": "pages/189-baseten-auth.md",
+  "title": "baseten auth",
+  "url": "https://docs.baseten.co/reference/cli/baseten/auth"
+ },
+ {
+  "file": "pages/190-baseten-model.md",
+  "title": "baseten model",
+  "url": "https://docs.baseten.co/reference/cli/baseten/model"
+ },
+ {
+  "file": "pages/191-baseten-model-api.md",
+  "title": "baseten model-api",
+  "url": "https://docs.baseten.co/reference/cli/baseten/model-api"
+ },
+ {
+  "file": "pages/192-baseten-model-deployment.md",
+  "title": "baseten model deployment",
+  "url": "https://docs.baseten.co/reference/cli/baseten/model-deployment"
+ },
+ {
+  "file": "pages/193-baseten-model-deployment-replica.md",
+  "title": "baseten model deployment replica",
+  "url": "https://docs.baseten.co/reference/cli/baseten/model-deployment-replica"
+ },
+ {
+  "file": "pages/194-baseten-model-environment.md",
+  "title": "baseten model environment",
+  "url": "https://docs.baseten.co/reference/cli/baseten/model-environment"
+ },
+ {
+  "file": "pages/195-baseten-org-api-key.md",
+  "title": "baseten org api-key",
+  "url": "https://docs.baseten.co/reference/cli/baseten/org-api-key"
+ },
+ {
+  "file": "pages/196-baseten-org-billing.md",
+  "title": "baseten org billing",
+  "url": "https://docs.baseten.co/reference/cli/baseten/org-billing"
+ },
+ {
+  "file": "pages/197-baseten-org-secret.md",
+  "title": "baseten org secret",
+  "url": "https://docs.baseten.co/reference/cli/baseten/org-secret"
+ },
+ {
+  "file": "pages/198-baseten-cli-overview.md",
+  "title": "Baseten CLI overview",
+  "url": "https://docs.baseten.co/reference/cli/baseten/overview"
+ },
+ {
+  "file": "pages/199-baseten-truss.md",
+  "title": "baseten truss",
+  "url": "https://docs.baseten.co/reference/cli/baseten/truss"
+ },
+ {
+  "file": "pages/200-baseten-version.md",
+  "title": "baseten version",
+  "url": "https://docs.baseten.co/reference/cli/baseten/version"
+ },
+ {
+  "file": "pages/201-chains-cli-reference.md",
+  "title": "Chains CLI reference",
+  "url": "https://docs.baseten.co/reference/cli/chains/chains-cli"
+ },
+ {
+  "file": "pages/202-baseten-command-line-tools.md",
+  "title": "Baseten command-line tools",
+  "url": "https://docs.baseten.co/reference/cli/index"
+ },
+ {
+  "file": "pages/203-loops-cli-reference.md",
+  "title": "Loops CLI reference",
+  "url": "https://docs.baseten.co/reference/cli/loops/loops-cli"
+ },
+ {
+  "file": "pages/204-training-cli-reference.md",
+  "title": "Training CLI reference",
+  "url": "https://docs.baseten.co/reference/cli/training/training-cli"
+ },
+ {
+  "file": "pages/205-truss-auth.md",
+  "title": "truss auth",
+  "url": "https://docs.baseten.co/reference/cli/truss/auth"
+ },
+ {
+  "file": "pages/206-truss-cleanup.md",
+  "title": "truss cleanup",
+  "url": "https://docs.baseten.co/reference/cli/truss/cleanup"
+ },
+ {
+  "file": "pages/207-truss-configure.md",
+  "title": "truss configure",
+  "url": "https://docs.baseten.co/reference/cli/truss/configure"
+ },
+ {
+  "file": "pages/208-truss-container.md",
+  "title": "truss container",
+  "url": "https://docs.baseten.co/reference/cli/truss/container"
+ },
+ {
+  "file": "pages/209-truss-download.md",
+  "title": "truss download",
+  "url": "https://docs.baseten.co/reference/cli/truss/download"
+ },
+ {
+  "file": "pages/210-truss-image.md",
+  "title": "truss image",
+  "url": "https://docs.baseten.co/reference/cli/truss/image"
+ },
+ {
+  "file": "pages/211-truss-init.md",
+  "title": "truss init",
+  "url": "https://docs.baseten.co/reference/cli/truss/init"
+ },
+ {
+  "file": "pages/212-truss-login.md",
+  "title": "truss login",
+  "url": "https://docs.baseten.co/reference/cli/truss/login"
+ },
+ {
+  "file": "pages/213-truss-migrate.md",
+  "title": "truss migrate",
+  "url": "https://docs.baseten.co/reference/cli/truss/migrate"
+ },
+ {
+  "file": "pages/214-truss-model-config.md",
+  "title": "truss model-config",
+  "url": "https://docs.baseten.co/reference/cli/truss/model-config"
+ },
+ {
+  "file": "pages/215-truss-model-logs.md",
+  "title": "truss model-logs",
+  "url": "https://docs.baseten.co/reference/cli/truss/model-logs"
+ },
+ {
+  "file": "pages/216-truss-cli-reference.md",
+  "title": "Truss CLI reference",
+  "url": "https://docs.baseten.co/reference/cli/truss/overview"
+ },
+ {
+  "file": "pages/217-truss-push.md",
+  "title": "truss push",
+  "url": "https://docs.baseten.co/reference/cli/truss/push"
+ },
+ {
+  "file": "pages/218-truss-run-python.md",
+  "title": "truss run-python",
+  "url": "https://docs.baseten.co/reference/cli/truss/run-python"
+ },
+ {
+  "file": "pages/219-truss-ssh.md",
+  "title": "truss ssh",
+  "url": "https://docs.baseten.co/reference/cli/truss/ssh"
+ },
+ {
+  "file": "pages/220-truss-upgrade.md",
+  "title": "truss upgrade",
+  "url": "https://docs.baseten.co/reference/cli/truss/upgrade"
+ },
+ {
+  "file": "pages/221-truss-watch.md",
+  "title": "truss watch",
+  "url": "https://docs.baseten.co/reference/cli/truss/watch"
+ },
+ {
+  "file": "pages/222-truss-whoami.md",
+  "title": "truss whoami",
+  "url": "https://docs.baseten.co/reference/cli/truss/whoami"
+ },
+ {
+  "file": "pages/223-create-an-api-key.md",
+  "title": "Create an API key",
+  "url": "https://docs.baseten.co/reference/gateway/api-keys/create-an-api-key"
+ },
+ {
+  "file": "pages/224-get-an-api-key.md",
+  "title": "Get an API key",
+  "url": "https://docs.baseten.co/reference/gateway/api-keys/get-an-api-key"
+ },
+ {
+  "file": "pages/225-list-api-keys-for-a-group.md",
+  "title": "List API keys for a group",
+  "url": "https://docs.baseten.co/reference/gateway/api-keys/list-api-keys-for-a-group"
+ },
+ {
+  "file": "pages/226-register-an-api-key.md",
+  "title": "Register an API key",
+  "url": "https://docs.baseten.co/reference/gateway/api-keys/register-an-api-key"
+ },
+ {
+  "file": "pages/227-revoke-an-api-key.md",
+  "title": "Revoke an API key",
+  "url": "https://docs.baseten.co/reference/gateway/api-keys/revoke-an-api-key"
+ },
+ {
+  "file": "pages/228-billing-webhooks.md",
+  "title": "Billing webhooks",
+  "url": "https://docs.baseten.co/reference/gateway/billing-webhooks"
+ },
+ {
+  "file": "pages/229-create-an-endpoint.md",
+  "title": "Create an endpoint",
+  "url": "https://docs.baseten.co/reference/gateway/endpoints/create-an-endpoint"
+ },
+ {
+  "file": "pages/230-delete-an-endpoint.md",
+  "title": "Delete an endpoint",
+  "url": "https://docs.baseten.co/reference/gateway/endpoints/delete-an-endpoint"
+ },
+ {
+  "file": "pages/231-get-an-endpoint.md",
+  "title": "Get an endpoint",
+  "url": "https://docs.baseten.co/reference/gateway/endpoints/get-an-endpoint"
+ },
+ {
+  "file": "pages/232-list-endpoints.md",
+  "title": "List endpoints",
+  "url": "https://docs.baseten.co/reference/gateway/endpoints/list-endpoints"
+ },
+ {
+  "file": "pages/233-update-an-endpoint.md",
+  "title": "Update an endpoint",
+  "url": "https://docs.baseten.co/reference/gateway/endpoints/replace-endpoint-targets"
+ },
+ {
+  "file": "pages/234-create-a-group.md",
+  "title": "Create a group",
+  "url": "https://docs.baseten.co/reference/gateway/groups/create-a-group"
+ },
+ {
+  "file": "pages/235-delete-a-group.md",
+  "title": "Delete a group",
+  "url": "https://docs.baseten.co/reference/gateway/groups/delete-a-group"
+ },
+ {
+  "file": "pages/236-get-a-group.md",
+  "title": "Get a group",
+  "url": "https://docs.baseten.co/reference/gateway/groups/get-a-group"
+ },
+ {
+  "file": "pages/237-get-group-usage.md",
+  "title": "Get group usage",
+  "url": "https://docs.baseten.co/reference/gateway/groups/get-group-usage"
+ },
+ {
+  "file": "pages/238-list-groups.md",
+  "title": "List groups",
+  "url": "https://docs.baseten.co/reference/gateway/groups/list-groups"
+ },
+ {
+  "file": "pages/239-update-a-group.md",
+  "title": "Update a group",
+  "url": "https://docs.baseten.co/reference/gateway/groups/update-a-group"
+ },
+ {
+  "file": "pages/240-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/reference/gateway/overview"
+ },
+ {
+  "file": "pages/241-chat-completions.md",
+  "title": "Chat Completions",
+  "url": "https://docs.baseten.co/reference/inference-api/chat-completions"
+ },
+ {
+  "file": "pages/242-messages.md",
+  "title": "Messages",
+  "url": "https://docs.baseten.co/reference/inference-api/messages"
+ },
+ {
+  "file": "pages/243-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/reference/inference-api/overview"
+ },
+ {
+  "file": "pages/244-websocket-deployment.md",
+  "title": "Websocket deployment",
+  "url": "https://docs.baseten.co/reference/inference-api/predict-endpoints/deployment-websocket"
+ },
+ {
+  "file": "pages/245-websocket-development.md",
+  "title": "Websocket development",
+  "url": "https://docs.baseten.co/reference/inference-api/predict-endpoints/development-websocket"
+ },
+ {
+  "file": "pages/246-websocket-environment.md",
+  "title": "Websocket environment",
+  "url": "https://docs.baseten.co/reference/inference-api/predict-endpoints/environments-websocket"
+ },
+ {
+  "file": "pages/247-transcribe-streaming-audio.md",
+  "title": "Transcribe streaming audio",
+  "url": "https://docs.baseten.co/reference/inference-api/predict-endpoints/streaming-transcription-api"
+ },
+ {
+  "file": "pages/248-transcribe-pre-recorded-audio.md",
+  "title": "Transcribe Pre-Recorded Audio",
+  "url": "https://docs.baseten.co/reference/inference-api/predict-endpoints/transcription-api"
+ },
+ {
+  "file": "pages/249-get-checkpoint-files.md",
+  "title": "Get checkpoint files",
+  "url": "https://docs.baseten.co/reference/loops-api/checkpoints/get-checkpoint-files"
+ },
+ {
+  "file": "pages/250-list-checkpoints.md",
+  "title": "List checkpoints",
+  "url": "https://docs.baseten.co/reference/loops-api/checkpoints/list-checkpoints"
+ },
+ {
+  "file": "pages/251-validate-a-checkpoint.md",
+  "title": "Validate a checkpoint",
+  "url": "https://docs.baseten.co/reference/loops-api/checkpoints/validate-a-checkpoint"
+ },
+ {
+  "file": "pages/252-deactivate-a-deployment.md",
+  "title": "Deactivate a deployment",
+  "url": "https://docs.baseten.co/reference/loops-api/deployments/deactivate-a-deployment"
+ },
+ {
+  "file": "pages/253-get-a-deployment.md",
+  "title": "Get a deployment",
+  "url": "https://docs.baseten.co/reference/loops-api/deployments/get-a-deployment"
+ },
+ {
+  "file": "pages/254-get-deployment-logs.md",
+  "title": "Get deployment logs",
+  "url": "https://docs.baseten.co/reference/loops-api/deployments/get-deployment-logs"
+ },
+ {
+  "file": "pages/255-get-deployment-metrics.md",
+  "title": "Get deployment metrics",
+  "url": "https://docs.baseten.co/reference/loops-api/deployments/get-deployment-metrics"
+ },
+ {
+  "file": "pages/256-list-deployments.md",
+  "title": "List deployments",
+  "url": "https://docs.baseten.co/reference/loops-api/deployments/list-deployments"
+ },
+ {
+  "file": "pages/257-loops-api-reference.md",
+  "title": "Loops API reference",
+  "url": "https://docs.baseten.co/reference/loops-api/overview"
+ },
+ {
+  "file": "pages/258-create-a-run.md",
+  "title": "Create a run",
+  "url": "https://docs.baseten.co/reference/loops-api/runs/create-a-run"
+ },
+ {
+  "file": "pages/259-get-a-run.md",
+  "title": "Get a run",
+  "url": "https://docs.baseten.co/reference/loops-api/runs/get-a-run"
+ },
+ {
+  "file": "pages/260-list-runs.md",
+  "title": "List runs",
+  "url": "https://docs.baseten.co/reference/loops-api/runs/list-runs"
+ },
+ {
+  "file": "pages/261-create-a-sampler.md",
+  "title": "Create a sampler",
+  "url": "https://docs.baseten.co/reference/loops-api/samplers/create-a-sampler"
+ },
+ {
+  "file": "pages/262-get-a-sampler.md",
+  "title": "Get a sampler",
+  "url": "https://docs.baseten.co/reference/loops-api/samplers/get-a-sampler"
+ },
+ {
+  "file": "pages/263-list-samplers.md",
+  "title": "List samplers",
+  "url": "https://docs.baseten.co/reference/loops-api/samplers/list-samplers"
+ },
+ {
+  "file": "pages/264-get-server-capabilities.md",
+  "title": "Get server capabilities",
+  "url": "https://docs.baseten.co/reference/loops-api/server/get-capabilities"
+ },
+ {
+  "file": "pages/265-create-a-session.md",
+  "title": "Create a session",
+  "url": "https://docs.baseten.co/reference/loops-api/sessions/create-a-session"
+ },
+ {
+  "file": "pages/266-get-a-session.md",
+  "title": "Get a session",
+  "url": "https://docs.baseten.co/reference/loops-api/sessions/get-a-session"
+ },
+ {
+  "file": "pages/267-create-an-api-key.md",
+  "title": "Create an API key",
+  "url": "https://docs.baseten.co/reference/management-api/api-keys/creates-an-api-key"
+ },
+ {
+  "file": "pages/268-delete-an-api-key.md",
+  "title": "Delete an API key",
+  "url": "https://docs.baseten.co/reference/management-api/api-keys/delete-an-api-key"
+ },
+ {
+  "file": "pages/269-get-all-api-keys.md",
+  "title": "Get all API keys",
+  "url": "https://docs.baseten.co/reference/management-api/api-keys/lists-the-users-api-keys"
+ },
+ {
+  "file": "pages/270-get-billing-usage-summary.md",
+  "title": "Get billing usage summary",
+  "url": "https://docs.baseten.co/reference/management-api/billing/gets-billing-usage-summary-for-a-date-range"
+ },
+ {
+  "file": "pages/271-delete-chains.md",
+  "title": "Delete chains",
+  "url": "https://docs.baseten.co/reference/management-api/chains/deletes-a-chain-by-id"
+ },
+ {
+  "file": "pages/272-by-id.md",
+  "title": "By ID",
+  "url": "https://docs.baseten.co/reference/management-api/chains/gets-a-chain-by-id"
+ },
+ {
+  "file": "pages/273-all-chains.md",
+  "title": "All chains",
+  "url": "https://docs.baseten.co/reference/management-api/chains/gets-all-chains"
+ },
+ {
+  "file": "pages/274-any-deployment-by-id.md",
+  "title": "Any deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/activate/activates-a-deployment"
+ },
+ {
+  "file": "pages/275-activate-environment-deployment.md",
+  "title": "Activate environment deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/activate/activates-a-deployment-associated-with-an-environment"
+ },
+ {
+  "file": "pages/276-development-deployment.md",
+  "title": "Development deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/activate/activates-a-development-deployment"
+ },
+ {
+  "file": "pages/277-activate-production-deployment.md",
+  "title": "Activate production deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/activate/activates-production-deployment"
+ },
+ {
+  "file": "pages/278-add-a-deployment-to-a-model.md",
+  "title": "Add a deployment to a model",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/adds-a-deployment-to-a-model"
+ },
+ {
+  "file": "pages/279-update-chainlet-environment-s-autoscaling-settings.md",
+  "title": "Update chainlet environment's autoscaling settings",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/autoscaling/update-a-chainlet-environments-autoscaling-settings"
+ },
+ {
+  "file": "pages/280-any-model-deployment-by-id.md",
+  "title": "Any model deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/autoscaling/updates-a-deployments-autoscaling-settings"
+ },
+ {
+  "file": "pages/281-development-model-deployment.md",
+  "title": "Development model deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/autoscaling/updates-a-development-deployments-autoscaling-settings"
+ },
+ {
+  "file": "pages/282-update-production-deployment-autoscaling-settings.md",
+  "title": "Update production deployment autoscaling settings",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/autoscaling/updates-production-deployment-autoscaling-settings"
+ },
+ {
+  "file": "pages/283-chain-deployment.md",
+  "title": "Chain deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deactivate/deactivates-a-chain-deployment"
+ },
+ {
+  "file": "pages/284-any-deployment-by-id.md",
+  "title": "Any deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deactivate/deactivates-a-deployment"
+ },
+ {
+  "file": "pages/285-deactivate-environment-deployment.md",
+  "title": "Deactivate environment deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deactivate/deactivates-a-deployment-associated-with-an-environment"
+ },
+ {
+  "file": "pages/286-development-deployment.md",
+  "title": "Development deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deactivate/deactivates-a-development-deployment"
+ },
+ {
+  "file": "pages/287-deactivate-production-deployment.md",
+  "title": "Deactivate production deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deactivate/deactivates-production-deployment"
+ },
+ {
+  "file": "pages/288-delete-chain-deployment.md",
+  "title": "Delete chain deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deletes-a-chain-deployment-by-id"
+ },
+ {
+  "file": "pages/289-delete-model-deployments.md",
+  "title": "Delete model deployments",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/deletes-a-models-deployment-by-id"
+ },
+ {
+  "file": "pages/290-get-model-deployment-config.md",
+  "title": "Get model deployment config",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/get-deployment-config"
+ },
+ {
+  "file": "pages/291-get-model-deployment-download-url.md",
+  "title": "Get model deployment download URL",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/get-deployment-download-url"
+ },
+ {
+  "file": "pages/292-get-model-deployment-logs.md",
+  "title": "Get model deployment logs",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/get-deployment-logs"
+ },
+ {
+  "file": "pages/293-get-model-deployment-metrics.md",
+  "title": "Get model deployment metrics",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/get-deployment-metrics"
+ },
+ {
+  "file": "pages/294-any-chain-deployment-by-id.md",
+  "title": "Any chain deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/gets-a-chain-deployment-by-id"
+ },
+ {
+  "file": "pages/295-any-model-deployment-by-id.md",
+  "title": "Any model deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/gets-a-models-deployment-by-id"
+ },
+ {
+  "file": "pages/296-development-model-deployment.md",
+  "title": "Development model deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/gets-a-models-development-deployment"
+ },
+ {
+  "file": "pages/297-production-model-deployment.md",
+  "title": "Production model deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/gets-a-models-production-deployment"
+ },
+ {
+  "file": "pages/298-get-all-chain-deployments.md",
+  "title": "Get all chain deployments",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/gets-all-chain-deployments"
+ },
+ {
+  "file": "pages/299-get-all-model-deployments.md",
+  "title": "Get all model deployments",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/gets-all-deployments-of-a-model"
+ },
+ {
+  "file": "pages/300-cancel-model-promotion.md",
+  "title": "Cancel model promotion",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/cancel-promotion"
+ },
+ {
+  "file": "pages/301-force-cancel-rolling-deployment.md",
+  "title": "Force cancel rolling deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/force-cancel-promotion"
+ },
+ {
+  "file": "pages/302-force-roll-forward-promotion.md",
+  "title": "Force roll forward promotion",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/force-roll-forward-promotion"
+ },
+ {
+  "file": "pages/303-pause-rolling-deployment.md",
+  "title": "Pause rolling deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/pause-promotion"
+ },
+ {
+  "file": "pages/304-promote-to-chain-environment.md",
+  "title": "Promote to chain environment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/promotes-a-chain-deployment-to-an-environment"
+ },
+ {
+  "file": "pages/305-promote-to-model-environment.md",
+  "title": "Promote to model environment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/promotes-a-deployment-to-an-environment"
+ },
+ {
+  "file": "pages/306-any-model-deployment-by-id.md",
+  "title": "Any model deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/promotes-a-deployment-to-production"
+ },
+ {
+  "file": "pages/307-development-model-deployment.md",
+  "title": "Development model deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/promotes-a-development-deployment-to-production"
+ },
+ {
+  "file": "pages/308-resume-rolling-deployment.md",
+  "title": "Resume rolling deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/promote/resume-promotion"
+ },
+ {
+  "file": "pages/309-any-deployment-by-id.md",
+  "title": "Any deployment by ID",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/retry/retries-a-deployment"
+ },
+ {
+  "file": "pages/310-development-deployment.md",
+  "title": "Development deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/retry/retries-a-development-deployment"
+ },
+ {
+  "file": "pages/311-production-deployment.md",
+  "title": "Production deployment",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/retry/retries-production-deployment"
+ },
+ {
+  "file": "pages/312-terminate-deployment-replica.md",
+  "title": "Terminate deployment replica",
+  "url": "https://docs.baseten.co/reference/management-api/deployments/terminates-deployment-replica"
+ },
+ {
+  "file": "pages/313-create-chain-environment.md",
+  "title": "Create Chain environment",
+  "url": "https://docs.baseten.co/reference/management-api/environments/create-a-chain-environment"
+ },
+ {
+  "file": "pages/314-create-environment.md",
+  "title": "Create environment",
+  "url": "https://docs.baseten.co/reference/management-api/environments/create-an-environment"
+ },
+ {
+  "file": "pages/315-get-chain-environment.md",
+  "title": "Get Chain environment",
+  "url": "https://docs.baseten.co/reference/management-api/environments/get-a-chain-environments-details"
+ },
+ {
+  "file": "pages/316-get-all-chain-environments.md",
+  "title": "Get all Chain environments",
+  "url": "https://docs.baseten.co/reference/management-api/environments/get-all-chain-environments"
+ },
+ {
+  "file": "pages/317-get-all-environments.md",
+  "title": "Get all environments",
+  "url": "https://docs.baseten.co/reference/management-api/environments/get-all-environments"
+ },
+ {
+  "file": "pages/318-get-environment.md",
+  "title": "Get environment",
+  "url": "https://docs.baseten.co/reference/management-api/environments/get-an-environments-details"
+ },
+ {
+  "file": "pages/319-update-chain-environment.md",
+  "title": "Update Chain environment",
+  "url": "https://docs.baseten.co/reference/management-api/environments/update-a-chain-environments-settings"
+ },
+ {
+  "file": "pages/320-update-chainlet-environment-s-instance-type.md",
+  "title": "Update chainlet environment's instance type",
+  "url": "https://docs.baseten.co/reference/management-api/environments/update-a-chainlet-environments-instance-type-settings"
+ },
+ {
+  "file": "pages/321-update-model-environment.md",
+  "title": "Update model environment",
+  "url": "https://docs.baseten.co/reference/management-api/environments/update-an-environments-settings"
+ },
+ {
+  "file": "pages/322-all-instance-types.md",
+  "title": "All instance types",
+  "url": "https://docs.baseten.co/reference/management-api/instance-types/gets-all-instance-types"
+ },
+ {
+  "file": "pages/323-instance-type-prices.md",
+  "title": "Instance type prices",
+  "url": "https://docs.baseten.co/reference/management-api/instance-types/gets-instance-type-prices"
+ },
+ {
+  "file": "pages/324-by-name.md",
+  "title": "By name",
+  "url": "https://docs.baseten.co/reference/management-api/model-apis/gets-a-model-api-by-name"
+ },
+ {
+  "file": "pages/325-all-model-apis.md",
+  "title": "All Model APIs",
+  "url": "https://docs.baseten.co/reference/management-api/model-apis/gets-all-model-apis"
+ },
+ {
+  "file": "pages/326-create-a-model-from-a-source.md",
+  "title": "Create a model from a source",
+  "url": "https://docs.baseten.co/reference/management-api/models/creates-a-model-from-a-source"
+ },
+ {
+  "file": "pages/327-delete-models.md",
+  "title": "Delete models",
+  "url": "https://docs.baseten.co/reference/management-api/models/deletes-a-model-by-id"
+ },
+ {
+  "file": "pages/328-by-id.md",
+  "title": "By ID",
+  "url": "https://docs.baseten.co/reference/management-api/models/gets-a-model-by-id"
+ },
+ {
+  "file": "pages/329-all-models.md",
+  "title": "All models",
+  "url": "https://docs.baseten.co/reference/management-api/models/gets-all-models"
+ },
+ {
+  "file": "pages/330-prepare-a-model-upload.md",
+  "title": "Prepare a model upload",
+  "url": "https://docs.baseten.co/reference/management-api/models/prepare-model-upload"
+ },
+ {
+  "file": "pages/331-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/reference/management-api/overview"
+ },
+ {
+  "file": "pages/332-rate-limits.md",
+  "title": "Rate limits",
+  "url": "https://docs.baseten.co/reference/management-api/rate-limits"
+ },
+ {
+  "file": "pages/333-get-all-secrets.md",
+  "title": "Get all secrets",
+  "url": "https://docs.baseten.co/reference/management-api/secrets/gets-all-secrets"
+ },
+ {
+  "file": "pages/334-upsert-a-secret.md",
+  "title": "Upsert a secret",
+  "url": "https://docs.baseten.co/reference/management-api/secrets/upserts-a-secret"
+ },
+ {
+  "file": "pages/335-create-a-team-api-key.md",
+  "title": "Create a team API key",
+  "url": "https://docs.baseten.co/reference/management-api/teams/creates-a-team-api-key"
+ },
+ {
+  "file": "pages/336-create-a-team-training-project.md",
+  "title": "Create a team training project",
+  "url": "https://docs.baseten.co/reference/management-api/teams/creates-a-team-training-project"
+ },
+ {
+  "file": "pages/337-get-all-team-secrets.md",
+  "title": "Get all team secrets",
+  "url": "https://docs.baseten.co/reference/management-api/teams/gets-all-team-secrets"
+ },
+ {
+  "file": "pages/338-list-all-teams.md",
+  "title": "List all teams",
+  "url": "https://docs.baseten.co/reference/management-api/teams/lists-all-teams"
+ },
+ {
+  "file": "pages/339-upsert-a-team-secret.md",
+  "title": "Upsert a team secret",
+  "url": "https://docs.baseten.co/reference/management-api/teams/upserts-a-team-secret"
+ },
+ {
+  "file": "pages/340-reference-documentation.md",
+  "title": "Reference documentation",
+  "url": "https://docs.baseten.co/reference/overview"
+ },
+ {
+  "file": "pages/341-chains-sdk-reference.md",
+  "title": "Chains SDK Reference",
+  "url": "https://docs.baseten.co/reference/sdk/chains"
+ },
+ {
+  "file": "pages/342-errors.md",
+  "title": "Errors",
+  "url": "https://docs.baseten.co/reference/sdk/loops/errors"
+ },
+ {
+  "file": "pages/343-loops-sdk-reference.md",
+  "title": "Loops SDK reference",
+  "url": "https://docs.baseten.co/reference/sdk/loops/overview"
+ },
+ {
+  "file": "pages/344-samplingclient.md",
+  "title": "SamplingClient",
+  "url": "https://docs.baseten.co/reference/sdk/loops/sampling-client"
+ },
+ {
+  "file": "pages/345-serviceclient.md",
+  "title": "ServiceClient",
+  "url": "https://docs.baseten.co/reference/sdk/loops/service-client"
+ },
+ {
+  "file": "pages/346-trainingclient.md",
+  "title": "TrainingClient",
+  "url": "https://docs.baseten.co/reference/sdk/loops/training-client"
+ },
+ {
+  "file": "pages/347-types.md",
+  "title": "Types",
+  "url": "https://docs.baseten.co/reference/sdk/loops/types"
+ },
+ {
+  "file": "pages/348-training-sdk.md",
+  "title": "Training SDK",
+  "url": "https://docs.baseten.co/reference/sdk/training"
+ },
+ {
+  "file": "pages/349-truss-load.md",
+  "title": "truss.load",
+  "url": "https://docs.baseten.co/reference/sdk/truss/load"
+ },
+ {
+  "file": "pages/350-truss-login.md",
+  "title": "truss.login",
+  "url": "https://docs.baseten.co/reference/sdk/truss/login"
+ },
+ {
+  "file": "pages/351-modeldeployment.md",
+  "title": "ModelDeployment",
+  "url": "https://docs.baseten.co/reference/sdk/truss/model-deployment"
+ },
+ {
+  "file": "pages/352-truss-sdk-reference.md",
+  "title": "Truss SDK Reference",
+  "url": "https://docs.baseten.co/reference/sdk/truss/overview"
+ },
+ {
+  "file": "pages/353-truss-push.md",
+  "title": "truss.push",
+  "url": "https://docs.baseten.co/reference/sdk/truss/push"
+ },
+ {
+  "file": "pages/354-truss-whoami.md",
+  "title": "truss.whoami",
+  "url": "https://docs.baseten.co/reference/sdk/truss/whoami"
+ },
+ {
+  "file": "pages/355-create-training-job.md",
+  "title": "Create training job",
+  "url": "https://docs.baseten.co/reference/training-api/create-training-job"
+ },
+ {
+  "file": "pages/356-create-training-project.md",
+  "title": "Create training project",
+  "url": "https://docs.baseten.co/reference/training-api/create-training-project"
+ },
+ {
+  "file": "pages/357-delete-training-job.md",
+  "title": "Delete training job",
+  "url": "https://docs.baseten.co/reference/training-api/delete-training-job"
+ },
+ {
+  "file": "pages/358-delete-training-project.md",
+  "title": "Delete training project",
+  "url": "https://docs.baseten.co/reference/training-api/delete-training-project"
+ },
+ {
+  "file": "pages/359-download-training-job-source-code.md",
+  "title": "Download training job source code",
+  "url": "https://docs.baseten.co/reference/training-api/download-training-job"
+ },
+ {
+  "file": "pages/360-get-auth-codes-for-training-job.md",
+  "title": "Get auth codes for training job",
+  "url": "https://docs.baseten.co/reference/training-api/get-auth-codes-for-training-job"
+ },
+ {
+  "file": "pages/361-get-training-job.md",
+  "title": "Get training job",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-job"
+ },
+ {
+  "file": "pages/362-get-training-job-checkpoint-files.md",
+  "title": "Get training job checkpoint files",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-job-checkpoint-files"
+ },
+ {
+  "file": "pages/363-list-training-job-checkpoints.md",
+  "title": "List training job checkpoints",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-job-checkpoints"
+ },
+ {
+  "file": "pages/364-get-training-job-logs.md",
+  "title": "Get training job logs",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-job-logs"
+ },
+ {
+  "file": "pages/365-get-training-job-metrics.md",
+  "title": "Get training job metrics",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-job-metrics"
+ },
+ {
+  "file": "pages/366-get-training-project.md",
+  "title": "Get training project",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-project"
+ },
+ {
+  "file": "pages/367-get-training-project-cache-summary.md",
+  "title": "Get training project cache summary",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-project-cache-summary"
+ },
+ {
+  "file": "pages/368-list-training-projects.md",
+  "title": "List training projects",
+  "url": "https://docs.baseten.co/reference/training-api/get-training-projects"
+ },
+ {
+  "file": "pages/369-list-training-jobs.md",
+  "title": "List training jobs",
+  "url": "https://docs.baseten.co/reference/training-api/list-training-jobs"
+ },
+ {
+  "file": "pages/370-overview.md",
+  "title": "Overview",
+  "url": "https://docs.baseten.co/reference/training-api/overview"
+ },
+ {
+  "file": "pages/371-recreate-training-job.md",
+  "title": "Recreate training job",
+  "url": "https://docs.baseten.co/reference/training-api/recreate-training-job"
+ },
+ {
+  "file": "pages/372-search-training-jobs.md",
+  "title": "Search training jobs",
+  "url": "https://docs.baseten.co/reference/training-api/search-training-jobs"
+ },
+ {
+  "file": "pages/373-stop-training-job.md",
+  "title": "Stop training job",
+  "url": "https://docs.baseten.co/reference/training-api/stop-training-job"
+ },
+ {
+  "file": "pages/374-truss-configuration.md",
+  "title": "Truss configuration",
+  "url": "https://docs.baseten.co/reference/truss-configuration"
+ },
+ {
+  "file": "pages/375-baseten-platform-status.md",
+  "title": "Baseten platform status",
+  "url": "https://docs.baseten.co/status/status"
+ },
+ {
+  "file": "pages/376-building-blocks.md",
+  "title": "Building blocks",
+  "url": "https://docs.baseten.co/training/concepts/basics"
+ },
+ {
+  "file": "pages/377-cache.md",
+  "title": "Cache",
+  "url": "https://docs.baseten.co/training/concepts/cache"
+ },
+ {
+  "file": "pages/378-checkpoints.md",
+  "title": "Checkpoints",
+  "url": "https://docs.baseten.co/training/concepts/checkpoints"
+ },
+ {
+  "file": "pages/379-multinode-training.md",
+  "title": "Multinode training",
+  "url": "https://docs.baseten.co/training/concepts/multinode"
+ },
+ {
+  "file": "pages/380-storage-and-data-ingestion.md",
+  "title": "Storage and data ingestion",
+  "url": "https://docs.baseten.co/training/concepts/storage"
+ },
+ {
+  "file": "pages/381-deploy-with-optimized-inference-engines.md",
+  "title": "Deploy with optimized inference engines",
+  "url": "https://docs.baseten.co/training/deploy-with-engine-builder"
+ },
+ {
+  "file": "pages/382-serve-your-trained-model.md",
+  "title": "Serve your trained model",
+  "url": "https://docs.baseten.co/training/deployment"
+ },
+ {
+  "file": "pages/383-get-started.md",
+  "title": "Get started",
+  "url": "https://docs.baseten.co/training/getting-started"
+ },
+ {
+  "file": "pages/384-vs-code-and-cursor-remote-tunnels.md",
+  "title": "VS Code and Cursor remote tunnels",
+  "url": "https://docs.baseten.co/training/interactive-sessions"
+ },
+ {
+  "file": "pages/385-lifecycle.md",
+  "title": "Lifecycle",
+  "url": "https://docs.baseten.co/training/lifecycle"
+ },
+ {
+  "file": "pages/386-load-checkpoints.md",
+  "title": "Load checkpoints",
+  "url": "https://docs.baseten.co/training/loading"
+ },
+ {
+  "file": "pages/387-management.md",
+  "title": "Management",
+  "url": "https://docs.baseten.co/training/management"
+ },
+ {
+  "file": "pages/388-training-on-baseten.md",
+  "title": "Training on Baseten",
+  "url": "https://docs.baseten.co/training/overview"
+ },
+ {
+  "file": "pages/389-remote-access.md",
+  "title": "Remote access",
+  "url": "https://docs.baseten.co/training/remote-access"
+ },
+ {
+  "file": "pages/390-slurm-workstations.md",
+  "title": "Slurm workstations",
+  "url": "https://docs.baseten.co/training/slurm"
+ },
+ {
+  "file": "pages/391-ssh-access.md",
+  "title": "SSH access",
+  "url": "https://docs.baseten.co/training/ssh"
+ },
+ {
+  "file": "pages/392-deployments.md",
+  "title": "Deployments",
+  "url": "https://docs.baseten.co/troubleshooting/deployments"
+ },
+ {
+  "file": "pages/393-inference.md",
+  "title": "Inference",
+  "url": "https://docs.baseten.co/troubleshooting/inference"
+ }
+]

@@ -1,0 +1,157 @@
+=== INV3 last-pool guard + real 5xx propagation — 18:51:34 ===
+--- pre-state /v1/pools ---
+{"pools":[{"id":"model-api-a","hw":"baseten-model-api","health":18.0,"status":"bad","util_pct":0.0,"cost_per_mtok":3.0,"autoscaler":{"replicas":1,"min":1,"max":2,"state":"steady"}},{"id":"model-api-b","hw":"baseten-model-api","health":80.0,"status":"warn","util_pct":0.0,"cost_per_mtok":2.4454,"autoscaler":{"replicas":1,"min":1,"max":2,"state":"steady"}}]}
+--- pre-state /v1/dev/chaos ---
+{"pools":[{"id":"model-api-a","capable":true,"state":{"latency_ms":0.0,"error_rate":0.0}},{"id":"model-api-b","capable":true,"state":{"latency_ms":0.0,"error_rate":0.0}}]}
+--- inject error_rate 1.0 on BOTH pools via chaos.py (router /v1/dev/chaos) ---
+injected on http://localhost:8096/v1/dev/chaos pool=model-api-a: {'model-api-a': {'latency_ms': 0.0, 'error_rate': 1.0}}
+injected on http://localhost:8096/v1/dev/chaos pool=model-api-b: {'model-api-b': {'latency_ms': 0.0, 'error_rate': 1.0}}
+{"pools":[{"id":"model-api-a","capable":true,"state":{"latency_ms":0.0,"error_rate":1.0}},{"id":"model-api-b","capable":true,"state":{"latency_ms":0.0,"error_rate":1.0}}]}
+--- blast: 30 client requests @ ~2rps, status codes + quarantine census every 5 ---
+500 500 500 500 503 
+  [t=5] pools: 
+503 503 503 503 503 
+  [t=10] pools: 
+503 503 503 503 503 
+  [t=15] pools: 
+503 503 503 503 503 
+  [t=20] pools: 
+503 503 503 503 503 
+  [t=25] pools: 
+503 503 503 503 503 
+  [t=30] pools: 
+
+--- incidents during blast ---
+[
+    {
+        "id": "INC-0005",
+        "title": "model-api-b breaching serving SLO \u2014 100% of recent requests \u00b7 last healthy pool, quarantine withheld",
+        "ts": 1783032707.654349,
+        "phase_ms": {
+            "detect": 0.0,
+            "diagnose": 4056.4,
+            "resolve": 10772.3
+        },
+        "mttr_s": 14.8,
+        "agent": true,
+        "actions": [
+            "detected SLO breach rate 100% over 4 requests on model-api-b",
+            "probe failed (19ms)",
+            "probe failed (19ms)",
+            "probe failed (15ms)"
+        ],
+        "postmortem_url": null,
+        "live": true
+    },
+    {
+        "id": "INC-0004",
+        "title": "model-api-a breaching serving SLO \u2014 100% of recent requests",
+        "ts": 1783032707.654314,
+        "phase_ms": {
+            "detect": 0.0,
+            "diagnose": 0.0,
+            "resolve": 14828.7
+        },
+        "mttr_s": 14.8,
+        "agent": true,
+        "actions": [
+            "detected SLO breach rate 100% over 4 requests on model-api-a",
+            "quarantined model-api-a; traffic spills to healthy pools",
+            "probe failed (28ms)",
+            "probe failed (28ms)",
+            "probe failed (21ms)"
+        ],
+        "postmortem_url": null,
+        "live": true
+    },
+    {
+        "id": "INC-0003",
+        "title": "model-api-b breaching serving SLO \u2014 100% of recent requests \u00b7 last healthy pool, quarantine withheld",
+        "ts": 1783032450.8175948,
+        "phase_ms": {
+            "detect": 0.0,
+            "diagnose": 4049.6,
+            "resolve": 12178.5
+        },
+        "mttr_s": 16.2,
+        "agent": true,
+        "actions": [
+            "detected SLO breach rate 100% over 6 requests on model-api-b",
+            "probe failed (14ms)",
+            "probe failed (20ms)",
+            "probe passed (34ms)",
+            "probe passed (20ms)"
+        ],
+        "postmortem_url": "/v1/incidents?focus=model-api-b",
+        "live": false
+    },
+    {
+        "id": "INC-0002",
+        "title": "model-api-a breaching serving SLO \u2014 100% of recent requests",
+        "ts": 1783032450.817525,
+        "phase_ms": {
+            "detect": 0.0,
+            "diagnose": 0.0,
+            "resolve": 56411.4
+        },
+        "mttr_s": 56.4,
+        "agent": true,
+        "actions": [
+            "detected SLO breach rate 100% over 6 requests on model-api-a",
+            "quarantined model-api-a; traffic spills to healthy pools",
+            "probe failed (18ms)",
+            "probe failed (29ms)",
+            "probe failed (21ms)",
+            "probe failed (28ms)",
+            "probe failed (29ms)",
+            "escalating to on-call \u2014 5 consecutive probes failed; quarantine held, beyond agent allowlist",
+            "probe failed (28ms)",
+            "probe passed (23ms)",
+            "probe passed (29ms)",
+            "reinstated model-api-a \u2014 2 consecutive probes within SLO"
+        ],
+        "postmortem_url": "/v1/incidents?focus=model-api-a",
+        "live": false
+    },
+    {
+        "id": "INC-0001",
+        "title": "model-api-a breaching serving SLO \u2014 50% of recent requests",
+        "ts": 1783032070.014493,
+        "phase_ms": {
+            "detect": 0.0,
+            "diagnose": 0.0,
+            "resolve": 8090.9
+        },
+        "mttr_s": 8.1,
+        "agent": true,
+        "actions": [
+            "detected SLO breach rate 50% over 4 requests on model-api-a",
+            "quarantined model-api-a; traffic spills to healthy pools",
+            "probe passed (42ms)",
+            "probe passed (31ms)",
+            "reinstated model-api-a \u2014 2 consecutive probes within SLO"
+        ],
+        "postmortem_url": "/v1/incidents?focus=model-api-a",
+        "live": false
+    }
+]
+--- quarantine census while both pools faulted (raw /v1/pools) ---
+{"pools":[{"id":"model-api-a","hw":"baseten-model-api","health":0.0,"status":"bad","util_pct":0.0,"cost_per_mtok":3.0,"autoscaler":{"replicas":0,"min":1,"max":2,"state":"ejected"}},{"id":"model-api-b","hw":"baseten-model-api","health":59.0,"status":"warn","util_pct":0.0,"cost_per_mtok":2.4454,"autoscaler":{"replicas":1,"min":1,"max":2,"state":"steady"}}]}
+quarantined/ejected pools: ['model-api-a'] count = 1 => at-most-one guard HELD
+--- clear all chaos via chaos.py (router /v1/dev/chaos) 18:52:28 ---
+cleared on http://localhost:8096/v1/dev/chaos pool=model-api-a: {'model-api-a': {'latency_ms': 0.0, 'error_rate': 0.0}}
+cleared on http://localhost:8096/v1/dev/chaos pool=model-api-b: {'model-api-b': {'latency_ms': 0.0, 'error_rate': 0.0}}
+{"pools":[{"id":"model-api-a","capable":true,"state":{"latency_ms":0.0,"error_rate":0.0}},{"id":"model-api-b","capable":true,"state":{"latency_ms":0.0,"error_rate":0.0}}]}
+--- pool-direct /chaos truth check ---
+{"latency_ms":0.0,"error_rate":0.0}
+{"latency_ms":0.0,"error_rate":0.0}
+--- recovery: 15 client requests post-clear ---
+200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 
+--- pools after recovery ---
+{"pools":[{"id":"model-api-a","hw":"baseten-model-api","health":13.0,"status":"bad","util_pct":0.0,"cost_per_mtok":3.0,"autoscaler":{"replicas":1,"min":1,"max":2,"state":"steady"}},{"id":"model-api-b","hw":"baseten-model-api","health":63.0,"status":"warn","util_pct":0.0,"cost_per_mtok":2.4051,"autoscaler":{"replicas":1,"min":1,"max":2,"state":"steady"}}]}
+--- live incidents after recovery ---
+INC-0005 resolved mttr=72.6s - model-api-b breaching serving SLO — 100% of recent requests · last healthy pool, quarantine withheld
+INC-0004 resolved mttr=72.5s - model-api-a breaching serving SLO — 100% of recent requests
+INC-0003 resolved mttr=16.2s - model-api-b breaching serving SLO — 100% of recent requests · last healthy pool, quarantine withheld
+INC-0002 resolved mttr=56.4s - model-api-a breaching serving SLO — 100% of recent requests
+INC-0001 resolved mttr=8.1s - model-api-a breaching serving SLO — 50% of recent requests

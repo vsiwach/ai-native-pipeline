@@ -1,110 +1,81 @@
 # SLO-AUDITOR — feature: model-apis (branch baseten-mvp)
 
-**Verdict: FAIL** (one untraceable count in `docs/FRICTION_LOG.md`; all claimed
-MTTR / catalog / cost-attribution numbers otherwise fully traced and reproduced).
+**Verdict: PASS** (re-audit after remediation commit `f647380`; supersedes the
+prior FAIL, which was scoped to one untraceable count in `docs/FRICTION_LOG.md`).
 
-Audited: 2026-07-02, sim stack at `http://localhost:8096` (pools 8103/8104,
-`DEVBOARD_MODEL=glm-4.7`). HARD CONSTRAINT honored: no live cloud calls —
-`BASETEN_API_BASE_URL` never set; backends verified as `"backend":"MaxLocalSim"`
-via `GET :8103/v1/info` and `:8104/v1/info` before any traffic.
+Re-audited: 2026-07-02, sim stack at `http://localhost:8096`
+(`DEVBOARD_MODEL=glm-4.7`). HARD CONSTRAINT honored: no live cloud calls;
+read-only against localhost only. The permitted one sim drill was NOT needed —
+committed evidence plus the live router state sufficed.
 
-## Commands run
+## What changed since the FAIL
+
+The FAIL had exactly one blocking finding: FRICTION_LOG #10 claimed
+"25 of 40 requests returned 429" with no committed per-request raw file.
+Commit `f647380` remediated:
+
+1. #10 now reads **"28 of 40"** and cites
+   `benchmarks/raw/rate_limit_glm47_20260702-183916.csv` ("one row per request
+   with status + latency"). The old 25/40 is now explicitly labeled "an earlier
+   unrecorded probe" — a disclosure, no longer a displayed metric.
+2. A new drill row `20260702-184106` (errors, sim) landed in
+   `benchmarks/raw/chaos_drills.csv` with its timeline CSV.
+
+## Commands run (this re-audit)
 
 ```
-curl -s http://localhost:8096/v1/pools
+git show --stat f647380
+wc -l benchmarks/raw/rate_limit_glm47_20260702-183916.csv     # 41 (header + 40)
+python3 - <<'EOF'   # independent recount from the raw CSV
+import csv, collections
+rows=list(csv.DictReader(open('benchmarks/raw/rate_limit_glm47_20260702-183916.csv')))
+# rows: 40; Counter({'429': 28, '200': 12}); duration 29.43s; rps 1.325
+EOF
+python3 - <<'EOF'   # every chaos_drills.csv row must have a timeline CSV
+# 24 rows, missing timelines: []
+EOF
+cat benchmarks/raw/chaos_drill_errors_20260702-184106.csv
 curl -s http://localhost:8096/v1/incidents
 curl -s http://localhost:8096/v1/metrics/hero
-curl -s http://localhost:8096/v1/metrics/slo
-curl -s http://localhost:8103/v1/info ; curl -s http://localhost:8104/v1/info
-python3 tools/chaos.py drill --router http://localhost:8096 --scenario latency \
-    --model glm-4.7 --latency-ms 2600 --rps 2 --timeout-s 120
-cd services/llm && python3 -m pytest tests/test_openai_compat.py -q   # 21 passed in 0.01s
 ```
 
-## (a) Chaos-drill MTTR — regenerated vs displayed
+## Regenerated vs displayed
 
-| Claim | benchmarks/raw/chaos_drills.csv row | Timeline CSV (resolved event) | /v1/incidents | Match |
-|---|---|---|---|---|
-| suite 16:31 latency MTTR 8.1s (sim) | `20260702-163119,...,8.1,True,19,0` | `chaos_drill_latency_20260702-163119.csv`: `resolved,MTTR 8.1s (agent=True)` | INC-0001 `mttr_s: 8.1` | EXACT |
-| suite 16:32 errors MTTR 8.1s (sim) | `20260702-163219,...,8.1,True,22,0` | `chaos_drill_errors_20260702-163219.csv`: `resolved,MTTR 8.1s` | INC-0002 `mttr_s: 8.1` | EXACT |
-| suite 16:33 combo MTTR 8.1s (sim) | `20260702-163309,...,8.1,True,19,0` | `chaos_drill_combo_20260702-163309.csv`: `resolved,MTTR 8.1s` | INC-0003 `mttr_s: 8.1` | EXACT |
-| 15:30 latency run MTTR 8.7s | `20260702-153057,...,8.7,True,18,5` | `chaos_drill_latency_20260702-153057.csv`: `resolved,MTTR 8.7s (agent=True)` | (pre-restart router; not in live store) | EXACT vs CSVs |
+| Displayed claim | Where | Regenerated (this audit) | Match |
+|---|---|---|---|
+| "28 of 40 requests returned 429" | FRICTION_LOG #10 line 160 | 40 CSV rows; status counter `429: 28, 200: 12` | EXACT |
+| "~1.3 aggregate rps" | FRICTION_LOG #10 line 159 | 39 intervals / 29.43 s = **1.325 rps** from `t_rel_s` | within "~" (stated ~1.3; recomputed 1.325 — a one-decimal rounding, the only tolerance applied) |
+| drill `20260702-184106` MTTR 8.1s (sim) | `chaos_drills.csv` row 24 | timeline `chaos_drill_errors_20260702-184106.csv`: `11.65,resolved,MTTR 8.1s (agent=True)`; router `INC-0001` `mttr_s: 8.1`, `agent: true`, `live: false` | EXACT |
+| `/v1/metrics/hero mttr_s: 8.1` | devboard endpoint | `mttr_median(agent=True)` over resolved incidents (`devboard.py:44,53`; `incidents.py:103-109`) = median{8.1} = 8.1 | EXACT (open incidents INC-0002/0003 show count-up `mttr_s` and are correctly excluded — `live` here means "still open") |
+| all prior traced items (16:31/16:32/16:33 suite, 15:30 run, catalog provenance, cost attribution, 21 unit tests) | prior audit | files unchanged since prior audit; `chaos_drills.csv` 24/24 rows have matching timeline CSVs in `benchmarks/raw/` | HOLDS |
 
-**Re-run from raw commands (this audit):** drill printed `MTTR 8.1s`, appended
-`20260702-164306,latency,model-api-a,glm-4.7,2600.0,0.0,True,17.7,17.7,17.73,8.1,True,19,0`
-to `chaos_drills.csv`, wrote `chaos_drill_latency_20260702-164306.csv`
-(`24.31,resolved,MTTR 8.1s (agent=True)`), and the router recorded INC-0004
-with `mttr_s: 8.1`, `agent: true`, `live: false`. Printed = CSV = timeline =
-`/v1/incidents` = `/v1/metrics/hero mttr_s: 8.1`. An independent second run at
-16:43:28 (`20260702-164328`, not run by this audit) also resolved at 8.1s —
-corroborating.
+**Tolerance:** counts exact (required and observed). "~1.3 rps" accepted at one
+decimal of the recomputed 1.325 because the doc itself writes it as approximate;
+every underlying datum is in the CSV. MTTR exact.
 
-**Tolerance applied:** MTTR itself: exact match required and observed (8.1s on
-every sim resolution — the agent's probe cadence is deterministic on the sim).
-Detect/quarantine timings vary run-to-run (17.7s this audit vs 18.76s in the
-16:31 row, and 45.91s in the 16:43:28 run) because breach detection depends on
-the sampling window; these are NOT displayed as claims, so no tolerance was
-needed on any displayed number.
+## Unreproducible claims
 
-Every `chaos_drills.csv` row has a matching per-drill timeline CSV in
-`benchmarks/raw/` (19 rows before audit, all 19 stamped timeline files present;
-now 21/21). Unresolved/FAIL rows (e.g. `20260702-160159` live-429 run,
-`timeout,no resolution within 150.0s — FAIL`) are honestly recorded, not
-massaged.
+None remaining. Every displayed number now traces to a committed raw file under
+`benchmarks/raw/` with enough columns to recompute it.
 
-## (b) Model catalog provenance
+## Follow-ups (acknowledged by the mission; judged non-blocking under the
+provenance rule because no *displayed number* depends on them)
 
-`deploy/baseten/model-apis.json` carries `"source": "GET
-https://inference.baseten.co/v1/models"` and `"fetched_at":
-"2026-07-02T19:11:03Z"`; structure matches exactly what
-`deploy/baseten/manage.py cmd_catalog` (lines 107–151) emits ($/token → $/1M
-conversion at lines 131–133). The backends re-expose this provenance live:
-`GET :8103/v1/info` returns `catalog_source` + `catalog_fetched_at` identical
-to the file. Could not re-run `manage.py catalog` (live-call ban) — verified by
-code inspection instead; not a blocker since the pricing claim is about the
-committed snapshot. **Weakness (noted, not failing):** `--fetched-at` is
-operator-supplied, not clock-derived (`manage.py` line 187), so the timestamp
-is asserted rather than recorded.
+1. **No committed generator for `rate_limit_glm47_*.csv`** (not in
+   `tools/chaos.py` or `deploy/baseten/manage.py`). The rule requires a raw CSV
+   sufficient to recompute the displayed number — satisfied — but a live re-run
+   of the probe is not scriptable from the repo. Recommend committing the probe
+   as `tools/chaos.py ratelimit`.
+2. **`chaos_drills.csv` has no live/sim column.** No doc/README/devboard surface
+   displays the live-vs-sim MTTR attribution (the 8.7s-live claim exists only in
+   the commit message, not an audited display surface), so nothing displayed is
+   untraceable — but add the column before any doc cites a "live MTTR".
+3. **`fetched_at` in `deploy/baseten/model-apis.json` is operator-asserted**
+   (`manage.py --fetched-at`), not clock-derived. Timestamp label, not a metric.
+4. **`tools/devboard/llm.html` lines 301-302 hard-code `slo_ttft_ms: 500`** —
+   inside the synthetic "Inject SLO breach" demo payload, not a rendered metric;
+   rendered SLOs come from `/v1/metrics/hero` (policy/registry-derived,
+   `routing-policy.yaml` realtime: ttft 500 / tpot 60 matches the mission).
+   Still flagged per policy; does not make any displayed number untraceable.
 
-## (c) Cost attribution
-
-`services/llm/llm_app/openai_compat.py` `generate()` (lines 231–236): when
-per-token prices are set, `est_cost_usd = prompt_tokens/1e6 * usd_per_1m_prompt
-+ completion_tokens/1e6 * usd_per_1m_completion`; per-token wins over the $/hr
-share path. Unit-verified by
-`services/llm/tests/test_openai_compat.py::ModelAPIEconomicsTest::test_per_token_prices_win_over_hourly_share`
-(100 prompt + 200 completion @ glm-5.2 catalog prices 1.4/4.4, asserted to 12
-places). Full suite: **21 passed**. Wiring: `llm_app/factory.py` builds the
-`baseten-api` mux from `MODEL_API_CATALOG` so sims carry the catalog's real
-per-token prices; live path gated on `BASETEN_API_BASE_URL` (unset here).
-
-## SLO definitions
-
-`routing-policy.yaml` tiers: `realtime: ttft_ms: 500, tpot_ms: 60` — matches
-the mission voice SLO exactly, with the mission cited in the comment. Displayed
-SLOs come from policy via the registry tier (`/v1/metrics/hero` shows
-`tpot_slo_ms: 80` because `glm-4.7` is registered tier `standard`
-(`inference-registry.yaml` line 17) — traced to config, not hard-coded).
-**Flag:** `tools/devboard/llm.html` lines 301–302 hard-code `slo_ttft_ms: 500`
-— it is inside the explicit "Inject SLO breach" demo button (synthetic
-incident), not a rendered metric, but per policy any UI-side SLO constant
-should come from the API.
-
-## Unreproducible claims (cause of FAIL)
-
-1. **`docs/FRICTION_LOG.md` #10 (line 160): "25 of 40 requests returned 429".**
-   No committed raw file anywhere in the repo contains per-request status codes
-   or a run with 40 requests / 25 429s (`chaos_drills.csv` has no such row;
-   timeline CSVs record only drill events). A displayed count with no CSV is an
-   automatic FAIL under the provenance rule.
-2. **Secondary (provenance gap, same entry): "~1.3 aggregate rps" and the
-   live-vs-sim attribution of runs.** `chaos_drills.csv` has no live/sim column,
-   so the claim that the 15:30-15:35 8.7s-era rows were "live" and 16:31+ rows
-   "sim" cannot be established from the committed evidence alone (only the
-   in-memory `/v1/incidents` records carry `live: false`, and only for the
-   current router process). Recommend adding `live` and `rps` columns to
-   `chaos_drills.csv` and a raw per-request CSV (status code column) for live
-   drills; then #10's numbers become traceable.
-
-Everything in the stated claim set (a)(b)(c) traced end-to-end; the FAIL is
-scoped to the FRICTION_LOG counts above.
+SLO definitions re-checked: unchanged and mission-conformant.

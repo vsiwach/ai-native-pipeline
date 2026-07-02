@@ -1,185 +1,149 @@
 # STAFF-SKEPTIC — model-apis
 
-**Verdict: FAIL** (top objection is neither fixed nor documented as a known
-limit; everything else about this feature is genuinely strong).
+**Verdict: PASS** (re-review 2026-07-02, after commit f647380 addressed the
+top objection; prior verdict was FAIL for status laundering).
 
-Reviewed: working-tree diff on `baseten-mvp` (BasetenModelAPIAdapter +
+Reviewed: commit f647380 on `baseten-mvp` (BasetenModelAPIAdapter +
 ModelAPIMux, catalog pipeline, chat failover, incident-agent fixes, MTTR
-drill runner, docs). Live sim stack verified at `http://localhost:8096`.
-Note: no SLO-AUDITOR or CHAOS-AGENT reports existed in `evals/model-apis/`
-at review time — this review had to reconstruct their evidence from
-`benchmarks/raw/` directly.
+drill runner, docs) plus the fixes for my two lead objections folded into
+that commit. Live sim stack re-verified at `http://localhost:8096`
+(pools :8103/:8104, DEVBOARD_MODEL=glm-4.7). SLO-AUDITOR report present
+(`evals/model-apis/slo-auditor.md`); evidence files in
+`evals/model-apis/evidence/`.
 
-## JD lines: claimed vs actually demonstrated
+## Re-verification of the prior FAIL (top objection)
 
-Actually demonstrated:
-- *Health-aware recovery from stuck or bad replicas* — detect → quarantine →
-  probe → reinstate → resolve loop, with the same-tick quarantine race and
-  last-pool guard fixed and unit-tested (`services/router/tests/
-  test_incident_agent.py`), and honest failed-drill rows retained in
-  `benchmarks/raw/chaos_drills.csv`.
-- *Self-serve incident management with measured MTTR* — `tools/chaos.py
-  drill --suite` produces a timeline CSV per drill; the hero MTTR (8.1s)
-  traces `/v1/metrics/hero` → `/v1/incidents` → the 16:31–16:33 rows of
-  `chaos_drills.csv`. Provenance chain holds.
-- *Cost/perf frontier instrumentation* — measured (not modeled) TTFT/decode,
-  per-token cost attribution whose prices trace to a catalog snapshot
-  generated from the live `/v1/models` GET (`deploy/baseten/manage.py
-  catalog`), reasoning-delta-aware TTFT latching (FRICTION_LOG #11 — real
-  learned behavior).
-- *Workload onboarding as config* — catalog → `SERVICES` expansion →
-  generated registry (`tools/devkit/sync.py`), registry stays generated per
-  CLAUDE.md rule 3b. Verified: no vendor SDK imports (stdlib urllib only).
+### Objection 1 — status laundering + invisible 429s: FIXED, verified 3 ways
 
-Claimed but NOT demonstrated:
-- *"Every request reaches a healthy replica"* — see objection 1: with every
-  replica returning 5xx, clients receive HTTP 200. Failover triggers on
-  transport errors only.
-- *"Measurable decline in MTTR"* — `mttr_delta_pct` is 0.0; there is no
-  manual-baseline MTTR anywhere in `benchmarks/raw/` to decline from.
-- *Redundancy via two replicas* — both replicas share one upstream key and
-  one per-model quota (FRICTION_LOG #10). This one IS documented
-  (services/model_apis/README.md caveats) — credited as a known limit.
+Code (`services/router/router_app/main.py`):
+- `:595` non-stream return is `JSONResponse(..., status_code=resp.status_code)`
+  with the comment naming this finding; `:556-558` stream return is
+  `StreamingResponse(..., status_code=up_status)`.
+- `:260-267` non-stream: backend 5xx → replica added to `tried`, next replica
+  selected via `_select_for_chat(exclude=tried)` (`:145-148` — exclusion
+  beats prefix affinity, so failover can't re-pick the sick pool); if every
+  replica 5xx's, the LAST REAL 5xx is returned ("be honest").
+- `:303-317` stream: `upstream.status_code >= 500` is caught BEFORE the
+  stream commits; breach recorded against the sick pool
+  (`http_ok=False`), failover event emitted, next replica tried.
+- `:258-259` and `:369-370`: `http_ok = status < 500 and status != 429` —
+  a 429 now feeds breach detection (the FRICTION_LOG #10 failure mode is
+  no longer invisible). 429 does NOT trigger failover — correct, since both
+  replicas share one upstream quota (retrying would amplify the storm).
 
-## Ranked objections
+Tests (`services/router/tests/test_chat_failover.py`, 5/5 pass):
+transport failover both modes, backend-5xx failover with breach recorded
+against the sick pool, and `test_all_replicas_5xx_returns_real_status_not_200`
+— the exact scenario I demonstrated. Full suites: router 110 pass,
+llm 54 pass.
 
-### 1. TOP — router converts backend errors into HTTP 200s; 429s are invisible to breach accounting (UNRESOLVED → FAIL)
+Live re-demonstration (2026-07-02, this review):
+1. `POST /chaos {"error_rate":1.0}` on BOTH pools → router
+   `/v1/chat/completions` returned **500** non-stream (body
+   `{"error":{"type":"chaos_injected_5xx"}}`) and **503**
+   `no_healthy_backend` streaming. Previously both were 200.
+2. Healed pool-b only → both modes returned **200** served by
+   `X-Replica: model-api-b`; `failover` events (`upstream 500`) and
+   `slo_breach` samples recorded against BOTH pools from step 1;
+   incident agent ejected model-api-a (still sick) and — bonus —
+   INC-0003 shows the last-pool guard live ("last healthy pool,
+   quarantine withheld" on model-api-b).
+3. Cleared chaos → agent probed and reinstated; both pools `steady`,
+   INC-0002/0003 resolved with measured MTTR. Stack left clean.
+4. 429 accounting verified empirically with a one-off harness (mock
+   backend answering 429): client received **429**, and a `slo_breach`
+   was recorded against the pool. Not laundered, not invisible.
 
-- `services/router/router_app/main.py:545` — non-stream chat returns
-  `JSONResponse(content=resp.json(), headers=headers)`: the pool's status
-  code is discarded, default 200.
-- `services/router/router_app/main.py:~268-282` (proxy_chat_stream) — the
-  stream path never inspects `upstream.status_code`; a pool 429/502/500 at
-  connect is re-emitted as `200 text/event-stream` whose body is a raw,
-  non-SSE-framed JSON error with no `[DONE]`.
-- **Empirically demonstrated on the live stack (2026-07-02):** injected
-  `error_rate=1.0` on BOTH mux replicas via their `/chaos` hooks; the router
-  answered `router_status=200` for streaming AND non-streaming
-  `/v1/chat/completions`, body `{"error":{"type":"chaos_injected_5xx"}}`.
-- Compounding: `main.py:245` and `main.py:329` set
-  `http_ok = status_code < 500`, so a **429 storm — the exact live failure
-  mode this feature's own FRICTION_LOG #10 documents (25/40 requests
-  rate-limited)** — is recorded as SLO-met traffic. No breach, no incident,
-  no escalation, clients get 200s. The pool-level fix in this very diff
-  (`llm_app/main.py` `_upstream_error_response`, "never a 200") is undone
-  one hop later.
-- This contradicts the feature README's claim that "upstream failures
-  surface as classified 5xx on the request path" and is documented nowhere
-  as a limit. It is the 3am pager: goodput collapses, board and clients
-  both read green/200.
-- **Fix is small:** propagate `resp.status_code` on the non-stream return;
-  check `upstream.status_code` before committing the StreamingResponse
-  (fail over or return the real status — the stream is uncommitted at that
-  point, exactly the window the pool-level fix exploited); count 429 as
-  not-ok (or as a distinct `rate_limited` goodput signal that can open an
-  incident of kind the agent escalates rather than quarantine-spills).
+### Objection 2 — event-loop blocking: FIXED (loop safety); ceiling remains
 
-### 2. Blocking calls on the asyncio event loop — the 100x collapse point
+- `services/llm/llm_app/main.py:112` first-line pull and `:128`
+  `backend.generate` now run via `run_in_threadpool`; the chaos gate's
+  latency sleep is `asyncio.sleep`.
+- `services/router/router_app/main.py:545,559` — both chat modes call the
+  blocking proxy (including the stream connect) through
+  `run_in_threadpool`. Sync body generators are iterated by Starlette's
+  own threadpool, so /healthz can no longer be starved by a slow pool.
+- **Follow-up (not blocking, should be a known limit):** each in-flight
+  stream still pins an anyio threadpool worker (default ~40/process) —
+  a hard per-process concurrency ceiling at 100x. The loop-starvation
+  pager is gone; the ceiling is a capacity fact, not a correctness bug.
 
-- `services/llm/llm_app/main.py:107-111`: `next(lines)` inside
-  `async def chat_completions` blocks the pool's event loop for the full
-  TTFT (real upstream network time on live; `sse_stream`'s `time.sleep`
-  pacing on the sim mux path, since `ModelAPIMux` always has `stream_raw`).
-- `services/llm/llm_app/main.py:122`: non-stream `backend.generate(req)`
-  blocks the loop for the entire completion.
-- `services/router/router_app/main.py` proxy_chat_stream: sync
-  `httpx.stream(...).__enter__()` in async context (the non-stream path
-  uses `run_in_threadpool` — the authors knew; the stream path doesn't).
-- The async chaos-gate fix comment in this diff states the rule verbatim
-  ("must never block the event loop and take the whole pool (including
-  /healthz) down with it") and the code below it violates it. At ~3 rps
-  with 2.6s injected latency the drills already show the symptom: failed
-  rows with 162–254 client errors (`chaos_drills.csv` 15:35, 15:41, 16:13).
-  At 50 rps: loop saturation → /healthz starvation → poller flap →
-  failover storm. Additionally each in-flight stream holds an anyio
-  threadpool worker (default ~40/process) — a hard concurrency ceiling.
+### Objection 3 — chat failover transport-only: FIXED
 
-### 3. Chat failover is transport-only; /v1/predict's is status-aware
+Both chat modes now retry on backend 5xx with the `tried` exclusion set,
+matching (and in stream mode exceeding) the `/v1/predict` guarantee. The
+docstring's parity claim is now earned.
 
-`main.py:362-365` (predict) marks unhealthy and retries the next replica on
-`resp.status_code >= 500`; the new chat loops retry only on
-`httpx.HTTPError`. A replica answering 502 goes straight to the client (as
-a 200, per objection 1) even with a healthy replica available. The
-docstring claims parity ("failover, like /v1/predict always had") —
-oversold.
+## Objections still open (follow-ups, none blocking)
 
-### 4. Two-replica spill shares one upstream quota — DOCUMENTED, accepted
+4. Two-replica spill shares one upstream key/quota — DOCUMENTED
+   (FRICTION_LOG #10 + `services/model_apis/README.md` caveats), accepted.
+   The devboard autoscaler card still renders a redundancy story the quota
+   physics don't back.
+5. Mux serves the default alias on unknown `model` with the default's
+   prices (`services/llm/llm_app/mux.py:51-56`); router front door guards
+   it, direct pool access doesn't. Tested-as-intended and README'd, but an
+   OpenAI-compatible surface should 404 `model_not_found`.
+6. `routing-policy.yaml` endpoint blocks are hand-pasted per model
+   (~70 lines for 11 models); registry is generated, this isn't. At 200
+   models the "config, never code" story acquires copy-paste drift.
+7. Minor: default alias picks `min(price, default 0.0)` so a missing price
+   wins (`mux.py:152-154`); `tools/chaos.py` matches incidents by title
+   substring; single `DEVBOARD_MODEL` watch; `healthz` cache refresh race
+   (benign). NEW minor: no committed router test for 429
+   propagation/breach (verified here via one-off harness — add one so a
+   regression can't silently reintroduce it); stream all-replicas-5xx
+   returns 503 `no_healthy_backend` rather than the last backend's real
+   5xx body (non-stream returns the real one) — honest but inconsistent.
 
-model-api-a/b are two local proxies over the same key and per-model
-quota; quarantine-and-spill relocates load onto the same limit, and probes
-compete with spilled traffic. Honestly written up (FRICTION_LOG #10 +
-README caveats, drill guidance ≤0.5 rps live, sim for repeatable MTTR).
-The devboard autoscaler card (`replicas 1/2`) still *renders* a redundancy
-story the physics don't back — worth a caveat in the pool card or README.
+## JD lines actually demonstrated (unchanged + upgraded)
 
-### 5. Mux silently serves the wrong model on unknown `model`
+- *Health-aware recovery from stuck/bad replicas* — now includes
+  status-aware chat failover; detect → quarantine → last-pool guard →
+  probe → reinstate → resolve observed LIVE during this re-review.
+- *"Every request reaches a healthy replica"* — NOW demonstrated: with one
+  sick and one healthy pool, clients got 200 from the healthy replica;
+  with zero healthy pools, clients got honest 5xx.
+- *Self-serve incident management with measured MTTR* — provenance chain
+  (hero → /v1/incidents → chaos_drills.csv) holds; still no manual
+  baseline, so `mttr_delta_pct` 0.0 ("measurable decline" remains
+  unproven — follow-up, not a fabrication).
+- *Cost/perf frontier instrumentation* and *workload onboarding as
+  config* — as before (catalog → generated registry, measured economics,
+  no vendor SDK imports).
 
-`mux.py:51-56`: unknown → default alias, HTTP 200, default's prices. Tested
-as intended (`test_unknown_model_falls_back_to_default`) and README'd, but
-an OpenAI-compatible surface should return `model_not_found`. The router's
-`UnknownModel` guard covers the front door; alias drift between the two
-separately-refreshed generated artifacts (registry via `./dev sync`,
-catalog via `manage.py catalog`) or direct pool access silently swaps
-models and mis-attributes cost.
+## Allowlist check — PASS (unchanged)
 
-### 6. routing-policy.yaml endpoints are hand-pasted, O(models)
+Incident-agent executor ops: open/act, quarantine, probe, reinstate,
+resolve, escalate (event-only, fires once, slow-poll after). Tight.
 
-11 identical two-replica blocks (~70 lines). The registry is generated;
-the policy endpoints are not. At 200 models that's ~1,200 hand-maintained
-lines and the "new model = config, never code" story quietly acquires a
-copy-paste drift risk. Generate this block from the catalog too.
+## Devboard contract check — PASS (unchanged)
 
-### 7. Minor
+Six endpoints live; SLO thresholds from `/v1/metrics/slo` trace to
+`routing-policy.yaml`, not hard-code; hero `mttr_s` traces to
+`benchmarks/raw/chaos_drills.csv`; `cost_per_mtok` computed from measured
+samples. No fabricated values. Caveat: `mttr_delta_pct` renders 0.0 (no
+manual baseline).
 
-- `mux.py:152-154`: default alias = `min(usd_per_1m_completion, default
-  0.0)` — a catalog entry with a missing price becomes the default.
-- `tools/chaos.py` drill matches incidents by `pool in i["title"]`
-  substring — brittle against pool-id prefixes.
-- Incident agent + devboard watch a single `DEVBOARD_MODEL`; fine at 2
-  pools, structurally single-model at 200.
-- `OpenAICompatAdapter.healthz` cache mutates `refreshing` without a lock
-  (benign double-refresh race).
+## 100x analysis (revised)
 
-## Allowlist check — PASS
+- **Throughput axis, revised:** loop starvation → healthz flap → failover
+  storm is fixed (threadpool offload both hops). The new ceiling is the
+  ~40-worker anyio pool per process pinned by long streams — degradation
+  is now queuing (slow, visible in TTFT/breach metrics) instead of
+  control-plane collapse (healthz lying). Strictly better failure mode;
+  size the pool or go native-async before 50 rps of multi-second streams.
+- **Models axis:** catalog → generated registry scales; hand-pasted
+  routing-policy endpoints (obj. 6) and single-model devboard watch
+  (obj. 7) don't.
+- **Quota axis:** honest and now VISIBLE — 429s reach clients as 429 and
+  feed breach accounting, so a quota brownout opens an incident instead
+  of rendering green. Spill still can't manufacture upstream quota
+  (documented).
 
-Executor ops verified in `incident_agent.py`: open/act (bookkeeping),
-quarantine, probe, reinstate, resolve, and `escalate` which **only emits an
-`agent_escalation` event** (no paging side effect, no scale/deploy/config
-mutation). Escalation fires exactly once, probes slow-poll 5x afterward,
-quarantine held. Tight.
+## Resolution of the prior top objection
 
-## Devboard contract check — PASS
-
-- Six endpoints unchanged and live on :8096 (`/v1/metrics/hero`,
-  `/v1/metrics/slo`, `/v1/pools`, `/v1/placement/feed`, `/v1/releases/
-  active`, `/v1/incidents`).
-- SLO thresholds from API, not hard-code: standard tier ttft 2000 / tpot 80
-  rendered in `/v1/metrics/slo` traces to `routing-policy.yaml:8`.
-- Traced number: hero `mttr_s: 8.1` → `/v1/incidents` INC-0001..3 →
-  `benchmarks/raw/chaos_drills.csv` rows 20260702-1631/1632/1633.
-- `cost_per_mtok` is computed from measured samples
-  (`metrics.py:98-101`), not the cost_table ranking value. No fabricated
-  values found. Caveat: hero `mttr_delta_pct` renders 0.0 because no manual
-  baseline exists — a gap in the "decline vs manual" story, not a
-  fabrication.
-
-## 100x analysis (11 models × 2 replicas → 200 models, 50 rps)
-
-- **Models axis mostly scales:** catalog → generated registry is O(1) human
-  effort; but routing-policy endpoints (objection 6) and the
-  single-DEVBOARD_MODEL watch (objection 7) do not.
-- **Throughput axis does not:** blocking event loops (objection 2) +
-  ~40-worker threadpool ceiling per proxy process cap each pool far below
-  50 rps of multi-second streams; the failure mode is healthz starvation →
-  poller flap → failover storm, already visible in the failed drill rows.
-- **Quota axis is honest but coupled:** replicas multiply proxy capacity,
-  not upstream quota; incident-agent spill can worsen a 429 brownout it
-  cannot even see (objection 1).
-
-## Resolution required for PASS
-
-Fix objection 1 (propagate real status on both chat paths + make 429 a
-non-ok/goodput-loss signal), or at minimum add it to the
-services/model_apis/README.md caveats as a known limit with the client
-impact stated plainly. Re-run one `drill --scenario errors` to show a 5xx
-storm reaching clients as 5xx.
+Fix verified (code + 5 passing tests + live chaos re-demonstration + 429
+harness). Prior FAIL is lifted. Remaining follow-ups (threadpool ceiling,
+429 router test, mux unknown-model default, policy-endpoint generation,
+MTTR baseline) do not block.
