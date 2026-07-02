@@ -24,6 +24,28 @@
         "docs/design"
       ],
       "port": 8401
+    },
+    {
+      "name": "router",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "ROUTING_POLICY_PATH=/private/tmp/claude-501/-Users-vikramsiwach-Downloads-ai-native-pipeline/eb2edd82-249e-421a-9f85-40e106c83f79/scratchpad/smoke/routing-policy.yaml",
+        "GOODPUT_CURVES_PATH=/Users/vikramsiwach/Downloads/ai-native-pipeline/benchmarks/goodput.json",
+        "HEALTH_POLL_INTERVAL_S=2",
+        "ROUTER_QUEUE_DIR=/private/tmp/claude-501/-Users-vikramsiwach-Downloads-ai-native-pipeline/eb2edd82-249e-421a-9f85-40e106c83f79/scratchpad/smoke/queue",
+        "python3",
+        "-m",
+        "uvicorn",
+        "router_app.main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8096",
+        "--log-level",
+        "error"
+      ],
+      "cwd": "services/router",
+      "port": 8096
     }
   ]
 }

@@ -571,6 +571,14 @@ def get_app(registry_path: Path | None = None,
                          "hit_rate": round(state.cache.hit_rate, 4)}
         return snap
 
+    @app.get("/devboard")
+    def devboard_page():
+        """The operator surface (docs/design contract) — single file, served
+        by the router per the repo's zero-install philosophy."""
+        from fastapi.responses import HTMLResponse
+        page = Path(__file__).parent / "static" / "devboard.html"
+        return HTMLResponse(page.read_text())
+
     # ---- devboard data surface (contracts/devboard.openapi.yaml) ----------
     # Shapes come from router_app/devboard.py builders over live state; the
     # board renders ONLY what the router measured (SLO-AUDITOR provenance).

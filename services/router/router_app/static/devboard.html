@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devboard — ai-native-pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  PRODUCTION devboard. Design contract: docs/design/refined/ (visual truth)
+  + docs/design/devboard-mockup.html (data truth) + contracts/devboard.
+  openapi.yaml. Served by the router at /devboard. Every number rendered
+  here comes from a live endpoint; nothing is generated client-side.
+  Feeds: /v1/metrics/hero 2.5s · /v1/metrics/slo, /v1/pools,
+  /v1/releases/active, /v1/incidents 5s · /v1/placement/feed SSE.
+  DEV switcher: HEALTHY reflects live telemetry; DEGRADING/INCIDENT arm
+  when tools/chaos.py wires them (F4/F6); REPLAY arms when a recorded
+  chaos-drill trace exists (never simulated) — see DESIGN.md deviations.
+-->
+<style>
+:root{
+  --bg:#0A0E12; --panel:#0E141B; --deep:#0B1016; --track:#161E27;
+  --line:#1C2530; --ctl:#243040; --red-tint:#3A1A1D; --amber-tint:#3A2E12;
+  --txt:#E6EDF3; --txt2:#93A1B0; --body:#8B98A5; --dim:#6B7A89;
+  --faint:#5C6A78; --ghost:#3E4A57;
+  --teal:#2FE0C6; --amber:#FFB020; --red:#FF5257; --blue:#5AB0FF;
+  --violet:#B08CFF;
+  --sans:Inter,-apple-system,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font:13px/1.5 var(--sans);
+  font-variant-numeric:tabular-nums;padding:14px 18px 40px}
+.mono{font-family:var(--mono)}
+.micro{font:600 10.5px/1 var(--sans);letter-spacing:.15em;
+  text-transform:uppercase;color:var(--faint)}
+#fold{display:flex;flex-direction:column;min-height:calc(100vh - 54px);gap:12px}
+/* topbar */
+#topbar{display:flex;align-items:center;gap:16px;height:44px}
+#topbar .wordmark{font:700 17px/1 var(--sans);letter-spacing:.18em}
+#topbar .sub{font:500 11px/1 var(--mono);color:var(--faint)}
+#topbar .vdiv{width:1px;height:20px;background:var(--line)}
+#pill{display:flex;align-items:center;gap:8px;font:600 11px/1 var(--sans);
+  letter-spacing:.08em}
+#pill .dot{width:7px;height:7px;border-radius:50%;
+  animation:dvBlink 2.4s infinite;box-shadow:0 0 8px currentColor}
+@keyframes dvBlink{0%,100%{opacity:1}50%{opacity:.45}}
+#clock{margin-left:auto;font:500 12px/1 var(--mono);color:var(--txt2)}
+#dev{display:flex;align-items:center;gap:6px}
+#dev .lbl{font:600 10px/1 var(--sans);letter-spacing:.15em;color:var(--ghost)}
+#dev button{font:600 10.5px/1 var(--mono);letter-spacing:.06em;padding:6px 10px;
+  border-radius:5px;border:1px solid var(--ctl);background:transparent;
+  color:var(--dim);cursor:pointer}
+#dev button.on{border-color:var(--teal);color:var(--teal);
+  background:rgba(47,224,198,.12)}
+#dev button:disabled{opacity:.45;cursor:not-allowed}
+/* hero */
+#hero{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px 12px;display:flex;flex-direction:column}
+.tile .row1{display:flex;justify-content:space-between;align-items:center}
+.tile .delta{font:600 10.5px/1 var(--mono)}
+.tile .big{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.tile .num{font:650 44px/1 var(--sans);letter-spacing:-.025em}
+.tile .unit{font:500 15px/1 var(--sans);color:var(--txt2)}
+.tile .subline{font:500 11.5px/1.4 var(--sans);color:var(--dim);margin-top:4px}
+.tile svg{margin-top:10px;width:100%;height:28px}
+/* slo panel */
+#slo{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;flex:1;display:grid;grid-template-columns:1fr 340px;gap:22px}
+.phead{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:12px}
+.phead .note{font:500 10px/1 var(--mono);color:var(--ghost)}
+#pools2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.pcol .phdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pcol .chip{width:8px;height:8px;border-radius:2px}
+.pcol .pname{font:600 12.5px/1 var(--sans)}
+.pcol .pmodel{font:500 10.5px/1 var(--mono);color:var(--faint)}
+.pcol .pstat{margin-left:auto;font:600 9.5px/1 var(--sans);
+  letter-spacing:.1em;text-transform:uppercase}
+.metric{margin-bottom:10px}
+.metric .mrow{display:flex;justify-content:space-between;
+  font:600 10px/1 var(--sans);letter-spacing:.12em;color:var(--faint);
+  margin-bottom:4px}
+.metric .readout{font:500 10px/1 var(--mono);text-transform:none;
+  letter-spacing:0}
+.metric .pvals{font:500 10px/1.6 var(--mono);color:var(--dim)}
+/* placement */
+#placement{margin-top:14px}
+#placement .grid{display:grid;grid-template-columns:1fr 360px 1fr;gap:14px;
+  margin-top:10px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px}
+.pcard.warn{border-color:var(--amber-tint)} .pcard.bad{border-color:var(--red-tint)}
+.pcard .hd{display:flex;justify-content:space-between;align-items:start}
+.pcard .nm{font:600 14px/1.2 var(--sans)}
+.pcard .meta{font:500 10.5px/1.6 var(--mono);color:var(--faint)}
+.badge{font:600 9.5px/1 var(--sans);letter-spacing:.08em;padding:4px 8px;
+  border-radius:99px;text-transform:uppercase}
+.badge.ok{color:var(--teal);background:rgba(47,224,198,.10)}
+.badge.warn{color:var(--amber);background:rgba(255,176,32,.12)}
+.badge.bad{color:var(--red);background:rgba(255,82,87,.12)}
+.pcard .nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+  margin:14px 0 10px}
+.pcard .nums .v{font:650 24px/1 var(--sans)}
+.pcard .nums .k{font:600 9.5px/1 var(--sans);letter-spacing:.1em;
+  color:var(--faint);text-transform:uppercase;margin-top:4px}
+.rbar{margin-top:6px}
+.rbar .rl{display:flex;justify-content:space-between;
+  font:500 10px/1 var(--mono);color:var(--dim);margin-bottom:5px}
+.rbar .track{height:6px;background:var(--track);border-radius:3px;overflow:hidden}
+.rbar .track i{display:block;height:100%;border-radius:3px;
+  transition:width .4s}
+#center{background:var(--deep);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;display:flex;flex-direction:column}
+#wire{position:relative;height:22px;margin-bottom:10px}
+#wire .ln{position:absolute;top:50%;left:0;right:0;height:1px;
+  background:var(--line)}
+#wire .fdot{position:absolute;top:7px;width:8px;height:8px;border-radius:50%;
+  transition:left .3s linear;box-shadow:0 0 8px currentColor}
+#feed{overflow-y:auto;max-height:320px;flex:1;scrollbar-width:thin}
+#feed::-webkit-scrollbar{width:6px}
+#feed::-webkit-scrollbar-thumb{background:var(--ctl);border-radius:3px}
+.frow{padding:7px 9px;border:1px solid transparent;border-radius:6px;
+  font:500 10.5px/1.6 var(--mono);color:var(--dim)}
+.frow.new{background:#141C25;border-color:var(--ctl);color:var(--txt2);
+  animation:dvFeedIn .35s ease}
+@keyframes dvFeedIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1}}
+.frow .rid{color:var(--txt)} .frow .pl{font-weight:600}
+.frow .l2{color:var(--ghost);font-size:10px}
+/* bottom lane */
+#bottom{display:grid;grid-template-columns:340px 1fr;gap:14px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px}
+#steps{margin:14px 0 12px}
+.step{display:flex;align-items:center;gap:12px;padding:7px 0}
+.step .node{width:11px;height:11px;border-radius:50%;border:2px solid var(--ctl);
+  flex:none}
+.step.pass .node{background:var(--teal);border-color:var(--teal)}
+.step.live .node{border-color:var(--teal);animation:dvBlink 1.6s infinite}
+.step.fail .node{background:var(--red);border-color:var(--red)}
+.step .pc{font:600 12px/1 var(--mono);width:44px}
+.step .verdict{font:600 10px/1 var(--sans);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ghost)}
+.step.pass .verdict{color:var(--teal)} .step.live .verdict{color:var(--teal)}
+.step.fail .verdict{color:var(--red)} .step.held .verdict{color:var(--amber)}
+#gatebox{border:1px solid var(--teal);background:rgba(47,224,198,.06);
+  border-radius:6px;padding:10px 12px;font:500 10.5px/1.6 var(--mono);
+  color:var(--txt2)}
+#gatebox.held{border-color:var(--amber);background:rgba(255,176,32,.06)}
+#lastrb{font:500 10px/1.6 var(--mono);color:var(--faint);margin-top:10px}
+#inclane{display:grid;grid-template-columns:1fr 300px;gap:22px}
+.inc{background:var(--deep);border:1px solid var(--line);border-radius:8px;
+  padding:12px 14px;margin-bottom:10px}
+.inc .ihd{display:flex;align-items:center;gap:8px}
+.inc .idot{width:8px;height:8px;border-radius:50%;background:var(--teal)}
+.inc.live .idot{background:var(--red);animation:dvPulse 1.4s infinite;
+  box-shadow:0 0 8px var(--red)}
+@keyframes dvPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.inc .ttl{font:600 12px/1.3 var(--sans)}
+.inc .mttr{margin-left:auto}
+.inc .narrative{font:500 10.5px/1.6 var(--mono);color:var(--dim);margin:8px 0}
+.durbar{display:flex;height:8px;border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.durbar i{height:100%}
+.durlbl{display:flex;font:500 9px/1 var(--mono);color:var(--ghost);gap:2px}
+.alog{margin-top:8px}
+.alog .arow{display:flex;gap:10px;font:500 10px/1.9 var(--mono);color:var(--dim)}
+.alog .at{color:var(--ghost);width:34px;flex:none}
+.alog .adot{width:5px;height:5px;border-radius:50%;background:var(--teal);
+  margin-top:7px;flex:none}
+.ifoot{font:500 10px/1.6 var(--mono);color:var(--faint);margin-top:8px}
+.ifoot a{color:var(--blue);text-decoration:none}
+.legend{display:flex;gap:12px;font:500 9.5px/1 var(--mono);color:var(--faint);
+  margin:8px 0 12px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;
+  margin-right:5px;vertical-align:-1px}
+.empty{color:var(--ghost);font:500 11px/1.6 var(--mono);padding:12px 0}
+</style>
+</head>
+<body>
+
+<div id="fold">
+  <div id="topbar">
+    <span class="wordmark">DEVBOARD</span>
+    <span class="sub">ai-native-pipeline · inference control plane</span>
+    <span class="vdiv"></span>
+    <span id="pill"><span class="dot"></span><span id="pill-t">CONNECTING…</span></span>
+    <span id="clock" class="mono">--:--:-- UTC</span>
+    <span id="dev">
+      <span class="lbl">DEV</span>
+      <button class="on" id="b-healthy" title="live telemetry">HEALTHY</button>
+      <button disabled title="arms when tools/chaos.py latency injection is wired (F4)">DEGRADING</button>
+      <button disabled title="arms when chaos kill + incident agent are wired (F6)">INCIDENT</button>
+      <button disabled title="arms when a recorded chaos-drill trace exists — replay is never simulated">REPLAY 90s</button>
+    </span>
+  </div>
+
+  <div id="hero">
+    <div class="tile"><div class="row1"><span class="micro" id="h1-l">TPOT P99 · BLENDED</span>
+      <span class="delta" id="h1-d"></span></div>
+      <div class="big"><span class="num" id="h1-v">—</span><span class="unit" id="h1-u">ms / SLO —</span></div>
+      <div class="subline" id="h1-s">awaiting samples</div>
+      <svg id="h1-spark" preserveAspectRatio="none" viewBox="0 0 200 28"></svg></div>
+    <div class="tile"><div class="row1"><span class="micro">COST AT SLO</span>
+      <span class="delta" id="h2-d"></span></div>
+      <div class="big"><span class="num" id="h2-v">—</span><span class="unit">/ 1M tok</span></div>
+      <div class="subline">blended across both pools at current mix</div>
+      <svg id="h2-spark" preserveAspectRatio="none" viewBox="0 0 200 28"></svg></div>
+    <div class="tile"><div class="row1"><span class="micro">MTTR · ROLLING</span>
+      <span class="delta" id="h3-d"></span></div>
+      <div class="big"><span class="num" id="h3-v">—</span><span class="unit">s</span></div>
+      <div class="subline" id="h3-s">agent detect→resolve · no drills yet</div>
+      <svg id="h3-spark" preserveAspectRatio="none" viewBox="0 0 200 28"></svg></div>
+  </div>
+
+  <div id="slo">
+    <div>
+      <div class="phead"><span class="micro">LATENCY SLO · LIVE DISTRIBUTION</span>
+        <span class="note mono" id="slo-note">TTFT ≤ —ms · TPOT ≤ —ms</span></div>
+      <div id="pools2"><div class="empty">no traffic yet — run the bench harness or send chat completions through the router</div></div>
+    </div>
+    <div>
+      <div class="phead"><span class="micro">GOODPUT × CONCURRENCY</span>
+        <span class="note mono">req/s meeting SLO · op live</span></div>
+      <svg id="goodput" width="100%" height="190" viewBox="0 0 320 190" preserveAspectRatio="none"></svg>
+      <div class="mono" id="gp-cap" style="font:500 10px/1.6 var(--mono);color:var(--dim);margin-top:6px">
+        curve appears after a bench sweep writes benchmarks/goodput.json</div>
+    </div>
+  </div>
+</div>
+
+<div id="placement">
+  <div class="phead"><span class="micro">PLACEMENT MAP · ROUTER DECISIONS · REASON-ANNOTATED</span></div>
+  <div class="grid">
+    <div class="pcard" id="pc-0"><div class="empty">no pool data</div></div>
+    <div id="center">
+      <div id="wire"><div class="ln"></div></div>
+      <div class="micro" style="margin-bottom:8px">PLACEMENT DECISIONS</div>
+      <div id="feed"><div class="empty">waiting for decisions…</div></div>
+    </div>
+    <div class="pcard" id="pc-1"><div class="empty">no pool data</div></div>
+  </div>
+</div>
+
+<div id="bottom">
+  <div class="card">
+    <div class="phead"><span class="micro">CANARY RELEASE</span></div>
+    <div class="mono" id="rel-sub" style="font:500 11px/1.4 var(--mono);color:var(--dim)">—</div>
+    <div id="steps"></div>
+    <div id="gatebox">no active rollout — release engine steady; gate verdicts land with F5 probes</div>
+    <div id="lastrb"></div>
+  </div>
+  <div class="card">
+    <div class="phead"><span class="micro">INCIDENTS · AGENT-DRIVEN · DETECT → DIAGNOSE → RESOLVE</span>
+      <span class="note mono" id="mttr-note"></span></div>
+    <div class="legend"><span><i style="background:var(--amber)"></i>detect</span>
+      <span><i style="background:#F5A623"></i>diagnose</span>
+      <span><i style="background:var(--teal)"></i>resolve</span></div>
+    <div id="inclane">
+      <div id="incs"><div class="empty">no incidents — chaos drills (F4/F6) populate this timeline</div></div>
+      <div><svg id="mttrchart" width="100%" height="170" viewBox="0 0 300 170" preserveAspectRatio="none"></svg>
+        <div class="mono" id="mttr-cap" style="font:500 10px/1.6 var(--mono);color:var(--dim);margin-top:6px"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $=q=>document.querySelector(q);
+const C={teal:"#2FE0C6",amber:"#FFB020",red:"#FF5257",blue:"#5AB0FF",
+  dim:"#6B7A89",ghost:"#3E4A57",faint:"#5C6A78"};
+const statusColor=s=>s==="ok"?C.teal:s==="warn"?C.amber:C.red;
+const statusWord=s=>s==="ok"?"HEALTHY":s==="warn"?"DEGRADED":"EJECTED";
+async function j(url){const r=await fetch(url);if(!r.ok)throw new Error(url);return r.json()}
+
+/* ---- clock + status pill ---- */
+setInterval(()=>{$("#clock").textContent=
+  new Date().toISOString().slice(11,19)+" UTC"},1000);
+function setPill(worst){
+  const t=$("#pill-t"),d=document.querySelector("#pill .dot");
+  const m={ok:["ALL SYSTEMS NOMINAL",C.teal],
+           warn:["DEGRADING · REBALANCING",C.amber],
+           bad:["SLO BREACH · INCIDENT ACTIVE",C.red]}[worst]||["CONNECTING…",C.ghost];
+  t.textContent=m[0];t.style.color=m[1];d.style.color=m[1];d.style.background=m[1];
+}
+
+/* ---- svg helpers ---- */
+function sparkline(el,vals,color){
+  const w=200,h=28,live=vals.filter(v=>v>0);
+  if(!live.length){el.innerHTML="";return}
+  const mx=Math.max(...live),mn=Math.min(...live),span=(mx-mn)||1;
+  const pts=vals.map((v,i)=>{
+    const y=v>0?(h-3-((v-mn)/span)*(h-8)):h-3;
+    return `${(i/(vals.length-1))*w},${y.toFixed(1)}`}).join(" ");
+  el.innerHTML=`<polygon points="0,${h} ${pts} ${w},${h}" fill="${color}" opacity="0.08"/>
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.6"/>`;
+}
+function densityStrip(m){ // {p50,p95,p99,slo,hist:{edges,counts}}
+  const w=272,h=44,slo=m.slo||1;
+  const maxX=Math.max(slo*1.35,(m.hist&&m.hist.edges.length)?m.hist.edges[m.hist.edges.length-1]:0)||1;
+  const x=v=>Math.min(w-2,(v/maxX)*w);
+  let area="";
+  if(m.hist&&m.hist.counts.length){
+    const mx=Math.max(...m.hist.counts)||1;
+    const pts=m.hist.counts.map((c,i)=>{
+      const cx=x((m.hist.edges[i]+m.hist.edges[i+1])/2);
+      return `${cx.toFixed(1)},${(h-4-(c/mx)*(h-12)).toFixed(1)}`}).join(" ");
+    area=`<polygon points="${x(m.hist.edges[0])},${h-4} ${pts} ${x(m.hist.edges[m.hist.edges.length-1])},${h-4}"
+      fill="${C.blue}" opacity="0.10"/>
+      <polyline points="${pts}" fill="none" stroke="${C.blue}" stroke-width="1.2"/>`;
+  }
+  const breach=m.p99>slo, pcol=breach?C.red:C.teal;
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">
+    ${area}
+    <line x1="${x(m.p50)}" y1="6" x2="${x(m.p50)}" y2="${h-4}" stroke="${C.dim}"
+      stroke-width="1" stroke-dasharray="2 3"/>
+    <line x1="${x(m.p99)}" y1="4" x2="${x(m.p99)}" y2="${h-4}" stroke="${pcol}" stroke-width="1.6"/>
+    <line x1="${x(slo)}" y1="2" x2="${x(slo)}" y2="${h-2}" stroke="${C.red}"
+      stroke-width="1.2" stroke-dasharray="4 3"/>
+  </svg>`;
+}
+
+/* ---- hero (2.5s) ---- */
+const fmtDelta=(v,goodDown=true)=>{
+  if(!v)return["·",C.ghost];
+  const down=v<0, good=goodDown?down:!down;
+  return[`${down?"▼":"▲"} ${Math.abs(v).toFixed(0)}%`,good?C.teal:C.red];};
+async function hero(){
+  const d=await j("/v1/metrics/hero");
+  const breach=d.tpot_p99_ms>d.tpot_slo_ms, warn=d.tpot_p99_ms>d.tpot_slo_ms*0.9;
+  const col=d.tpot_p99_ms?(breach?C.red:warn?C.amber:C.teal):C.ghost;
+  $("#h1-v").textContent=d.tpot_p99_ms?d.tpot_p99_ms.toFixed(0):"—";
+  $("#h1-v").style.color=col;
+  $("#h1-u").textContent=`ms / SLO ${d.tpot_slo_ms}ms`;
+  $("#h1-s").textContent=d.tpot_p99_ms?
+    `${Math.max(0,d.tpot_slo_ms-d.tpot_p99_ms).toFixed(0)}ms headroom to SLO`:"awaiting samples";
+  const[t1,c1]=fmtDelta(d.tpot_delta_pct);$("#h1-d").textContent=t1;$("#h1-d").style.color=c1;
+  $("#h2-v").textContent=d.cost_per_mtok_usd?`$${d.cost_per_mtok_usd.toFixed(2)}`:"—";
+  const[t2,c2]=fmtDelta(d.cost_delta_pct);
+  $("#h2-d").textContent=d.cost_delta_pct?`${t2} vs single-pool`:t2;$("#h2-d").style.color=c2;
+  $("#h3-v").textContent=d.mttr_s?d.mttr_s.toFixed(0):"—";
+  $("#h3-v").style.color=d.mttr_s?C.teal:"var(--txt)";
+  $("#h3-s").textContent=d.mttr_s?"agent detect→resolve · vs manual baseline"
+    :"agent detect→resolve · no drills yet";
+  const[t3,c3]=fmtDelta(d.mttr_delta_pct);
+  $("#h3-d").textContent=d.mttr_delta_pct?`${t3} vs manual`:t3;$("#h3-d").style.color=c3;
+  sparkline($("#h1-spark"),d.spark.tpot,col);
+  sparkline($("#h2-spark"),d.spark.cost,C.blue);
+  sparkline($("#h3-spark"),d.spark.mttr,C.teal);
+}
+
+/* ---- slo panel + goodput (5s) ---- */
+async function slo(){
+  const d=await j("/v1/metrics/slo");
+  if(!d.pools.length)return;
+  const withData=d.pools.some(p=>p.ttft.p99>0||p.tpot.p99>0);
+  if(withData){
+    const t=d.pools[0];
+    $("#slo-note").textContent=`TTFT ≤ ${t.ttft.slo}ms · TPOT ≤ ${t.tpot.slo}ms`;
+    $("#pools2").innerHTML=d.pools.map((p,i)=>{
+      const col=i===0?C.teal:C.blue;
+      const strip=(name,m)=>{
+        const read=m.p99===0?"no traffic":m.p99>m.slo?"p99 over SLO"
+          :m.p99>m.slo*0.9?"near SLO":"within SLO";
+        const rcol=m.p99===0?C.ghost:m.p99>m.slo?C.red:m.p99>m.slo*0.9?C.amber:C.teal;
+        return `<div class="metric"><div class="mrow"><span>${name}</span>
+          <span class="readout" style="color:${rcol}">${read}</span></div>
+          ${densityStrip(m)}
+          <div class="pvals">p50 ${m.p50}ms · p95 ${m.p95}ms ·
+          <b style="color:${m.p99>m.slo?C.red:"inherit"}">p99 ${m.p99}ms</b> / SLO ${m.slo}ms</div></div>`};
+      return `<div class="pcol"><div class="phdr">
+        <span class="chip" style="background:${col}"></span>
+        <span class="pname">${p.id}</span>
+        <span class="pstat" style="color:${statusColor(p.status||"ok")}">${statusWord(p.status||"ok")}</span></div>
+        ${strip("TTFT",p.ttft)}${strip("TPOT",p.tpot)}</div>`;}).join("");
+  }
+  // goodput: measured curve (bench artifact) + live operating point
+  const curve=(d.pools.find(p=>p.goodput&&p.goodput.points.length)||{}).goodput;
+  const op=d.pools.reduce((a,p)=>({conc:a.conc+((p.goodput||{}).operating||{}).conc||0,
+    tps:a.tps+(((p.goodput||{}).operating||{}).tps||0)}),{conc:0,tps:0});
+  const svg=$("#goodput");
+  const W=320,H=190,ax="#1C2530";
+  let inner=`<line x1="30" y1="8" x2="30" y2="166" stroke="${ax}"/>
+    <line x1="30" y1="166" x2="312" y2="166" stroke="${ax}"/>
+    <text x="4" y="16" fill="${C.ghost}" font-size="8.5" font-family="monospace">req/s</text>`;
+  if(curve){
+    const mxC=Math.max(...curve.points.map(p=>p.conc))||1;
+    const mxT=Math.max(...curve.points.map(p=>p.tps))||1;
+    const X=c=>30+(c/mxC)*278, Y=t=>166-(t/mxT)*150;
+    inner+=`<polyline points="${curve.points.map(p=>`${X(p.conc)},${Y(p.tps)}`).join(" ")}"
+      fill="none" stroke="${C.teal}" stroke-width="2"/>`;
+    if(curve.slo_max_conc)inner+=`<line x1="${X(curve.slo_max_conc)}" y1="8"
+      x2="${X(curve.slo_max_conc)}" y2="166" stroke="${C.faint}" stroke-dasharray="3 4" opacity=".5"/>`;
+    if(op.conc||op.tps){
+      const past=curve.slo_max_conc&&op.conc>curve.slo_max_conc;
+      inner+=`<circle cx="${X(Math.min(op.conc,mxC))}" cy="${Y(Math.min(op.tps,mxT))}"
+        r="4.5" fill="${past?C.amber:C.teal}"/>`;
+      $("#gp-cap").textContent=`op · ${op.conc} concurrent · ${op.tps.toFixed(1)} req/s — `+
+        (past?"past the knee — goodput rolling off":"left of knee — headroom available");}
+    else $("#gp-cap").textContent=`measured curve · SLO-max ${curve.slo_max_conc} concurrent (bench sweep)`;
+  }
+  svg.innerHTML=inner;
+}
+
+/* ---- pool cards (5s) ---- */
+async function pools(){
+  const d=await j("/v1/pools");
+  if(!d.pools.length)return;
+  const worst=d.pools.reduce((w,p)=>p.status==="bad"?"bad":
+    (p.status==="warn"&&w!=="bad")?"warn":w,"ok");
+  setPill(worst);
+  d.pools.slice(0,2).forEach((p,i)=>{
+    const col=p.status==="ok"?C.teal:p.status==="warn"?C.amber:C.red;
+    $(`#pc-${i}`).className=`pcard ${p.status==="ok"?"":p.status}`;
+    $(`#pc-${i}`).innerHTML=`<div class="hd"><div>
+      <div class="nm">${p.id}</div><div class="meta">${p.hw}</div></div>
+      <span class="badge ${p.status}">${statusWord(p.status)}</span></div>
+      <div class="nums">
+      <div><div class="v" style="color:${col}">${p.util_pct.toFixed(0)}<span style="font-size:14px">%</span></div><div class="k">util</div></div>
+      <div><div class="v">${p.health.toFixed(0)}</div><div class="k">health</div></div>
+      <div><div class="v">${p.cost_per_mtok?"$"+p.cost_per_mtok.toFixed(2):"—"}</div><div class="k">$/1M tok</div></div></div>
+      <div class="rbar"><div class="rl"><span>Replicas ${p.autoscaler.replicas}/${p.autoscaler.max}
+      · ${p.autoscaler.state}</span><span>${p.util_pct.toFixed(0)}% load</span></div>
+      <div class="track"><i style="width:${p.util_pct}%;background:${col}"></i></div></div>`;
+  });
+}
+
+/* ---- placement feed (SSE) + request dots ---- */
+const poolColors={};
+let dotN=0;
+function spawnDot(color,dir){
+  if(document.querySelectorAll(".fdot").length>=8)return;
+  const d=document.createElement("div");
+  d.className="fdot";d.style.color=color;d.style.background=color;
+  d.style.left=dir?"0%":"96%";
+  $("#wire").appendChild(d);
+  requestAnimationFrame(()=>{d.style.left=dir?"96%":"0%"});
+  setTimeout(()=>d.remove(),1200);
+}
+function startFeed(){
+  const es=new EventSource("/v1/placement/feed");
+  es.onmessage=e=>{
+    const f=JSON.parse(e.data);
+    const feed=$("#feed");
+    if(feed.querySelector(".empty"))feed.innerHTML="";
+    document.querySelectorAll(".frow.new").forEach(r=>r.classList.remove("new"));
+    const col=poolColors[f.pool]||(f.pool.includes("vllm")?C.blue:C.teal);
+    const row=document.createElement("div");
+    row.className="frow new";
+    row.innerHTML=`<div><span class="rid">${f.req}</span>
+      ${f.tier}${f.tag?"/"+f.tag:""} → <span class="pl" style="color:${col}">${f.pool}</span>
+      <span style="float:right;color:var(--ghost)">${f.decide_ms}ms</span></div>
+      <div class="l2">reason · ${f.reason}</div>`;
+    feed.prepend(row);
+    while(feed.children.length>9)feed.lastChild.remove();
+    spawnDot(col,(dotN++)%2===0);
+  };
+  es.onerror=()=>{es.close();setTimeout(startFeed,3000)};
+}
+
+/* ---- release (5s) ---- */
+async function release(){
+  const d=await j("/v1/releases/active");
+  $("#rel-sub").textContent=d.strategy==="steady"?
+    `${d.model} · ${d.version} steady · 100% stable`:
+    `${d.model} · ${d.from} → ${d.to} · ${d.strategy}`;
+  const words={pass:"PASS",live:"RUNNING",wait:"QUEUED",fail:"ROLLED BACK"};
+  $("#steps").innerHTML=d.steps.map(s=>
+    `<div class="step ${s.status}"><span class="node"></span>
+     <span class="pc">${s.pct}</span>
+     <span class="verdict">${(s.gate&&s.gate.verdict)||words[s.status]||""}</span>
+     ${s.gate&&s.gate.tpot_p99?`<span class="mono" style="font:500 10px/1 var(--mono);color:var(--dim)">TPOT p99 ${s.gate.tpot_p99}ms</span>`:""}
+     </div>`).join("");
+  if(d.strategy!=="steady"){
+    const g=d.steps.find(s=>s.status==="live");
+    $("#gatebox").textContent=g&&g.gate?
+      `gate: TPOT p99 ${g.gate.tpot_p99}ms · ${g.gate.verdict} · auto-rollback armed`:
+      `rollout in progress · auto-rollback armed`;}
+  $("#lastrb").textContent=d.last_rollback?
+    `last rollback: ${d.last_rollback.from} → ${d.last_rollback.to} · ${d.last_rollback.reason} · ${d.last_rollback.duration_s}s, ${d.last_rollback.user_errors} user errors`:
+    "last rollback: none recorded";
+}
+
+/* ---- incidents + mttr history (5s) ---- */
+function mttrChart(incs){
+  const done=incs.filter(i=>!i.live).reverse(); // oldest first
+  const manual=done.filter(i=>!i.agent).map(i=>i.mttr_s);
+  const agent=done.filter(i=>i.agent).map(i=>i.mttr_s);
+  const svg=$("#mttrchart"),W=300,H=170,ax="#1C2530";
+  let inner=`<line x1="30" y1="6" x2="30" y2="146" stroke="${ax}"/>
+    <line x1="30" y1="146" x2="296" y2="146" stroke="${ax}"/>`;
+  const all=manual.concat(agent);
+  if(all.length){
+    const mx=Math.max(...all,1);
+    const line=(vals,color,dash)=>{
+      if(vals.length<2)return"";
+      const pts=vals.map((v,i)=>`${30+(i/(vals.length-1))*260},${146-(v/mx)*130}`).join(" ");
+      return `<polyline points="${pts}" fill="none" stroke="${color}"
+        stroke-width="${dash?1.5:2}" ${dash?'stroke-dasharray="4 3"':""}/>`};
+    inner+=line(manual,C.faint,true)+line(agent,C.teal,false);
+    const mm=manual.length?manual.reduce((a,b)=>a+b)/manual.length:0;
+    const am=agent.length?agent.reduce((a,b)=>a+b)/agent.length:0;
+    $("#mttr-cap").textContent=(mm&&am)?
+      `agent MTTR ${am.toFixed(0)}s vs manual ${mm.toFixed(0)}s — gap shaded is time saved per incident.`:
+      `n=${done.length} drills — manual baseline appears when agent-off drills run.`;
+    if(manual.length>1&&agent.length>1){
+      const n=Math.min(manual.length,agent.length);
+      const P=(vals,i,len)=>`${30+(i/(len-1))*260},${146-(vals[i]/mx)*130}`;
+      const top=Array.from({length:n},(_,i)=>P(manual,i,n)).join(" ");
+      const bot=Array.from({length:n},(_,i)=>P(agent,n-1-i,n)).join(" ");
+      inner+=`<polygon points="${top} ${bot}" fill="${C.teal}" opacity="0.09"/>`;}
+  }
+  svg.innerHTML=inner;
+}
+async function incidents(){
+  const incs=await j("/v1/incidents");
+  const agents=incs.filter(i=>i.agent&&!i.live).map(i=>i.mttr_s);
+  if(agents.length){
+    const med=agents.sort((a,b)=>a-b)[Math.floor(agents.length/2)];
+    $("#mttr-note").textContent=`MTTR 30d avg ${med.toFixed(0)}s`;}
+  if(!incs.length)return;
+  $("#incs").innerHTML=incs.slice(0,3).map(i=>{
+    const tot=(i.phase_ms.detect+i.phase_ms.diagnose+i.phase_ms.resolve)||1;
+    const seg=(v,c)=>`<i style="width:${(v/tot*100).toFixed(1)}%;background:${c}"></i>`;
+    const acts=i.actions.slice(-6).map((a,n)=>
+      `<div class="arow"><span class="adot"></span><span>${a}</span></div>`).join("");
+    return `<div class="inc ${i.live?"live":""}">
+      <div class="ihd"><span class="idot"></span><span class="ttl">${i.title}</span>
+      <span class="badge ${i.live?"bad":"ok"} mttr">${i.live?`resolving · ${i.mttr_s.toFixed(0)}s`:`MTTR ${i.mttr_s.toFixed(0)}s${i.agent?"":" · manual"}`}</span></div>
+      <div class="durbar">${seg(i.phase_ms.detect,C.amber)}${seg(i.phase_ms.diagnose,"#F5A623")}${seg(i.phase_ms.resolve,C.teal)}</div>
+      <div class="durlbl"><span style="flex:${i.phase_ms.detect}">detect ${(i.phase_ms.detect/1000).toFixed(0)}s</span>
+      <span style="flex:${i.phase_ms.diagnose}">diagnose ${(i.phase_ms.diagnose/1000).toFixed(0)}s</span>
+      <span style="flex:${i.phase_ms.resolve}">resolve ${(i.phase_ms.resolve/1000).toFixed(0)}s</span></div>
+      <div class="alog">${acts}</div>
+      ${i.postmortem_url?`<div class="ifoot">→ <a href="${i.postmortem_url}">auto-postmortem</a></div>`:""}
+      </div>`;}).join("");
+  mttrChart(incs);
+}
+
+/* ---- schedulers (poll cadences per DESIGN.md) ---- */
+const safe=f=>()=>f().catch(()=>{});
+setInterval(safe(hero),2500);
+setInterval(safe(slo),5000);
+setInterval(safe(pools),5000);
+setInterval(safe(release),5000);
+setInterval(safe(incidents),5000);
+[hero,slo,pools,release,incidents].forEach(f=>safe(f)());
+startFeed();
+</script>
+</body>
+</html>
