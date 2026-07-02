@@ -226,3 +226,19 @@ cycle; retargeted to `T4x8x32`. **Workaround:** trial-and-error per family
 types via API/console (the management API's instance-types endpoint would be
 the natural place), annotate the docs table, and validate at `truss push`
 config-check time before upload.
+
+### 14. Unpinned transitive dep = deploy-time import crash (build green, deploy dead)
+**Doing:** 4th dedicated attempt, custom vLLM Truss on T4x8x32 (q86yjdy) —
+the SKU fix worked, build passed, node scheduled. **Happened:** model.load()
+crash-looped on `from vllm import AsyncEngineArgs`:
+`ValueError: 'aimv2' is already used by a Transformers config` — config.yaml
+pinned `vllm==0.9.1` but transformers floated, pip resolved a version newer
+than vllm 0.9.1's Ovis shim tolerates, and the collision only fires at
+IMPORT, i.e. at deploy, after a green build. The failure email again says
+"view the logs" — this time runtime logs DID exist via the API (progress vs
+friction #12). **Cost:** one dead deploy cycle (~15 min); fix was a one-line
+`transformers==4.53.2` pin (w52yvzr). **Workaround:** pin the full working
+set, not just the top-level dep. **Product could:** import the model class
+during BUILD (a 5-second smoke that would have failed fast and cheap), or
+resolve/lock requirements at push time and show the diff vs the last
+successful deploy.

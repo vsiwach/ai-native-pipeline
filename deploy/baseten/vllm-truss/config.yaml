@@ -18,6 +18,10 @@ model_metadata:
   engine: vllm-truss
 requirements:
   - vllm==0.9.1
+  # vllm 0.9.1 import-crashes with transformers>=4.54 ('aimv2' config name
+  # collision in its Ovis shim, seen live on q86yjdy — FRICTION #14): the
+  # floating transitive dep must be pinned to the era vllm 0.9.1 shipped in.
+  - transformers==4.53.2
   - huggingface_hub
 resources:
   instance_type: "T4x8x32"

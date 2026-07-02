@@ -47,10 +47,17 @@ def build_adapter() -> BackendAdapter:
         if base_url:
             from llm_app.openai_compat import BasetenAdapter, VllmAdapter
             cls = BasetenAdapter if engine == "baseten" else VllmAdapter
-            return cls(name, base_url=base_url,
-                       model_id=os.environ.get("MODEL_ID"),
-                       usd_per_hour=float(
-                           os.environ.get("POOL_USD_PER_HOUR", "0")))
+            adapter = cls(name, base_url=base_url,
+                          model_id=os.environ.get("MODEL_ID"),
+                          usd_per_hour=float(
+                              os.environ.get("POOL_USD_PER_HOUR", "0")))
+            # Baseten serves two invocation styles: Engine-Builder is
+            # OpenAI-compatible (/v1/chat/completions, the class default);
+            # a custom Truss model.py is invoked at /predict. Config, not
+            # code: BASETEN_CHAT_PATH=/predict flips per instance.
+            if engine == "baseten" and os.environ.get("BASETEN_CHAT_PATH"):
+                adapter.chat_path = os.environ["BASETEN_CHAT_PATH"]
+            return adapter
         econ = Economics(
             cold_start_s=float(os.environ.get("COLD_START_S", "8.0")),
             kv_ttl_s=float(os.environ.get("KV_TTL_S", "300.0")),
