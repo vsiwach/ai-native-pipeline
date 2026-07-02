@@ -15,16 +15,19 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Query, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from router_app import config as cfg
+from router_app import devboard
 from router_app.batch import BatchQueue, BatchWorker
 from router_app.cache import TTLCache, cache_key
 from router_app.costs import CostLedger
 from router_app.autoscaler import AutoScaler, AutoscaleConfig
 from router_app.events import EventLog
 from router_app.health import HealthPoller
+from router_app.incidents import IncidentStore
 from router_app.kvstate import KVState
+from router_app.metrics import MetricsWindow
 from router_app.placement import eligible_pools
 from router_app.policy import (NoHealthyBackend, UnknownModel, resolve_tier,
                                select, select_replica)
@@ -40,6 +43,10 @@ class RouterState:
         self.policy_path = policy_path
         self.ledger = CostLedger()
         self.events = EventLog()
+        self.metrics = MetricsWindow()
+        self.incidents = IncidentStore(emit=self.events.emit)
+        self.release = None            # F5 wires live canary control
+        self.goodput_curves = self._load_goodput_curves()
         self.reload()
         self.poller = HealthPoller(
             get_endpoints=lambda: self.policy["endpoints"],
@@ -69,6 +76,30 @@ class RouterState:
         self.placement = cfg.load_placement()
         if getattr(self, "autoscalers", None) is None:
             self.autoscalers = {}  # model -> AutoScaler (created on first use)
+
+    @staticmethod
+    def _load_goodput_curves() -> dict:
+        """Measured goodput curves from the bench harness artifact — never
+        synthesized. Empty until benchmarks run (the board shows no curve)."""
+        path = Path(os.environ.get("GOODPUT_CURVES_PATH",
+                                   "benchmarks/goodput.json"))
+        try:
+            return json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    def devboard_model(self) -> str | None:
+        """The LLM model the devboard watches: DEVBOARD_MODEL env, else the
+        first chat backend with endpoints in the routing policy."""
+        configured = os.environ.get("DEVBOARD_MODEL")
+        if configured:
+            return configured
+        for engines in (("baseten", "vllm"), ("max",)):
+            for name, entry in self.registry.items():
+                if entry.get("engine") in engines and \
+                        self.policy["endpoints"].get(name):
+                    return name
+        return None
 
     def _autoscaler(self, model: str) -> AutoScaler:
         if model not in self.autoscalers:
@@ -113,6 +144,7 @@ class RouterState:
         pending = sum(self.kvstate.pending(r["id"]) for r in replicas) + 1
         self._autoscaler(model).step(time.monotonic(), pending)
 
+        decide_start = time.monotonic()
         choice = select_replica(
             prompt, replicas, is_usable=lambda u: self.poller.status_for(u).usable,
             kvstate=self.kvstate, tier_rules=tier_rules,
@@ -120,6 +152,7 @@ class RouterState:
             affinity_cfg=affinity, capacity=int(affinity.get("capacity", 8)),
             latency_of=lambda u: self.poller.status_for(u).p50_ms,
             placement_filter=placement_filter)
+        decide_ms = round((time.monotonic() - decide_start) * 1000, 2)
 
         self.kvstate.inc_pending(choice.replica_id)
         try:
@@ -128,6 +161,7 @@ class RouterState:
             resp = httpx.post(f"{choice.url}/v1/chat/completions", json=body,
                               headers=fwd, timeout=120)
             ttft = float(resp.headers.get("X-TTFT-Ms", 0.0))
+            decode_ms = float(resp.headers.get("X-Decode-Ms", 0.0))
             tps = float(resp.headers.get("X-Tokens-Per-Sec", 0.0))
             cost = float(resp.headers.get("X-Est-Cost", 0.0))
             prompt_tokens = int(resp.headers.get("X-Prompt-Tokens", 0))
@@ -137,21 +171,36 @@ class RouterState:
             self.kvstate.dec_pending(choice.replica_id)
         # record what the replica now holds (warm + prefix cached)
         self.kvstate.record_prefix(choice.replica_id, choice.prefix)
+        tpot = round(decode_ms / completion_tokens, 2) if completion_tokens \
+            else 0.0
         slo_ttft = tier_rules.get("ttft_ms")
-        slo_met = slo_ttft is None or ttft <= slo_ttft
+        slo_tpot = tier_rules.get("tpot_ms")
+        ttft_ok = slo_ttft is None or ttft <= slo_ttft
+        tpot_ok = slo_tpot is None or tpot <= slo_tpot
+        slo_met = ttft_ok and tpot_ok
         self.ledger.record_llm(
             model, choice.provider, est_cost_usd=cost,
             cache_hit=choice.cache_hit or backend_hit, ttft_ms=ttft,
             tokens_per_sec=tps, prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens, slo_met=slo_met)
+        self.metrics.record(
+            model=model, replica=choice.replica_id, provider=choice.provider,
+            ttft_ms=ttft, tpot_ms=tpot, prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens, est_cost_usd=cost,
+            ttft_slo_met=ttft_ok, tpot_slo_met=tpot_ok)
         self.events.emit("route", model=model, replica=choice.replica_id,
                          provider=choice.provider, cache_hit=choice.cache_hit,
-                         reason=choice.reason, ttft_ms=ttft)
+                         reason=choice.reason, ttft_ms=ttft, tpot_ms=tpot,
+                         req=f"#{self.events.seq() % 10000:04d}",
+                         wl_tier=tier, tag=compliance, decide_ms=decide_ms,
+                         iso_ts=time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                              time.gmtime()))
         if not slo_met:
             # feeds the devboard's self-serve incident management
             self.events.emit("slo_breach", model=model,
                              replica=choice.replica_id, ttft_ms=round(ttft, 1),
-                             slo_ttft_ms=slo_ttft, tier=tier,
+                             tpot_ms=tpot, slo_ttft_ms=slo_ttft,
+                             slo_tpot_ms=slo_tpot, tier=tier,
                              remediation="scale up / reroute / roll back")
         return resp, choice
 
@@ -399,6 +448,108 @@ def get_app(registry_path: Path | None = None,
                          "misses": state.cache.misses,
                          "hit_rate": round(state.cache.hit_rate, 4)}
         return snap
+
+    # ---- devboard data surface (contracts/devboard.openapi.yaml) ----------
+    # Shapes come from router_app/devboard.py builders over live state; the
+    # board renders ONLY what the router measured (SLO-AUDITOR provenance).
+
+    def _board_ctx():
+        model = state.devboard_model()
+        if model is None:
+            return None
+        replicas = cfg.replicas_for(state.policy, model)
+        entry = state.registry.get(model, {})
+        tier_rules = state.policy["tiers"].get(
+            entry.get("tier", "realtime"), {})
+        return model, replicas, entry, tier_rules
+
+    @app.get("/v1/metrics/hero")
+    def metrics_hero():
+        ctx = _board_ctx()
+        tpot_slo = (ctx[3].get("tpot_ms", 60) if ctx else 60)
+        return devboard.hero(state.metrics, state.incidents,
+                             tpot_slo_ms=tpot_slo)
+
+    @app.get("/v1/metrics/slo")
+    def metrics_slo():
+        ctx = _board_ctx()
+        if ctx is None:
+            return {"pools": []}
+        _, replicas, _, tier_rules = ctx
+        return devboard.slo_panel(
+            state.metrics, replicas, tier_rules,
+            is_usable=lambda u: state.poller.status_for(u).usable,
+            pending_of=state.kvstate.pending,
+            goodput_curves=state.goodput_curves)
+
+    @app.get("/v1/pools")
+    def pools():
+        ctx = _board_ctx()
+        if ctx is None:
+            return {"pools": []}
+        _, replicas, entry, _ = ctx
+        affinity = state.policy.get("affinity", {})
+        return devboard.pools_snapshot(
+            state.metrics, replicas, entry,
+            is_usable=lambda u: state.poller.status_for(u).usable,
+            pending_of=state.kvstate.pending,
+            capacity=int(affinity.get("capacity", 8)))
+
+    @app.get("/v1/placement/feed")
+    def placement_feed():
+        """SSE stream of placement decisions (newest events as they land)."""
+        def tail():
+            last = state.events.seq()
+            # replay the most recent decisions so the board fills instantly
+            for ev in state.events.recent(8, "route"):
+                item = devboard.feed_item(ev)
+                if item:
+                    yield f"data: {json.dumps(item)}\n\n"
+            while True:
+                for ev in state.events.since(last, "route"):
+                    last = max(last, ev["seq"])
+                    item = devboard.feed_item(ev)
+                    if item:
+                        yield f"data: {json.dumps(item)}\n\n"
+                time.sleep(0.25)
+        return StreamingResponse(tail(), media_type="text/event-stream")
+
+    @app.get("/v1/releases/active")
+    def releases_active():
+        ctx = _board_ctx()
+        model = ctx[0] if ctx else "none"
+        return devboard.release_active(state.release, model)
+
+    @app.get("/v1/incidents")
+    def incidents():
+        return state.incidents.snapshot()
+
+    # Dev surface for the incident agent + chaos drills (not in the board's
+    # read contract): open / act / resolve.
+    @app.post("/v1/incidents")
+    async def incident_open(request: Request):
+        body = await request.json()
+        inc = state.incidents.open(body.get("title", "untitled incident"),
+                                   agent=bool(body.get("agent", True)))
+        return {"id": inc["id"]}
+
+    @app.post("/v1/incidents/{incident_id}/actions")
+    async def incident_act(incident_id: str, request: Request):
+        body = await request.json()
+        inc = state.incidents.act(incident_id, body.get("action", ""),
+                                  phase=body.get("phase"))
+        if inc is None:
+            return _error(404, "unknown_incident", incident_id)
+        return {"id": incident_id, "actions": len(inc["actions"])}
+
+    @app.post("/v1/incidents/{incident_id}/resolve")
+    async def incident_resolve(incident_id: str, request: Request):
+        body = await request.json()
+        inc = state.incidents.resolve(incident_id,
+                                      postmortem_url=body.get("postmortem_url"))
+        if inc is None:
+            return _error(404, "unknown_incident", incident_id)
+        return {"id": incident_id, "mttr_s": inc["mttr_s"]}
 
     return app
 

@@ -22,6 +22,17 @@ class EventLog:
             self._events.append(event)
             return event
 
+    def seq(self) -> int:
+        """Current sequence number (monotonic request-ish counter)."""
+        with self._lock:
+            return self._seq
+
+    def since(self, seq: int, kind: str | None = None) -> list[dict]:
+        """Events after `seq`, oldest first — the streaming-feed tail."""
+        with self._lock:
+            return [e for e in self._events if e["seq"] > seq
+                    and (kind is None or e["kind"] == kind)]
+
     def recent(self, limit: int = 100, kind: str | None = None) -> list[dict]:
         with self._lock:
             items = [e for e in self._events if kind is None or e["kind"] == kind]

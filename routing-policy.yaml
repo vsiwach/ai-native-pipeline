@@ -3,7 +3,8 @@
 tiers:
   # ttft_ms / tpot_ms are the LLM SLOs (time-to-first-token, time-per-output-
   # token) the router routes and (Phase 8) autoscales against.
-  realtime: {max_latency_ms: 250, prefer: lowest_latency, ttft_ms: 500, tpot_ms: 40}
+  # voice SLO per the baseten-mvp mission: TTFT p99<500ms, TPOT p99<60ms
+  realtime: {max_latency_ms: 250, prefer: lowest_latency, ttft_ms: 500, tpot_ms: 60}
   standard: {max_latency_ms: 2000, prefer: lowest_cost, ttft_ms: 2000, tpot_ms: 80}
   batch: {max_latency_ms: null, prefer: lowest_cost, queue: true}
 
@@ -40,7 +41,9 @@ endpoints:
   qwen3-8b:
     - id: baseten-l4
       provider: baseten-l4
+      pool: baseten-l4        # placement-policy pool id
       url: http://pool-baseten:8080
     - id: vllm-l4
       provider: runpod-vllm-l4
+      pool: vllm-l4
       url: http://pool-vllm:8080

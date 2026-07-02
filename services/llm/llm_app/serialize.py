@@ -20,6 +20,7 @@ def economics_headers(gen: Generation, backend: str) -> dict:
         "X-Cache": "hit" if p.cache_hit else "miss",
         "X-Backend": backend,
         "X-TTFT-Ms": f"{p.ttft_ms:.2f}",
+        "X-Decode-Ms": f"{p.decode_ms:.2f}",
         "X-Tokens-Per-Sec": f"{p.tokens_per_sec:.2f}",
         "X-Est-Cost": f"{p.est_cost_usd:.10f}",
         "X-Prompt-Tokens": str(p.prompt_tokens),
