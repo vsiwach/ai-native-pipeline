@@ -113,11 +113,11 @@ class RouterState:
                 emit=lambda kind, **f: self.events.emit(kind, model=model, **f))
         return self.autoscalers[model]
 
-    def proxy_chat(self, model: str, body: dict, headers: dict,
-                   region: str | None = None, compliance: str | None = None):
-        """Select a replica with placement + prefix affinity, forward the chat
-        completion, record LLM economics, and return (httpx.Response,
-        ReplicaChoice). Raises UnknownModel / NoHealthyBackend."""
+    def _select_for_chat(self, model: str, body: dict,
+                         region: str | None, compliance: str | None):
+        """Shared selection for the chat paths: placement + affinity +
+        autoscale signal. Returns (choice, tier, tier_rules, decide_ms,
+        prompt). Raises UnknownModel / NoHealthyBackend."""
         if model not in self.registry:
             raise UnknownModel(model)
         replicas = cfg.replicas_for(self.policy, model)
@@ -153,7 +153,55 @@ class RouterState:
             latency_of=lambda u: self.poller.status_for(u).p50_ms,
             placement_filter=placement_filter)
         decide_ms = round((time.monotonic() - decide_start) * 1000, 2)
+        return choice, tier, tier_rules, decide_ms, prompt
 
+    def _record_chat(self, model: str, choice, tier: str, tier_rules: dict,
+                     decide_ms: float, *, ttft: float, decode_ms: float,
+                     tps: float, cost: float, prompt_tokens: int,
+                     completion_tokens: int, backend_hit: bool,
+                     tag: str | None) -> None:
+        """One bookkeeping path for both chat modes: ledger, metrics window,
+        route/breach events."""
+        tpot = round(decode_ms / completion_tokens, 2) if completion_tokens \
+            else 0.0
+        slo_ttft = tier_rules.get("ttft_ms")
+        slo_tpot = tier_rules.get("tpot_ms")
+        ttft_ok = slo_ttft is None or ttft <= slo_ttft
+        tpot_ok = slo_tpot is None or tpot <= slo_tpot
+        self.ledger.record_llm(
+            model, choice.provider, est_cost_usd=cost,
+            cache_hit=choice.cache_hit or backend_hit, ttft_ms=ttft,
+            tokens_per_sec=tps, prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            slo_met=ttft_ok and tpot_ok)
+        self.metrics.record(
+            model=model, replica=choice.replica_id, provider=choice.provider,
+            ttft_ms=ttft, tpot_ms=tpot, prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens, est_cost_usd=cost,
+            ttft_slo_met=ttft_ok, tpot_slo_met=tpot_ok)
+        self.events.emit("route", model=model, replica=choice.replica_id,
+                         provider=choice.provider, cache_hit=choice.cache_hit,
+                         reason=choice.reason, ttft_ms=round(ttft, 1),
+                         tpot_ms=tpot,
+                         req=f"#{self.events.seq() % 10000:04d}",
+                         wl_tier=tier, tag=tag, decide_ms=decide_ms,
+                         iso_ts=time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                              time.gmtime()))
+        if not (ttft_ok and tpot_ok):
+            # feeds the devboard's self-serve incident management
+            self.events.emit("slo_breach", model=model,
+                             replica=choice.replica_id, ttft_ms=round(ttft, 1),
+                             tpot_ms=tpot, slo_ttft_ms=slo_ttft,
+                             slo_tpot_ms=slo_tpot, tier=tier,
+                             remediation="scale up / reroute / roll back")
+
+    def proxy_chat(self, model: str, body: dict, headers: dict,
+                   region: str | None = None, compliance: str | None = None):
+        """Non-streaming chat: forward, record LLM economics, return
+        (httpx.Response, ReplicaChoice). Raises UnknownModel /
+        NoHealthyBackend."""
+        choice, tier, tier_rules, decide_ms, _ = self._select_for_chat(
+            model, body, region, compliance)
         self.kvstate.inc_pending(choice.replica_id)
         try:
             fwd = {k: v for k, v in headers.items()
@@ -171,38 +219,87 @@ class RouterState:
             self.kvstate.dec_pending(choice.replica_id)
         # record what the replica now holds (warm + prefix cached)
         self.kvstate.record_prefix(choice.replica_id, choice.prefix)
-        tpot = round(decode_ms / completion_tokens, 2) if completion_tokens \
-            else 0.0
-        slo_ttft = tier_rules.get("ttft_ms")
-        slo_tpot = tier_rules.get("tpot_ms")
-        ttft_ok = slo_ttft is None or ttft <= slo_ttft
-        tpot_ok = slo_tpot is None or tpot <= slo_tpot
-        slo_met = ttft_ok and tpot_ok
-        self.ledger.record_llm(
-            model, choice.provider, est_cost_usd=cost,
-            cache_hit=choice.cache_hit or backend_hit, ttft_ms=ttft,
-            tokens_per_sec=tps, prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens, slo_met=slo_met)
-        self.metrics.record(
-            model=model, replica=choice.replica_id, provider=choice.provider,
-            ttft_ms=ttft, tpot_ms=tpot, prompt_tokens=prompt_tokens,
-            completion_tokens=completion_tokens, est_cost_usd=cost,
-            ttft_slo_met=ttft_ok, tpot_slo_met=tpot_ok)
-        self.events.emit("route", model=model, replica=choice.replica_id,
-                         provider=choice.provider, cache_hit=choice.cache_hit,
-                         reason=choice.reason, ttft_ms=ttft, tpot_ms=tpot,
-                         req=f"#{self.events.seq() % 10000:04d}",
-                         wl_tier=tier, tag=compliance, decide_ms=decide_ms,
-                         iso_ts=time.strftime("%Y-%m-%dT%H:%M:%SZ",
-                                              time.gmtime()))
-        if not slo_met:
-            # feeds the devboard's self-serve incident management
-            self.events.emit("slo_breach", model=model,
-                             replica=choice.replica_id, ttft_ms=round(ttft, 1),
-                             tpot_ms=tpot, slo_ttft_ms=slo_ttft,
-                             slo_tpot_ms=slo_tpot, tier=tier,
-                             remediation="scale up / reroute / roll back")
+        self._record_chat(model, choice, tier, tier_rules, decide_ms,
+                          ttft=ttft, decode_ms=decode_ms, tps=tps, cost=cost,
+                          prompt_tokens=prompt_tokens,
+                          completion_tokens=completion_tokens,
+                          backend_hit=backend_hit, tag=compliance)
         return resp, choice
+
+    def proxy_chat_stream(self, model: str, body: dict, headers: dict,
+                          region: str | None = None,
+                          compliance: str | None = None):
+        """Streaming chat: returns (line_generator, choice). Tokens flow to
+        the client AS the backend emits them — the router adds selection, not
+        buffering (client TTFT ≈ backend TTFT). Economics come from backend
+        headers when present (sim), else are measured here and costed from
+        the provider's $/1M-output-token entry in cost_table (live pools)."""
+        choice, tier, tier_rules, decide_ms, _ = self._select_for_chat(
+            model, body, region, compliance)
+        fwd = {k: v for k, v in headers.items()
+               if k.lower() in FORWARDED_HEADERS}
+        self.kvstate.inc_pending(choice.replica_id)
+        # Open the upstream response BEFORE returning so its headers (the
+        # sim's economics) can be forwarded on our own response; the body
+        # still streams token by token through the generator below.
+        t0 = time.monotonic()
+        ctx = httpx.stream("POST", f"{choice.url}/v1/chat/completions",
+                           json=body, headers=fwd, timeout=120)
+        try:
+            upstream = ctx.__enter__()
+        except httpx.HTTPError:
+            self.kvstate.dec_pending(choice.replica_id)
+            self.poller.mark_unhealthy(choice.url)
+            raise NoHealthyBackend(f"{choice.url} unreachable")
+        hdrs = upstream.headers
+
+        def stream():
+            first = None
+            chunks = 0
+            try:
+                for line in upstream.iter_lines():
+                    if not line:
+                        continue
+                    if line.startswith("data:") and "[DONE]" not in line:
+                        if first is None:
+                            first = time.monotonic()
+                        chunks += 1
+                    yield f"{line}\n\n"
+            except httpx.HTTPError as exc:
+                self.poller.mark_unhealthy(choice.url)
+                yield ("data: " + json.dumps(
+                    {"error": {"type": "backend_error",
+                               "message": str(exc)}}) + "\n\n")
+            finally:
+                ctx.__exit__(None, None, None)
+                self.kvstate.dec_pending(choice.replica_id)
+                t_end = time.monotonic()
+                measured_ttft = ((first or t_end) - t0) * 1000.0
+                measured_decode = ((t_end - first) * 1000.0) if first else 0.0
+                completion_tokens = int(hdrs.get("X-Completion-Tokens",
+                                                 0) or 0) or chunks
+                cost = float(hdrs.get("X-Est-Cost", 0.0) or 0.0)
+                if not cost and completion_tokens:
+                    per_mtok = float(
+                        self.policy["cost_table"].get(choice.provider, 0.0))
+                    cost = completion_tokens / 1_000_000 * per_mtok
+                total_s = t_end - t0
+                self.kvstate.record_prefix(choice.replica_id, choice.prefix)
+                # ttft/decode are ROUTER-measured: they include queueing and
+                # network, which is what the client actually experienced.
+                self._record_chat(
+                    model, choice, tier, tier_rules, decide_ms,
+                    ttft=round(measured_ttft, 1),
+                    decode_ms=round(measured_decode, 1),
+                    tps=round(completion_tokens / total_s, 2)
+                    if total_s > 0 else 0.0,
+                    cost=cost,
+                    prompt_tokens=int(hdrs.get("X-Prompt-Tokens", 0) or 0),
+                    completion_tokens=completion_tokens,
+                    backend_hit=hdrs.get("X-Cache") == "hit",
+                    tag=compliance)
+
+        return stream(), choice, hdrs
 
     # ---- core proxy path (shared by live predict and batch worker) ----
 
@@ -361,8 +458,27 @@ def get_app(registry_path: Path | None = None,
             return _error(400, "invalid_json", "request body must be JSON")
         model = model or body.get("model")
         try:
-            resp, choice = state.proxy_chat(model, body, dict(request.headers),
-                                            region=region, compliance=compliance)
+            if body.get("stream"):
+                # tokens flow as the backend emits them; bookkeeping happens
+                # when the stream closes (inside the generator)
+                gen, choice, up_hdrs = state.proxy_chat_stream(
+                    model, body, dict(request.headers),
+                    region=region, compliance=compliance)
+                out_headers = {"X-Backend": choice.provider,
+                               "X-Replica": choice.replica_id,
+                               "X-Route-Reason": choice.reason}
+                for h in ("X-TTFT-Ms", "X-Decode-Ms", "X-Tokens-Per-Sec",
+                          "X-Est-Cost", "X-Prompt-Tokens",
+                          "X-Completion-Tokens", "X-Cache"):
+                    if h in up_hdrs:
+                        out_headers[h] = up_hdrs[h]
+                return StreamingResponse(
+                    gen, media_type="text/event-stream",
+                    headers=out_headers)
+            from fastapi.concurrency import run_in_threadpool
+            resp, choice = await run_in_threadpool(
+                state.proxy_chat, model, body, dict(request.headers),
+                region, compliance)
         except UnknownModel:
             return _error(404, "unknown_model",
                           f"model '{model}' is not in inference-registry.yaml",
@@ -379,6 +495,12 @@ def get_app(registry_path: Path | None = None,
             "X-Cache": "hit" if choice.cache_hit else "miss",
             "X-Route-Reason": choice.reason,
         }
+        # forward backend economics so clients (bench harness) can log the
+        # same numbers the router recorded — one provenance chain end to end
+        for h in ("X-TTFT-Ms", "X-Decode-Ms", "X-Tokens-Per-Sec",
+                  "X-Est-Cost", "X-Prompt-Tokens", "X-Completion-Tokens"):
+            if h in resp.headers:
+                headers[h] = resp.headers[h]
         media = resp.headers.get("content-type", "application/json")
         if media.startswith("text/event-stream"):
             return Response(content=resp.content, media_type=media,

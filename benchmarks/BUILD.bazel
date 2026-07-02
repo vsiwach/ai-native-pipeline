@@ -1,0 +1,17 @@
+# Bench harness + summarizer are stdlib-only by design (SLO-AUDITOR must be
+# able to re-run them anywhere with plain python3).
+
+py_library(
+    name = "bench",
+    srcs = ["harness.py", "summarize.py"],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "bench_tests",
+    size = "small",
+    srcs = glob(["tests/**/*.py"]),
+    main = "tests/test_summarize.py",
+    deps = [":bench"],
+)

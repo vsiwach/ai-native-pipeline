@@ -1,0 +1,65 @@
+{
+  "blended": {
+    "points": [
+      {
+        "conc": 2,
+        "tps": 1.44
+      },
+      {
+        "conc": 4,
+        "tps": 3.02
+      },
+      {
+        "conc": 8,
+        "tps": 6.03
+      },
+      {
+        "conc": 16,
+        "tps": 12.38
+      }
+    ],
+    "slo_max_conc": 16
+  },
+  "baseten-l4": {
+    "points": [
+      {
+        "conc": 2,
+        "tps": 0.85
+      },
+      {
+        "conc": 4,
+        "tps": 1.6
+      },
+      {
+        "conc": 8,
+        "tps": 2.93
+      },
+      {
+        "conc": 16,
+        "tps": 5.82
+      }
+    ],
+    "slo_max_conc": 16
+  },
+  "vllm-l4": {
+    "points": [
+      {
+        "conc": 2,
+        "tps": 0.59
+      },
+      {
+        "conc": 4,
+        "tps": 1.43
+      },
+      {
+        "conc": 8,
+        "tps": 3.1
+      },
+      {
+        "conc": 16,
+        "tps": 6.55
+      }
+    ],
+    "slo_max_conc": 16
+  }
+}
