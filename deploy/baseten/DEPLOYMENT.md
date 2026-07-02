@@ -1,30 +1,27 @@
 # Live Baseten deployment — qwen3-8b-pool
 
-First live deploy: 2026-07-02 (F1 primary pool).
+Model id: `qrj78jv3` · endpoint base `https://model-qrj78jv3.api.baseten.co`
 
-| field | value |
-|---|---|
-| model name | qwen3-8b-pool |
-| model id | `qrj78jv3` |
-| deployment id | `wno2dv0` |
-| endpoint base | `https://model-qrj78jv3.api.baseten.co` |
-| logs | https://app.baseten.co/models/qrj78jv3/logs/wno2dv0 |
-| instance (attempt 1) | L4:2x24x96 (2× L4) — hung 30 min scheduling, went INACTIVE (FRICTION #6) |
-| instance (attempt 2) | T4x4x16 (1× T4, 16GiB RAM) — OOM crash-loop on load, deactivated (FRICTION #7) |
-| status | NOT live — both deploys failed on Baseten SKU fit; deploy wno2dv0 INACTIVE, w52ym5j deactivated |
-| next SKU to try | A10G or A100 (single GPU, more host RAM) — or pivot live pool to RunPod |
+## Approach: Engine-Builder (Baseten's recommended path)
+Config-only (no model.py, no Dockerfile). Baseten compiles a TensorRT-LLM
+engine and serves it OpenAI-compatible. Docs: build-your-first-model +
+engine-builder-config. Model Qwen3-8B (`Qwen3ForCausalLM`, supported),
+single H100, fp8_kv, `tags: [openai-compatible]`.
+
+OpenAI endpoint once ACTIVE:
+`https://model-qrj78jv3.api.baseten.co/environments/production/sync/v1/chat/completions`
+Auth `Authorization: Bearer $BASETEN_API_KEY`. Router BasetenAdapter points
+`base_url` at `…/environments/production/sync` and uses `/v1/chat/completions`.
+
+## Deploy history
+| deployment | instance | outcome |
+|---|---|---|
+| wno2dv0 | L4 (2× node) | hung 30 min scheduling → INACTIVE (custom model.py, FRICTION #6) |
+| w52ym5j | T4x4x16 (16GiB RAM) | OOM crash-loop on load → deactivated (custom model.py, FRICTION #7) |
+| **qz47j5o** | **H100** | **Engine-Builder — BUILDING (TRT-LLM compile, active path)** |
 
 ## Cost control
-- min_replica 0 → idle cost \$0; but a 900s (15 min) idle tail bills after
-  each use before scale-down. `python3 deploy/baseten/manage.py deactivate
-  wno2dv0 --model-id qrj78jv3 --yes` when done for the day.
-- Covered by workspace free credits for now; \$40 mission guard is backstop.
-
-## Invocation (VERIFY LIVE — custom Truss model.py)
-A custom `model.py` is invoked via Baseten's predict path, NOT a raw
-OpenAI `/v1/chat/completions`. Expected:
-`POST {base}/environments/production/predict` with the chat request as body,
-`Authorization: Api-Key $BASETEN_API_KEY`, returning the OpenAI-shaped dict
-our `model.py` builds. The BasetenAdapter is wired for OpenAI streaming and
-will likely need a Baseten-predict mode — confirm the actual path once the
-replica is ACTIVE, then adjust the adapter + routing-policy URL.
+- H100 ~\$6/hr active; scale-to-zero (min 0) → idle \$0; free credits cover.
+- Build (fp8) may need >inference memory; if it OOMs, add `num_builder_gpus: 2`.
+- `python3 deploy/baseten/manage.py deactivate qz47j5o --model-id qrj78jv3 --yes`
+  when done for the day.

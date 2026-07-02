@@ -120,8 +120,9 @@ class AuthTest(unittest.TestCase):
             adapter.generate(request())
             self.assertEqual(opener.calls[0]["headers"]["Authorization"],
                              "Bearer sk-test")
-            # custom Truss is invoked at /predict, not /v1/chat/completions
-            self.assertTrue(opener.calls[0]["url"].endswith("/predict"))
+            # Engine-Builder deploy is OpenAI-compatible: /v1/chat/completions
+            self.assertTrue(
+                opener.calls[0]["url"].endswith("/v1/chat/completions"))
 
     def test_baseten_healthz_never_wakes_the_pool(self):
         # health_path is None -> report proxy liveness, never ping Baseten

@@ -204,8 +204,13 @@ class BasetenAdapter(OpenAICompatAdapter):
     auth_scheme = "Bearer"          # Baseten model invocation prefers Bearer
     auth_required = True
     backend_label = "baseten-truss"
-    chat_path = "/predict"
-    health_path = None              # no cheap health route; don't wake on poll
+    # Engine-Builder deploys are OpenAI-compatible: base_url is the sync
+    # endpoint (…/environments/production/sync) and chat is /v1/chat/completions,
+    # so the standard OpenAI SSE machinery applies. health_path stays None so a
+    # health poll reports proxy liveness instead of waking a scaled-to-zero
+    # replica (which would bill).
+    chat_path = "/v1/chat/completions"
+    health_path = None
 
 
 class VllmAdapter(OpenAICompatAdapter):

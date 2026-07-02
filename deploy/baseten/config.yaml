@@ -1,34 +1,22 @@
-# Truss config — Baseten primary pool (baseten-mvp mission F1)
-#
-# Deployed with `truss push` from this directory. This wraps the same
-# OpenAI-compatible surface the router's BasetenAdapter expects, serving a
-# Qwen3-8B-class model via vLLM inside the Truss container so both pools run
-# the SAME model for a fair baseline (DESIGN.md deviation 2026-07-01).
-#
-# Verify field names against current truss docs during the live session; any
-# mismatch is a FRICTION_LOG.md entry.
-model_name: qwen3-8b-pool
-description: "ai-native-pipeline primary pool — OpenAI-compat chat, voice-SLO tier"
-python_version: py311
 model_metadata:
-  # surfaced through /v1/info by the adapter
-  tier: realtime
-  target: gpu
-  engine: vllm-truss
-requirements:
-  - vllm==0.9.1
-  - huggingface_hub
-# Single T4 (16GB) + int4 AWQ Qwen3-8B (~6GB) — a well-stocked single-GPU SKU
-# that schedules in minutes. Baseten's L4 is a 2x-GPU instance whose scheduling
-# hung for 30 min (see FRICTION_LOG #6); T4 avoids the 2-GPU node entirely.
+  tags:
+  - openai-compatible
+model_name: qwen3-8b-pool
+python_version: py313
 resources:
-  accelerator: T4
+  accelerator: H100
+  cpu: '1'
+  memory: 10Gi
   use_gpu: true
-# No secrets: Qwen3-8B(-AWQ) is open-weight (Apache-2.0), no HF token needed.
-runtime:
-  predict_concurrency: 4
-environment_variables:
-  MODEL_ID: Qwen/Qwen3-8B-AWQ
-  MAX_MODEL_LEN: "4096"     # T4 16GB: leave headroom for the KV cache
-  QUANTIZATION: awq
-  DTYPE: float16            # T4 is Turing (no bf16); AWQ kernels want fp16
+trt_llm:
+  build:
+    base_model: decoder
+    checkpoint_repository:
+      repo: Qwen/Qwen3-8B
+      source: HF
+    max_seq_len: 8192
+    quantization_type: fp8_kv
+    tensor_parallel_count: 1
+  runtime:
+    kv_cache_free_gpu_mem_fraction: 0.9
+    served_model_name: qwen3-8b
