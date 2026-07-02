@@ -23,9 +23,9 @@ resources:
   use_gpu: true
   cpu: "4"
   memory: 24Gi
-secrets:
-  # set in Baseten workspace secrets, never in this file
-  hf_access_token: null
+# No secrets: Qwen3-8B is open-weight (Apache-2.0), so no HF token is needed.
+# A gated model would add `secrets: {hf_access_token: null}` here AND require
+# the secret be set in the Baseten workspace, or the push fails.
 runtime:
   predict_concurrency: 8
 environment_variables:
