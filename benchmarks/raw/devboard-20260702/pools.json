@@ -1,0 +1,1 @@
+{"pools":[{"id":"baseten-l4","hw":"baseten-l4","health":47.0,"status":"bad","util_pct":0.0,"cost_per_mtok":1.05,"autoscaler":{"replicas":1,"min":0,"max":4,"state":"steady"}},{"id":"vllm-l4","hw":"runpod-vllm-l4","health":99.0,"status":"ok","util_pct":0.0,"cost_per_mtok":0.7031,"autoscaler":{"replicas":1,"min":0,"max":4,"state":"steady"}}]}
