@@ -28,3 +28,5 @@ stamp,scenario,pool,model,latency_ms,error_rate,agent,detected_s,quarantined_s,c
 20260702-201834,latency,baseten-l4,qwen3-8b,600.0,0.0,True,39.53,39.53,39.55,8.7,True,19,1
 20260702-201958,errors,baseten-l4,qwen3-8b,0.0,0.9,True,17.24,17.24,17.26,17.6,True,44,0
 20260702-202107,combo,baseten-l4,qwen3-8b,600.0,0.5,True,17.24,17.24,17.27,8.7,True,30,0
+20260703-154911,latency,baseten-l4,qwen3-8b,600.0,0.0,True,12.66,12.66,12.69,8.8,True,15,0
+20260703-155011,errors,baseten-l4,qwen3-8b,0.0,0.9,True,10.61,10.61,10.62,9.2,True,13,0

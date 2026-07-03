@@ -46,10 +46,18 @@ endpoints:
       provider: baseten-l4
       pool: baseten-l4        # placement-policy pool id
       url: http://pool-baseten:8080
-    - id: vllm-l4
-      provider: runpod-vllm-l4
-      pool: vllm-l4
-      url: http://pool-vllm:8080
+    # Baseten-native spill target: when the dedicated deployment degrades,
+    # traffic spills to Baseten's serverless Model APIs — a genuinely
+    # different failure domain on the same platform (the mux serves the
+    # request with its default catalog model).
+    - id: model-api-spill
+      provider: baseten-model-api
+      url: http://pool-model-api-a:8080
+    # RunPod pool returns when their provisioning recovers (FRICTION #16):
+    # - id: vllm-l4
+    #   provider: runpod-vllm-l4
+    #   pool: vllm-l4
+    #   url: http://pool-vllm:8080
   # Baseten hosted Model APIs (catalog: deploy/baseten/model-apis.json).
   # Every alias is served by BOTH mux proxy replicas — quarantine one
   # (chaos drills) and traffic spills to the other, same upstream.

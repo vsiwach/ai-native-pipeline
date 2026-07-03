@@ -1,0 +1,1 @@
+{"pools":[{"id":"baseten-l4","hw":"baseten-l4","health":54.0,"status":"warn","util_pct":0.0,"cost_per_mtok":3.8376,"autoscaler":{"replicas":1,"min":0,"max":4,"state":"steady"}},{"id":"model-api-spill","hw":"baseten-model-api","health":70.0,"status":"warn","util_pct":12.5,"cost_per_mtok":2.9587,"autoscaler":{"replicas":1,"min":0,"max":4,"state":"steady"}}]}
