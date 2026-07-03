@@ -23,6 +23,24 @@
       "what": "runpod NVIDIA GeForce RTX 4090 pod 7798nqwes35026",
       "start_ts": 1783035093.503989,
       "usd_per_hr": 0.7,
+      "end_ts": 1783035421.372907
+    },
+    {
+      "what": "runpod NVIDIA RTX A5000 pod mnjykn3o6cbdru",
+      "start_ts": 1783035422.6432798,
+      "usd_per_hr": 0.7,
+      "end_ts": 1783035779.892801
+    },
+    {
+      "what": "runpod NVIDIA GeForce RTX 3090 pod xmmi6l3snambk7",
+      "start_ts": 1783035794.881242,
+      "usd_per_hr": 0.7,
+      "end_ts": 1783036788.259583
+    },
+    {
+      "what": "runpod NVIDIA L4 pod nilloreej9y926",
+      "start_ts": 1783036848.51573,
+      "usd_per_hr": 0.7,
       "end_ts": null
     }
   ]

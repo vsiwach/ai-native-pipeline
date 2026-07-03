@@ -108,7 +108,10 @@ def cmd_up(args):
 
     body = {
         "name": "ai-native-vllm-pool",
-        "imageName": "vllm/vllm-openai:latest",
+        # pinned by default: an unpinned :latest means every fresh host
+        # cold-pulls whatever was published today — which presents as
+        # "rented, runtime:null" while billing (2026-07-02: four pods stuck)
+        "imageName": args.image,
         "gpuTypeIds": [args.gpu],
         "gpuCount": 1,
         "cloudType": args.cloud,
@@ -125,6 +128,8 @@ def cmd_up(args):
             "--disable-log-requests",
         ],
     }
+    if args.dtype:  # pre-Ampere GPUs (T4) can't run bf16 — pass --dtype half
+        body["dockerStartCmd"] += ["--dtype", args.dtype]
     if os.environ.get("HF_TOKEN"):
         body["env"] = {"HF_TOKEN": os.environ["HF_TOKEN"]}
     print(f"about to create pod: gpu={args.gpu} model={args.model} "
@@ -190,6 +195,11 @@ def main(argv=None):
     u.add_argument("--max-model-len", type=int, default=4096)
     u.add_argument("--cloud", default="SECURE", choices=["SECURE", "COMMUNITY"])
     u.add_argument("--disk", type=int, default=60)
+    u.add_argument("--dtype", default=None,
+                   help="vLLM --dtype override (e.g. 'half' for T4/pre-Ampere)")
+    u.add_argument("--image", default="vllm/vllm-openai:v0.9.1",
+                   help="pinned vLLM image (':latest' cold-pulls today's "
+                        "publish on fresh hosts and can stall provisioning)")
     u.add_argument("--est-hours", type=float, default=3.0)
     u.add_argument("--max-hourly", type=float, default=0.70)
     u.add_argument("--yes", action="store_true")
