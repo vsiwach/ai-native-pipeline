@@ -262,3 +262,22 @@ SLO). **Product could:** never leave an environment pointing at a
 DEPLOY_FAILED deployment when a newer ACTIVE one exists (or at least flag it
 in `truss push` output: "note: production still serves failed q86yjdy —
 promote to switch").
+
+### 16. RunPod provisioning outage: five consecutive pods "rented, runtime null" — billing while dead
+**Doing:** re-provisioning the vLLM pool that had worked earlier the same day
+(pod 3hs5xl4usl6l5j, created 18:44 UTC, served fine until terminated).
+**Happened:** from 23:06 UTC, five consecutive pods across SECURE and
+COMMUNITY clouds and four GPU families (RTX 4090 ×2, RTX A5000, RTX 3090,
+L4) sat `desiredStatus: RUNNING` with `runtime: null` for 15-30+ minutes
+each — rented and BILLING, container never started. Ruled out: our spec
+(identical to the working pod), the image (`vllm/vllm-openai:latest` last
+moved 06:00 UTC per Docker Hub, before the working pod; a pinned v0.9.1
+stalled identically), GPU family, and cloud tier. One COMMUNITY create
+failed honestly ("machine does not have the resources"); SECURE just takes
+the money and never starts. The API exposes no provisioning state, no error,
+no events — `machine: {}`, `runtime: null` is all you get. **Cost:** ~$0.60
+across five dead pods + ~90 min of forensic work. **Workaround:** none —
+capacity-side. Detection rule now encoded in pod.py + LIVE_SETUP.md: if
+`runtime` is null after ~10 min, kill the pod (it will not recover).
+**Product could:** not bill until the container starts, expose provisioning
+events via API, and fail create loudly when a host can't start the workload.
