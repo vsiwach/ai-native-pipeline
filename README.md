@@ -182,6 +182,7 @@ applied to humans and CI.
 | ⑨ | Release controls | `POST /v1/routes/<r>/promote` · `…/rollback` · `GET …/shadow-stats` | Promote swaps the route's primary for the candidate via the release engine (events recorded); rollback restores the saved endpoints |
 | ⑨ | Certifier | `tools/certify.py` (`./dev certify`) | Grounding+rubric parity + bench SLO evidence → ed25519/HMAC-signed cert; `verify` validates, tampering invalidates; eval facts re-checked by `tools/ragindex/verify_evals.py` |
 | ⑨ | Bench + replay | `tools/bench.py` (`./dev bench`), `tools/replay.py` | Measured $/Mtok = declared pool $/hr ÷ measured tok/s; timed eval replay drives the shadow phase; `scripts/run_migration_loop.sh` runs the whole loop on the sim |
+| ⑨ | Synthetic load | `tools/loadgen.py` (CLI) + `POST /v1/dev/loadgen` (console button) | Seeded Poisson arrivals, profile mix, stream ratio, concurrency cap — panels/shadow fill with zero humans typing; in-router runs are bounded (≤20 rps, ≤10 min, one at a time) |
 | ⑨ | Demo console | `vercel-deploy/` | Unified site (hub/brief/strategy/prd/mvp/demo); `demo.html` polls `/v1/costs` + `certs/latest.json`, `?mock=true` runs backendless |
 
 ### Request lifecycle (runtime)

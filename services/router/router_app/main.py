@@ -937,6 +937,43 @@ def get_app(registry_path: Path | None = None,
                              ("pool_id", "latency_ms", "error_rate")})
         return results
 
+    # Dev-mode synthetic load: the demo console's "generate load" button.
+    # One bounded run at a time; requests go through the ordinary chat path
+    # so shadow/metrics/ledger behave exactly as under real traffic.
+    @app.get("/v1/dev/loadgen")
+    def loadgen_status():
+        run = getattr(state, "loadgen", None)
+        return run.status() if run else {"running": False, "sent": 0}
+
+    @app.post("/v1/dev/loadgen")
+    async def loadgen_ctl(request: Request):
+        from router_app.loadgen import LoadRun
+        body = await request.json()
+        run = getattr(state, "loadgen", None)
+        if body.get("action") == "stop":
+            if run is not None:
+                run.stop()
+            return run.status() if run else {"running": False, "sent": 0}
+        if run is not None and run.running:
+            return JSONResponse(status_code=409, content={
+                "error": {"code": "already_running",
+                          "message": "a load run is active — stop it first"},
+                **run.status()})
+        # default target = this router, so the run exercises the real
+        # routing/shadow path; tests may point it elsewhere
+        target = body.get("target") or str(request.base_url)
+        run = LoadRun(
+            target=target,
+            route=body.get("route", state.devboard_model() or "docs-assist"),
+            rps=float(body.get("rps", 2.0)),
+            duration_s=float(body.get("duration_s", 120.0)),
+            stream_ratio=float(body.get("stream_ratio", 0.5)),
+            seed=int(body.get("seed", 42)),
+            emit=state.events.emit)
+        state.loadgen = run
+        run.start()
+        return run.status()
+
     # Dev surface for the incident agent + chaos drills (not in the board's
     # read contract): open / act / resolve.
     @app.post("/v1/incidents")

@@ -119,6 +119,22 @@ Each entry: what was decided, why, and what a human may want to revisit.
 - First-attempt run dirs from the two failed script iterations were
   deleted; only the passing run's artifacts are committed.
 
+## Post-phase, user-driven (2026-07-05, same session)
+- **CORS**: env-gated `ROUTER_CORS_ORIGINS` (off by default) so the static
+  console origin can poll the router from the browser.
+- **Grounding headers**: X-Citations/X-Retrieval-Ms now forwarded on both
+  chat paths (found live: the console chip lost its sources).
+- **demo.html robustness**: unknown serving ids degrade to em-dashes
+  instead of killing the poll loop; `.actions` wraps on narrow viewports.
+- **Synthetic load**: user decided the demo should self-drive rather than
+  rely on agent Q&A (the sim's lorem answers are by design — economics,
+  not language). Two shapes: `tools/loadgen.py` (CLI, CSV evidence) and
+  `/v1/dev/loadgen` + a console button (in-router runner, bounded ≤20 rps
+  ≤600 s, one run at a time, start/done events). Requests traverse the
+  ordinary chat path so shadow/metrics/ledger see real traffic. A stopped
+  run may count its aborted in-flight request as 1 error — honest artifact
+  of hard-stop.
+
 ## F — quality gates
 - `./dev check` surfaced two PRE-EXISTING artifact gaps (not Phase 6's):
   `services/model_apis` and `services/qwen3_8b` had no BUILD.bazel or
