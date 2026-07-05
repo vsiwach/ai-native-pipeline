@@ -1,23 +1,38 @@
-# RunPod vLLM pool (second pool)
+# RunPod pools — MAX-first, vLLM fallback
 
-One self-hosted pod (L4 or A10, ~$0.30-0.60/hr) running the official
-`vllm/vllm-openai` image with the same Qwen3-8B-class model as the Baseten
-pool. This is the pool we fully control — chaos drills kill THIS one.
+Two pods, one model, two vendors. Per-second billing; stop pods when idle.
 
-## Files
-- `pod.py` — provision (`up`), `status`, teardown (`down`), `budget`.
-  `RUNPOD_API_KEY` env var only; `up`/`down` require `--yes`.
-- `spend-ledger.json` — committed record of every billable hour (created on
-  first `up`). `pod.py up` ABORTS if projected spend exceeds the $40 mission
-  cap. `.pod-state.json` (gitignored) pins the single live pod id.
+| Pool | GPU | Serve | Image |
+|---|---|---|---|
+| `a100-nvidia` | A100 80GB (1x) | `max serve` (fallback: vLLM) | `modular/max-nvidia-full:latest` |
+| `mi300x-amd` | MI300X 192GB (1x) | `max serve` (fallback: vLLM ROCm) | `modular/max-amd:latest` |
 
-## Live session checklist
-1. `export RUNPOD_API_KEY=...` (+ `HF_TOKEN` if the model needs it)
-2. `python3 deploy/runpod/pod.py up --yes` → wait for RUNNING in `status`
-3. Smoke: `curl https://<pod-id>-8000.proxy.runpod.net/v1/models`
-4. Wire the URL into the router registry (VllmAdapter `base_url`)
-5. ALWAYS `python3 deploy/runpod/pod.py down --yes` at session end — the
-   ledger keeps counting until the entry closes.
+Model: `Qwen/Qwen2.5-14B-Instruct` (bf16 fits both; use FP8 build on A100
+if TTFT is tight). Pin image tags on demo day — check
+https://docs.modular.com/max/container for current names, and confirm live
+pod pricing in the RunPod console (enter actual $/hr into `./dev bench`).
 
-REST paths were written from docs knowledge — verify on first live run; every
-mismatch is a docs/FRICTION_LOG.md entry.
+## 1. Launch (console or API)
+Console: Pods -> Deploy -> pick GPU -> use the docker command below as the
+container start command -> expose port 8000 -> add HF_TOKEN env if the model
+needs it. Or use `launch_pod.sh` with a RunPod API key.
+
+## 2. Serve — MAX (primary path)
+    bash serve_max.sh          # prints the exact docker command per vendor
+
+Bring-up discipline (this is part of the story): drive the bring-up with
+Modular's own skills (import-model / debug-model) from your coding agent,
+and save the transcript — that's the §4.2 flywheel demonstrated.
+
+## 3. Serve — vLLM (tested fallback)
+    bash serve_vllm.sh nvidia | amd
+
+## 4. Verify from your laptop
+    curl -s http://<POD_IP>:8000/v1/models
+    python3 tools/bench.py --base-url http://<POD_IP>:8000/v1 \
+      --model Qwen/Qwen2.5-14B-Instruct --pool-usd-hr <ACTUAL> \
+      --pool-name a100-nvidia --out bench-reports/a100.json
+
+## Budget guardrail
+~20 pod-hours total across build+rehearsal+demo. Stop pods between sessions;
+`runpodctl stop pod <id>`.

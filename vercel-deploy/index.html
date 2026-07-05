@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Winning the Endpoint Game — Modular</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #16160F; }
+    html, body { height: 100%; }
+  </style>
+</helmet>
+<div data-screen-label="Site" style="height: 100vh; display: flex; flex-direction: column; font-family: 'Archivo', sans-serif; color: #F4F4EE; box-sizing: border-box;">
+
+  <!-- Header -->
+  <div style="flex: 0 0 auto; background: #16160F; border-bottom: 1px solid #2C2C24; padding: 0 36px; display: flex; align-items: center; justify-content: space-between; height: 68px;">
+    <div style="display: flex; align-items: center; gap: 28px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.16em; font-weight: 600;">MODULAR</span>
+      <span style="width: 1px; height: 20px; background: #3A3A32;"></span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8A8A80;">WINNING THE ENDPOINT GAME</span>
+    </div>
+    <nav style="display: flex; gap: 4px;">
+      <button onClick="{{ goOverview }}" style="{{ tabOverviewStyle }}">OVERVIEW</button>
+      <button onClick="{{ goDeck }}" style="{{ tabDeckStyle }}">DECK</button>
+      <button onClick="{{ goBrief }}" style="{{ tabBriefStyle }}">BRIEF</button>
+      <button onClick="{{ goStrategy }}" style="{{ tabStrategyStyle }}">STRATEGY</button>
+      <button onClick="{{ goPrd }}" style="{{ tabPrdStyle }}">PRD</button>
+      <button onClick="{{ goMvp }}" style="{{ tabMvpStyle }}">MVP</button>
+      <button onClick="{{ goDemo }}" style="{{ tabDemoStyle }}">DEMO</button>
+    </nav>
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8A8A80;">CONFIDENTIAL &middot; JULY 2026</span>
+  </div>
+
+  <!-- Overview pane -->
+  <div style="{{ paneOverviewStyle }}">
+    <div style="max-width: 980px; margin: 0 auto; padding: 90px 32px 80px 32px;">
+      <h1 style="font-size: 68px; line-height: 1.02; font-weight: 800; letter-spacing: -0.028em; margin: 0;">Winning the<br><span style="color: #D5F26E;">endpoint game</span></h1>
+      <p style="font-size: 17px; line-height: 1.6; color: #A8A89E; margin: 24px 0 0 0; max-width: 58ch;">Every company will soon run thousands of AI tasks an hour. Someone has to run them at the lowest proven cost, on whatever silicon is available, with the company&rsquo;s knowledge staying its own. These documents argue that someone is Modular — and lay out exactly how.</p>
+      <p style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #8A8A80; margin: 26px 0 0 0;">PREPARED BY VIKRAM SIWACH &middot; FOR ERIC JOHNSON &amp; THE MODULAR PRODUCT TEAM</p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 56px 0 0 0;">
+        <button onClick="{{ goDeck }}" style="text-align: left; cursor: pointer; background: #D5F26E; color: #16160F; border: none; padding: 26px 26px 22px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; font-family: 'Archivo', sans-serif;" style-hover="background: #C6E96A;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; font-weight: 600;">START HERE &middot; 9 SLIDES</span>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;">The executive deck</span>
+          <span style="font-size: 14px; line-height: 1.55; margin-top: auto; color: #3A3A2A;">The whole argument in five minutes — problem, mechanism, market, motions, risks.</span>
+        </button>
+        <button onClick="{{ goBrief }}" style="text-align: left; cursor: pointer; background: transparent; color: #F4F4EE; border: 1px solid #3A3A32; padding: 26px 26px 22px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; font-family: 'Archivo', sans-serif;" style-hover="border: 1px solid #D5F26E; background: #1D1D15;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #D5F26E;">01 &middot; EXECUTIVE BRIEF &middot; 2 PAGES</span>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;">The business in plain language</span>
+          <span style="font-size: 14px; line-height: 1.55; color: #A8A89E; margin-top: auto;">What Modular does, why it wins, and how it goes to market.</span>
+        </button>
+        <button onClick="{{ goStrategy }}" style="text-align: left; cursor: pointer; background: transparent; color: #F4F4EE; border: 1px solid #3A3A32; padding: 26px 26px 22px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; font-family: 'Archivo', sans-serif;" style-hover="border: 1px solid #D5F26E; background: #1D1D15;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #D5F26E;">02 &middot; STRATEGY</span>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;">Winning the endpoint game</span>
+          <span style="font-size: 14px; line-height: 1.55; color: #A8A89E; margin-top: auto;">Market, physics, the three-layer moat, open source, go-to-market, commitments, risks.</span>
+        </button>
+        <button onClick="{{ goPrd }}" style="text-align: left; cursor: pointer; background: transparent; color: #F4F4EE; border: 1px solid #3A3A32; padding: 26px 26px 22px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; font-family: 'Archivo', sans-serif;" style-hover="border: 1px solid #D5F26E; background: #1D1D15;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #D5F26E;">03 &middot; PRD</span>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;">The endpoint platform</span>
+          <span style="font-size: 14px; line-height: 1.55; color: #A8A89E; margin-top: auto;">Phased requirements with exit gates, kill criteria, and a 30-day MVP.</span>
+        </button>
+        <button onClick="{{ goMvp }}" style="text-align: left; cursor: pointer; background: transparent; color: #F4F4EE; border: 1px solid #3A3A32; padding: 26px 26px 22px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; font-family: 'Archivo', sans-serif;" style-hover="border: 1px solid #D5F26E; background: #1D1D15;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #D5F26E;">04 &middot; MVP &middot; FROM PLAN TO PROOF</span>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;">The conversion machine, built</span>
+          <span style="font-size: 14px; line-height: 1.55; color: #A8A89E; margin-top: auto;">Certified migration of a live agent route &mdash; frontier &rarr; NVIDIA &rarr; AMD &mdash; with signed parity certificates and measured costs.</span>
+        </button>
+        <button onClick="{{ goDemo }}" style="text-align: left; cursor: pointer; background: transparent; color: #F4F4EE; border: 1px solid #D5F26E; padding: 26px 26px 22px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 160px; font-family: 'Archivo', sans-serif;" style-hover="background: #1D1D15;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #D5F26E;">05 &middot; LIVE DEMO &middot; INTERACTIVE</span>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2;">Watch a route migrate</span>
+          <span style="font-size: 14px; line-height: 1.55; color: #A8A89E; margin-top: auto;">Ask the docs agent anything; shadow, certify, promote, roll back &mdash; and see which silicon answers.</span>
+        </button>
+      </div>
+
+      <p style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: #6B6B60; margin: 44px 0 0 0; line-height: 1.8;">EACH DOCUMENT PRINTS TO PDF FROM ITS TAB (CMD+P) &middot; DECK: ARROW KEYS TO NAVIGATE</p>
+    </div>
+  </div>
+
+  <!-- Document panes (iframes stay mounted so scroll/slide position survives tab switches) -->
+  <div style="{{ paneDeckStyle }}"><iframe title="Executive deck" src="deck.html" style="width: 100%; height: 100%; border: none; display: block;"></iframe></div>
+  <div style="{{ paneBriefStyle }}"><iframe title="Executive brief" src="brief.html" style="width: 100%; height: 100%; border: none; display: block;"></iframe></div>
+  <div style="{{ paneStrategyStyle }}"><iframe title="Strategy" src="strategy.html" style="width: 100%; height: 100%; border: none; display: block;"></iframe></div>
+  <div style="{{ panePrdStyle }}"><iframe title="PRD" src="prd.html" style="width: 100%; height: 100%; border: none; display: block;"></iframe></div>
+  <div style="{{ paneMvpStyle }}"><iframe title="MVP" src="mvp.html" style="width: 100%; height: 100%; border: none; display: block;"></iframe></div>
+  <div style="{{ paneDemoStyle }}"><iframe title="Live demo" src="demo.html" style="width: 100%; height: 100%; border: none; display: block;"></iframe></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { tab: (location.hash || '#overview').replace('#', '') };
+
+  componentDidMount() {
+    this._onHash = () => {
+      const t = (location.hash || '#overview').replace('#', '');
+      if (t !== this.state.tab) this.setState({ tab: t });
+    };
+    window.addEventListener('hashchange', this._onHash);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this._onHash);
+  }
+
+  go(tab) {
+    location.hash = tab;
+    this.setState({ tab });
+  }
+
+  tabStyle(active) {
+    return [
+      "font-family: 'IBM Plex Mono', monospace",
+      'font-size: 12px',
+      'letter-spacing: 0.12em',
+      'font-weight: 600',
+      'padding: 8px 16px',
+      'cursor: pointer',
+      'background: ' + (active ? '#D5F26E' : 'transparent'),
+      'color: ' + (active ? '#16160F' : '#A8A89E'),
+      'border: 1px solid ' + (active ? '#D5F26E' : 'transparent'),
+      'border-radius: 2px',
+    ].join('; ');
+  }
+
+  paneStyle(name, visible) {
+    const base = 'flex: 1 1 auto; min-height: 0; overflow: hidden;';
+    if (name === 'overview') return (visible ? '' : 'display: none; ') + base.replace('overflow: hidden', 'overflow-y: auto');
+    return (visible ? '' : 'display: none; ') + base + ((name === 'deck' || name === 'demo') ? ' background: #0E0E09;' : ' background: #EBEBE6;');
+  }
+
+  renderVals() {
+    const t = this.state.tab;
+    const valid = ['overview', 'deck', 'brief', 'strategy', 'prd', 'mvp', 'demo'];
+    const tab = valid.includes(t) ? t : 'overview';
+    return {
+      goOverview: () => this.go('overview'),
+      goDeck: () => this.go('deck'),
+      goBrief: () => this.go('brief'),
+      goStrategy: () => this.go('strategy'),
+      goPrd: () => this.go('prd'),
+      goMvp: () => this.go('mvp'),
+      goDemo: () => this.go('demo'),
+      tabOverviewStyle: this.tabStyle(tab === 'overview'),
+      tabDeckStyle: this.tabStyle(tab === 'deck'),
+      tabBriefStyle: this.tabStyle(tab === 'brief'),
+      tabStrategyStyle: this.tabStyle(tab === 'strategy'),
+      tabPrdStyle: this.tabStyle(tab === 'prd'),
+      tabMvpStyle: this.tabStyle(tab === 'mvp'),
+      tabDemoStyle: this.tabStyle(tab === 'demo'),
+      paneOverviewStyle: this.paneStyle('overview', tab === 'overview'),
+      paneDeckStyle: this.paneStyle('deck', tab === 'deck'),
+      paneBriefStyle: this.paneStyle('brief', tab === 'brief'),
+      paneStrategyStyle: this.paneStyle('strategy', tab === 'strategy'),
+      panePrdStyle: this.paneStyle('prd', tab === 'prd'),
+      paneMvpStyle: this.paneStyle('mvp', tab === 'mvp'),
+      paneDemoStyle: this.paneStyle('demo', tab === 'demo'),
+    };
+  }
+}
+</script>
+</body>
+</html>

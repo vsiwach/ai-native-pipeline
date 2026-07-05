@@ -1,0 +1,12 @@
+{"id": "q01", "question": "What license is the MAX framework and serving layer released under?", "must_include": ["apache"], "must_not_include": ["proprietary only"]}
+{"id": "q02", "question": "When does the Mojo compiler ship as open source?", "must_include": ["fall 2026"], "must_not_include": []}
+{"id": "q03", "question": "What is Mammoth in the Modular stack?", "must_include": ["control plane"], "must_not_include": []}
+{"id": "q04", "question": "Which hardware vendors does MAX support for serving on day 0?", "must_include": ["nvidia", "amd"], "must_not_include": []}
+{"id": "q05", "question": "What is the role of the Mojo standard library and kernels — are they open source?", "must_include": ["open"], "must_not_include": []}
+{"id": "q06", "question": "How does KV-aware routing decide where a request lands?", "must_include": ["cache"], "must_not_include": []}
+{"id": "q07", "question": "What is disaggregated serving and why does it lower cost?", "must_include": ["prefill", "decode"], "must_not_include": []}
+{"id": "q08", "question": "Can I self-host MAX for single-node serving for free?", "must_include": ["self-host"], "must_not_include": ["not possible"]}
+{"id": "q09", "question": "What skills does the Modular skills repo provide for coding agents?", "must_include": ["import-model"], "must_not_include": []}
+{"id": "q10", "question": "What Python interoperability does Mojo offer?", "must_include": ["python"], "must_not_include": []}
+{"id": "q11", "question": "Which open model families does Modular serve with day-0 coverage?", "must_include": [], "must_not_include": ["i don't have"]}
+{"id": "q12", "question": "What does the OpenAI-compatible endpoint on MAX expose?", "must_include": ["chat"], "must_not_include": []}

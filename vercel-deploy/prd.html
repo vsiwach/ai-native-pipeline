@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #EBEBE6; }
+  </style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="letter" margin="0.8in" hint-size="100%,9000px">
+
+  <div slot="footer" style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: #8A8A80; padding-top: 6px; border-top: 1px solid #E4E4DC;">
+    <span>MODULAR &middot; INFERENCE PLATFORM PRD &middot; JULY 2026</span>
+    <span>VIKRAM SIWACH &middot; CONFIDENTIAL</span>
+  </div>
+
+  <div data-screen-label="PRD" style="font-family: 'Archivo', sans-serif; color: #16160F;">
+
+    <!-- Masthead -->
+    <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em;">
+      <span style="font-weight: 600;">MODULAR</span>
+      <span style="color: #8A8A80;">INFERENCE PLATFORM PRD &middot; JULY 2026</span>
+    </div>
+    <div style="height: 3px; background: #16160F; margin: 10px 0 0 0;"></div>
+
+    <h1 style="font-size: 52px; line-height: 1.02; font-weight: 800; letter-spacing: -0.028em; margin: 34px 0 0 0;">The endpoint<br><span style="box-shadow: inset 0 -0.3em 0 #D5F26E;">platform</span></h1>
+
+    <p style="font-size: 16px; line-height: 1.55; color: #55554D; margin: 20px 0 0 0; max-width: 62ch;">Complete product requirements for winning the endpoint game: prove the cost curve, land marquee agent workloads on committed capacity, convert enterprises on proof plus perimeter, and compound the advantage with every new chip. Companion to the Strategy and the Executive Brief.</p>
+
+    <div style="background: #16160F; color: #F4F4EE; padding: 18px 22px; margin: 24px 0 0 0;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #C6E96A; margin-bottom: 7px;">NORTH STAR</div>
+      <p style="font-size: 14px; line-height: 1.55; font-weight: 500; margin: 0;">Tokens served on Modular endpoints at the lowest independently proven $ per task at SLO — measured as committed-capacity utilization, certified route wins, and $/Mtok leadership per model class.</p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8A8A80; margin: 16px 0 0 0;">
+      <span>VIKRAM SIWACH &middot; JULY 2026</span><span>REFERENCE IMPLEMENTATION: github.com/vsiwach/ai-native-pipeline</span><span>EVERY FEATURE NAMES ITS STRATEGY PILLAR (P1&ndash;P6) AND MVP HOOK</span>
+    </div>
+
+    <!-- 1 Product definition -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 36px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">01</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Product definition</h2>
+    </div>
+    <p style="font-size: 13px; line-height: 1.62; margin: 12px 0 0 0;"><strong>Product:</strong> an OpenAI-compatible endpoint platform for open-weight and customer-tuned models — serverless, dedicated, and in-customer-cloud (BYOC) — running on disaggregated, mixed-vendor fleets (NVIDIA + AMD today; Qualcomm pools post-close) that make Modular the structural low-cost serve.</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 22px; margin: 14px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The conversion machinery is certified migration:</strong> shadow a customer&rsquo;s route from a frontier API or a competitor&rsquo;s endpoint onto a Modular endpoint, certify quality parity against the customer&rsquo;s own evaluation sets, promote with instant rollback.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The retention machinery is the perimeter:</strong> adapters, evals, context, and tuned checkpoints accumulate inside the customer&rsquo;s deployment, compounding switching costs in our favor.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The compounding machinery is the agentic pipeline:</strong> agents generate in the factory, the harness verifies, only signed kernels reach the field — making every new model and every new chip serveable in days.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The enterprise landing machinery is Fleet Maximizer:</strong> recover the utilization customers already waste on hardware they already own — KV-aware routing plus workload-specialized compilation in their VPC, priced as a share of harness-verified savings.</p>
+    </div>
+
+    <!-- Figure 1 -->
+    <figure style="margin: 20px 0 0 0; border: 1.5px solid #16160F; padding: 18px 20px 16px 20px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600; margin-bottom: 14px;">FIGURE 1 &middot; CERTIFIED MIGRATION — THE CONVERSION MACHINE</div>
+      <div style="display: grid; grid-template-columns: 1fr 24px 1fr 24px 1fr 24px 1fr; gap: 0; align-items: stretch;">
+        <div style="border: 1.5px solid #C9C9C0; background: #F7F7F1; padding: 10px 12px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #55554D;">INCUMBENT ROUTE</div>
+          <div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">frontier API or competitor endpoint</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; color: #8A8A80;">&rarr;</div>
+        <div style="border: 1.5px solid #16160F; padding: 10px 12px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">SHADOW</div>
+          <div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">mirror live traffic onto a candidate &middot; zero user risk</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; color: #8A8A80;">&rarr;</div>
+        <div style="border: 1.5px solid #16160F; padding: 10px 12px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">CERTIFY</div>
+          <div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">customer-owned, hash-attested evals &middot; signed parity report</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; color: #8A8A80;">&rarr;</div>
+        <div style="border: 1.5px solid #16160F; background: #EDF6D4; padding: 10px 12px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">PROMOTE</div>
+          <div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">one gesture &middot; live on the cheapest certified endpoint</div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; gap: 20px; margin-top: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: #8A8A80;">
+        <span>&#8630; INSTANT ROLLBACK — held for the life of the route</span>
+      </div>
+      <div style="margin-top: 10px; border-top: 1.5px solid #16160F; padding-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; line-height: 1.6;"><span style="font-weight: 600;">ROUTE LEDGER</span> <span style="color: #55554D;">— every step recorded: $ per task &middot; quality score &middot; egress class &middot; the audit trail from eval hash to invoice</span></div>
+      <figcaption style="font-size: 11px; line-height: 1.55; color: #8A8A80; margin-top: 12px;">No leap of faith anywhere in the loop: traffic is shadowed before it is moved, parity is certified against evals the customer owns, promotion is reversible in one gesture, and the ledger makes the whole path auditable. This is the motion that wins routes from frontier APIs and competitor endpoints alike — and re-runs automatically on every model update.</figcaption>
+    </figure>
+
+    <p style="font-size: 13px; line-height: 1.62; margin: 16px 0 0 0;"><strong>Frontier access:</strong> customer-owned keys, pass-through at zero markup, keys in customer KMS; the platform sees metadata, never payloads. We monetize the serving, the certification, and the ledger — never resold tokens.</p>
+    <p style="font-size: 13px; line-height: 1.62; margin: 10px 0 0 0;"><strong>Commercial ladder:</strong> self-serve serverless (funnel) &rarr; committed dedicated capacity (marquee AI-natives, 2026) &rarr; BYOC/dedicated enterprise contracts (2027) &rarr; edge license (post-close, gated).</p>
+    <p style="font-size: 13px; line-height: 1.62; margin: 10px 0 0 0;"><strong>Supporting metrics:</strong> tokens/week served; committed-capacity utilization; certified route wins; $/Mtok leadership per model class in the public harness; day-0 coverage of top model families; enterprise perimeter deployments.</p>
+
+    <!-- 2 Users -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">02</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Users</h2>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 24%;">PERSONA</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F;">JOB TO BE DONE</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F; width: 22%;">CONVERTS VIA</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P1 &middot; Marquee AI-native inference owner</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6F8F1F;">PRIMARY, 2026</span></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Head of inference at a coding-agent / voice / vertical-AI company where tokens are cost-of-goods-sold. Needs lowest $/Mtok at strict SLO, day-0 models, capacity certainty, and migration with proof quality didn&rsquo;t regress.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Bake-off &rarr; committed dedicated-capacity contract</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P2 &middot; Enterprise AI platform owner</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6F8F1F;">PRIMARY, 2027</span></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Owns the agent-driven inference bill. Needs to migrate high-volume routes off frontier APIs at attested parity, keep context/adapters/evals in-perimeter, and show procurement an audited bill per task.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Certified migration &rarr; dedicated / BYOC</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P3 &middot; Platform / infra engineer</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Run multi-node inference in-VPC with placement, autoscaling, and cost visibility.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Dedicated / BYOC, per-GPU-minute + commit</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P4 &middot; Sovereign / regulated buyer</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Compliance, residency, provable egress control, vendor diversity, committed pricing.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Committed BYOC / license</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>P5 &middot; Model lab / OSS developer</strong></td>
+          <td style="padding: 10px 14px 0 0;">Labs: launch new models multi-silicon on day 0. Community: contribute kernels and skills. Not buyers — the trust, coverage, and day-0 engine.</td>
+          <td style="padding: 10px 0 0 0;">Release partnerships; community</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">Goals and non-goals</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 10px 0 0 0;">
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">GOALS</div>
+        <p style="font-size: 12.5px; line-height: 1.62; margin: 7px 0 0 0;">(1) Independently proven cost leadership on decode-heavy serving; (2) 3&ndash;5 marquee accounts on committed capacity with public reference numbers; (3) certified migration as the repeatable route-winning motion, trajectory-granular for agents; (4) enterprise conversion on proof + perimeter with compliance at GA; (5) the agentic pipeline compressing time-to-economics on every new model and chip; (6) neutrality structural and contractual.</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; font-weight: 600;">NON-GOALS</div>
+        <p style="font-size: 12.5px; line-height: 1.62; margin: 7px 0 0 0;">Token resale; standalone router or control-plane sales; peak-NVIDIA speed races; post-training as a standalone business (tuning ships only on routes we serve); building gateway mindshare from zero (adopt compatible semantics); homegrown billing (Stripe-metered); prefill-heavy workloads as wedge targets; growth targets before proof exists.</p>
+      </div>
+    </div>
+
+    <!-- Figure 2 roadmap -->
+    <figure style="margin: 22px 0 0 0; border: 1.5px solid #16160F; padding: 18px 20px 16px 20px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600; margin-bottom: 14px;">FIGURE 2 &middot; THE ROADMAP AND ITS GATES</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="border: 1.5px solid #16160F; padding: 9px 11px; min-height: 64px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">PHASE 0 &middot; PROVE</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #6F8F1F; margin-top: 2px;">Q3&ndash;Q4 2026</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 5px;">license &middot; benchmarks &middot; bake-offs</div></div>
+          <div style="background: #EDF6D4; padding: 8px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em;">EXIT GATE</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 3px;">parity license shipped &middot; MAX in independent suite &middot; 2 bake-offs</div></div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; line-height: 1.5; color: #A5551F;">&#9888; no paid acquisition before exit</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="border: 1.5px solid #16160F; padding: 9px 11px; min-height: 64px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">PHASE 1 &middot; LAND</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #6F8F1F; margin-top: 2px;">Q4&rsquo;26&ndash;Q2&rsquo;27</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 5px;">3&ndash;5 whales &middot; committed capacity</div></div>
+          <div style="background: #EDF6D4; padding: 8px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em;">EXIT GATE</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 3px;">&ge;30% routes migrated at parity &middot; &ge;15% savings public &middot; 100% logos</div></div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; line-height: 1.5; color: #A5551F;">&#9888; kill: no parity wins in 2 qtrs &rarr; pivot license-first</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="border: 1.5px solid #16160F; padding: 9px 11px; min-height: 64px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">PHASE 2 &middot; CONVERT</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #6F8F1F; margin-top: 2px;">2027</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 5px;">enterprise BYOC &middot; margin engine</div></div>
+          <div style="background: #EDF6D4; padding: 8px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em;">EXIT GATE</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 3px;">&ge;10 BYOC at $25&ndash;50K &middot; GM&rarr;60% &middot; SOC2+BAA &middot; NRR &ge;110%</div></div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; line-height: 1.5; color: #A5551F;">&#9888; kill: utilization &lt;50% 2 qtrs &rarr; partner clouds only</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="border: 1.5px dashed #16160F; padding: 9px 11px; min-height: 64px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;">PHASE 3 &middot; COMPOUND</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #6F8F1F; margin-top: 2px;">2028+ &middot; DOUBLE-GATED</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 5px;">Qualcomm silicon &middot; edge</div></div>
+          <div style="background: #F1F1EA; padding: 8px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; font-weight: 600; letter-spacing: 0.08em;">ENTRY GATE</div><div style="font-size: 10.5px; line-height: 1.5; color: #55554D; margin-top: 3px;">Qualcomm AI200/AI250 GA with MAX support</div></div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; line-height: 1.5; color: #A5551F;">&#9888; kill: AI250 slips past mid-2028 &rarr; cross-silicon stays a lab</div>
+        </div>
+      </div>
+      <figcaption style="font-size: 11px; line-height: 1.55; color: #8A8A80; margin-top: 12px;">Each phase funds the next only after its exit gate is met, and every phase carries an explicit kill/pivot so a failed hypothesis costs one phase, not the company. Spend never scales past an ungated phase. The business must stand on Phases 0&ndash;2 alone.</figcaption>
+    </figure>
+
+    <!-- 3 Phase 0 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">03</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Phase 0 — Prove <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #8A8A80; letter-spacing: 0.06em;">&nbsp;Q3&ndash;Q4 2026 &middot; P1 P5</span></h2>
+    </div>
+    <p style="font-size: 12.5px; line-height: 1.6; margin: 12px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>Entry:</strong> now. <strong>Exit gate:</strong> license parity shipped + MAX in &ge;1 independent benchmark suite + AMD decode result reproduced on MAX (or gap published) + &ge;2 marquee bake-offs running. No go-to-market scaling before exit. <strong>Scope note:</strong> ~150 engineers mid-acquisition — the primary bet is proof + capacity; everything else buys, partners, or waits. Phase 0 + the 30-day plan (&sect;9) is the MVP.</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 11.5px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 17%;">FEATURE</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 45%;">REQUIREMENT</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 21%;">TARGET METRIC</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">MVP HOOK</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F0.1 License parity</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0 &middot; WEEK-1 &middot; CEO-OWNED</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Community License free production tier identical across x86, ARM, NVIDIA, AMD, and NPUs — remove the 8-device cap on non-NVIDIA accelerators; no telemetry mandate in the free tier; license diff published publicly. <strong>Blocking:</strong> mixed-vendor fleets and cost-comparison claims are unbuildable in good faith until this ships.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">0 license objections in reviews; AMD/NPU production deploys free; diff public &le; week 1</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Policy; LICENSE in repo; public changelog</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F0.2 Benchmark harness &amp; independent proof</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">One-command $/Mtok at fixed SLO (p99 TTFT + TPOT) for voice, coding-agent, and reasoning profiles; third-party rerunnable. Submit MAX to an independent suite (InferenceMAX/MLPerf) within 90 days, published win or lose. Reproduce the third-party MI355X-vs-B200 decode result on MAX or publish the gap analysis. For head models, publish parity against the best hand-tuned NVIDIA artifacts (including NVFP4-quantized checkpoints) on NVIDIA silicon. This harness is the sales deck — and later, the agent reward function.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">MAX in &ge;1 independent suite by Q4&rsquo;26; &ge;1 external rerun within &plusmn;10%; MI355X repro published; head-model parity table live</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">./dev bench; MaxContainer e2e on 1 GPU node</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F0.3 Marquee capacity program</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Named-account program for 3&ndash;5 AI-native whales: a structured bake-off kit (their traffic, our harness, their evals), a committed dedicated-capacity term sheet (per-GPU-minute + committed $/Mtok bands, utilization floor), and white-glove migration of 1&ndash;2 highest-volume routes each. Small roster by design.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;2 bake-offs live in Q3; &ge;2 signed committed-capacity contracts by Q4; &ge;60% utilization on committed pools</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Bake-off kit = F0.2 harness + route config; term-sheet template</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 0 0;"><strong>F0.4 Cost/SLO console</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 0 0;">Per-endpoint live $/Mtok, goodput vs SLO, cache-hit. Savings reported against the customer&rsquo;s own declared baseline (their current provider&rsquo;s invoice) — synthetic counterfactuals are reported, never invoiced.</td>
+          <td style="padding: 10px 12px 0 0;">100% endpoints instrumented; console WAU &ge;50% of active accounts</td>
+          <td style="padding: 10px 0 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">/v1/costs + devboard (design contract committed)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 4 Phase 1 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">04</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Phase 1 — Land the whales <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #8A8A80; letter-spacing: 0.06em;">&nbsp;Q4 2026 &ndash; Q2 2027 &middot; P1 P2 P3 P6</span></h2>
+    </div>
+    <p style="font-size: 12.5px; line-height: 1.6; margin: 12px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>Entry:</strong> Phase 0 exit. <strong>Exit gate:</strong> 3&ndash;5 marquee accounts live on committed capacity; &ge;30% of each account&rsquo;s eligible high-volume routes on Modular endpoints at attested parity; verified &ge;15% savings published from real traffic; &ge;70% committed-pool utilization; 100% logo retention. <strong>Kill / pivot:</strong> no trajectory-level parity wins at &ge;15% savings after 2 quarters &rarr; stop capacity expansion, pivot license-first.</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 11.5px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 17%;">FEATURE</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 45%;">REQUIREMENT</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 21%;">TARGET METRIC</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">MVP HOOK</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.1 Dedicated endpoints on committed capacity</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0 &middot; HEADLINE</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Production dedicated pools per account: per-GPU-minute + committed $/Mtok bands; batch 50% off; capacity certainty (reserved + burst via neocloud contracts); 99.9% SLA. The product marquee accounts actually buy.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">3&ndash;5 accounts live; &ge;70% utilization; zero capacity-miss incidents</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Pool provisioning on placement-policy.yaml; commit ledger on /v1/costs</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.2 Certified migration</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0 &middot; CONVERSION MACHINERY</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Shadow &rarr; certify &rarr; promote &rarr; instant rollback, from frontier APIs and competitor endpoints. Trajectory-granular for agents: sticky model-per-trajectory, step-class routing, per-trajectory budget caps; the ledger keys on task outcomes, not request pairs. Frontier legs on customer-owned keys at zero markup.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;30% of eligible routes migrated per account at attested parity; certified savings report per route; &ge;1 public case study per account</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Router + release engine; frontier pass-through adapter; per-route rollups</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.3 Eval-set custody</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Customer-owned, versioned, hash-attested evaluation sets held in the customer&rsquo;s perimeter. Certification = a signed report binding eval hash + model build + route config, re-run on every promotion. Without this, &ldquo;certified parity&rdquo; is the vendor grading its own homework.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">100% of promotions carry signed certification records; &ge;3 accounts with custody-held evals</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Eval scaffolding around BackendAdapter; signed-report schema in registry CI</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.4 Heterogeneous placement + KV-aware global routing</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0 &middot; THE COST CURVE</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Mixed NVIDIA + AMD pools; decode preferentially on memory-rich silicon; disaggregated prefill/decode at 16+ GPUs where reproducible (honest 10&ndash;30% base claim; 2&times; multi-turn only where measured). KV-aware load balancing: replicas gossip cache digests (radix/bloom); the router scores candidates on tokens-already-cached minus queue depth minus pool cost tier, with egress class as a hard filter; trajectory affinity keeps a 20-step agent loop pinned to its warm replica; misses pull saved KV from a DRAM/SSD cluster pool over RDMA instead of re-prefilling. Per-tenant cache namespaces (cross-tenant prefix sharing is a side channel). Billed flat per-token with a discounted cached-input rate; savings reported, never invoiced from counterfactuals. Pool types extensible by design: Sohu-class ASICs become placement targets for stable head routes if independent benchmarks ever exist — the harness decides, not the hype.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;15% blended $/tok reduction at equal SLO vs single-vendor baseline; zero SLO regressions on failover; cluster cache-hit +30&ndash;50%; TTFT &minus;40% on shared prefixes</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">placement-policy.yaml + per-pool $ inputs; cache-digest gossip on state-handle abstraction</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.5 Release engine + SLA</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Canary/shadow/A-B across fleets — the shared machinery certified promotion depends on; auto-revert &lt;5 min; OTel + Prometheus; fleet upgrade lead time &lt;1 week.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">99.9% uptime across marquee accounts</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">release-policy.yaml engine productized</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.6 Day-0 pipeline + model-lab release partnerships</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&lt;48h bring-up for top-5 open families; Western-model depth (Gemma, GPT-OSS, Mistral, Llama) held to the same tuning quality as an explicit enterprise-readiness gate; licenses version-checked; partner for the tail. Upstream motion: offer model labs (Zhipu, Moonshot, MiniMax, DeepSeek, Google/Gemma) the pipeline as a release service — launch day-0 on NVIDIA + AMD (+ Qualcomm post-close) in open quantization formats with parity reports, making canonical checkpoints multi-silicon from birth and blunting NVIDIA-native artifact lock-in.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Day-0 &lt;48h for top-5 releases; cheapest-at-SLO within 1 week of each release; &ge;1 lab release partnership signed; Western-model parity table live</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Registry CI matrix; import-model / debug-model skills; lab partnership one-pager</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.7 Agentic kernel factory — internal</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">The factory side of the factory/field split (Strategy &sect;4.5): agents — trained on the open Mojo corpus and community contributions — scaffold new architectures from donors, port and optimize kernels; the harness verifies numerics (layer-by-layer logit divergence) and $/Mtok at SLO; humans gate; artifacts ship signed and reproducible from the harness record. Harden the harness against reward gaming (anti-exploit checks, held-out shapes) before any external claim. Publish the Mojo-vs-Python-DSL agent benchmark (matched kernel tasks, agent success rate to certified-correct-and-fast), win or lose.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Day-0 median bring-up time &minus;50% vs manual baseline; &ge;1 new silicon target enabled via pipeline; agent benchmark published; 0 gamed-reward incidents</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">modular/skills + eval scaffolding; harness reward API on ./dev bench</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F1.8 Self-serve serverless — funnel</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P2</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Signup &rarr; deployed endpoint &lt;10 min, no sales contact; free credits; Stripe-metered per-token billing. Judged as marketing: pipeline contribution to the two revenue motions, dollar-capped loss leader.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">TTFI p50 &lt;5 min; 150&ndash;300 signups/mo; activation &ge;25%; &ge;2 marquee/enterprise leads per quarter sourced from self-serve</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">contracts/llm.openapi.yaml + service.py flow</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 0 0;"><strong>F1.9 White-glove BYOC pilots</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 0 0;">2&ndash;3 design partners deployed in-VPC, Terraform-assisted, manual where needed; weights, adapters, context, evals, and ledger in-perimeter. Purpose: surface enterprise objections (security review, key custody, egress policy) before Phase-2 GA.</td>
+          <td style="padding: 10px 12px 0 0;">2&ndash;3 pilots live; security-review objection log feeding F2.1/F2.2</td>
+          <td style="padding: 10px 0 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Terraform module-as-interface; enterprise OIDC variant</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 5 Phase 2 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">05</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Phase 2 — Convert enterprises <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #8A8A80; letter-spacing: 0.06em;">&nbsp;2027 H1&ndash;H2 &middot; P2 P4</span></h2>
+    </div>
+    <p style="font-size: 12.5px; line-height: 1.6; margin: 12px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>Entry:</strong> Phase 1 exit (public reference numbers exist). <strong>Exit gate:</strong> &ge;10 enterprise dedicated/BYOC accounts at $25&ndash;50K ACV, of which &ge;3 landed via Fleet Maximizer gain-share; blended gross margin &rarr; 60% as mix shifts from whale contracts to enterprise commits; SOC2 Type II + HIPAA/BAA in hand; first honest net-revenue-retention reading (2027 H2 cohort) &ge;110%. <strong>Kill / pivot:</strong> dedicated utilization &lt;50% for 2 quarters &rarr; serve dedicated from partner clouds only.</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 11.5px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 17%;">FEATURE</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 45%;">REQUIREMENT</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 21%;">TARGET METRIC</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">MVP HOOK</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.0 Fleet Maximizer</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0 &middot; THE ENTERPRISE LANDING SKU</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">BYOC utilization recovery on the customer&rsquo;s existing hardware — no model change, no hardware change, no data movement. Deploys in their VPC: (1) <strong>Mammoth control plane</strong> — KV-aware routing (F1.4), paged/shared KV, HBM&rarr;DRAM&rarr;SSD tiering, cost/SLO ledger; (2) <strong>workload-specialized compilation</strong> — the compiler recompiles and autotunes against observed traffic shapes from the ledger, deterministically, no code generation in-perimeter; (3) <strong>field application of factory-signed kernels</strong> (F1.7), canaried by the release engine with instant rollback. Engagement arc 30/60/90: baseline capture (rerunnable harness, contractually agreed) &rarr; routing + KV wins promoted &rarr; kernel pass on top-3 workload shapes &rarr; certified capacity-recovery report. Pricing: gain-share on harness-verified savings converting to per-GPU-minute subscription. Kernel provenance non-negotiable: signed, human-gated, reproducible. Expansion ladder built in: Saturate &rarr; Diversify (F2.7) &rarr; Specialize (F2.3) &rarr; Extend (F3.3).</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;3 gain-share engagements; &ge;2&times; verified tokens/sec/GPU on eligible routes; certified capacity-recovery report at day 90 per account; 0 disputed baselines; &ge;60% convert to subscription</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Mammoth deploy via F1.9 Terraform; baseline profile in ./dev bench; gain-share term sheet</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.1 BYOC / dedicated GA + compliance wrap</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0 &middot; ANCHOR</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Committed BYOC in the customer&rsquo;s VPC: weights, adapters, context, evals, and the route ledger inside the perimeter; VPC deploy &lt;1 day; per-GPU-minute dedicated; batch 50% off. SOC2 Type II, HIPAA + BAA, and GDPR residency ship with GA, not after — pitching sovereign buyers with compliance &ldquo;coming later&rdquo; is disqualifying in procurement.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">ACV $25&ndash;50K; &ge;10 accounts; margin mix shifts off tokens; attestations in hand at GA</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Terraform module hardened from F1.9 pilots; region/compliance placement + audit log</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.2 Context firewall</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">In-perimeter PII/secret/data-class detection; redaction with in-house re-hydration; per-route egress policy (&ldquo;PHI never leaves; redacted context may go frontier&rdquo;); signed egress ledger per request. The sovereignty promise and the frontier-routing reality reconciled — and the reason sovereign buyers run frontier-bound traffic through us at all.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">100% frontier routes behind firewall; &le;50ms p99 added latency; 0 unclassified egress events</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Egress-class field on routes (seeded Phase 1); redaction service in perimeter</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.3 Reinforcement fine-tuning as a service</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1 &middot; RETENTION FLYWHEEL</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">RFT on verifiable routes we already serve, against the customer&rsquo;s own reward harness and custody evals; checkpoints enter shadow &rarr; certify &rarr; promote like any candidate; the customer owns weights and reward functions. Each tuned route drops their cost curve further and deepens switching costs in our favor. Sold as economics with certification — &ldquo;your route at attested parity, at a fraction of the cost&rdquo; — never as intelligence. Weak-verifier reward-hacking checks built in.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;3 tuned routes in production at attested parity; &ge;50% $/task reduction on tuned routes; 0 uncaught reward-hacking regressions</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">GRPO/DPO pipeline vs custody evals; checkpoint registry in promote flow</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.4 Multi-adapter serving</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1 &middot; CAPABILITY</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Hundreds of LoRA adapters per base model at near-base cost; hot-swap &lt;2s; adapter-affinity placement. Table stakes executed well — the substrate F2.3 rides on, not a differentiator.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;90% base throughput at 100+ adapters/GPU</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Adapter-affinity = state-affinity variant</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.5 KV offload + spot-aware serving</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">KV tiering (HBM &rarr; DRAM &rarr; remote); preemption-safe spot serving — reload state instead of recomputing; eviction SLO math defined before commitment.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Spot $/tok &le;60% of dedicated at 99.9% effective availability</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Cold-start-aware autoscaling + affinity extension</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F2.6 Enterprise cost governance</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Chargeback/showback per team and per agent; per-trajectory budget caps productized; audited $/task reporting for procurement. The CFO-facing surface of the ledger.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">&ge;50% of enterprise accounts using chargeback; audited reports in &ge;3 renewals</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">/v1/costs org rollups + governance/agent-policy.yaml</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 0 0;"><strong>F2.7 Day-0 hardware adoption service</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 0 0;">The agentic pipeline (F1.7) productized for enterprise and neocloud fleets: whatever silicon the customer procures, agents port and optimize their models, adapters, and tuned checkpoints; the harness certifies parity and cost; endpoints go live in their perimeter in days. Compute scarcity becomes the sales motion; every silicon generation becomes a renewal event. Claims bounded to demonstrated bring-up compression.</td>
+          <td style="padding: 10px 12px 0 0;">&ge;2 fleet customers onboarded onto a new silicon target in &lt;2 weeks each, certified via harness; &ge;1 public case study</td>
+          <td style="padding: 10px 0 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">F1.7 pipeline + BYOC Terraform; per-silicon certification report schema</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 6 Phase 3 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">06</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Phase 3 — Compound the cost curve <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #8A8A80; letter-spacing: 0.06em;">&nbsp;2028+ &middot; DOUBLE-GATED &middot; P3 P4 P6</span></h2>
+    </div>
+    <p style="font-size: 12.5px; line-height: 1.6; margin: 12px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>Entry:</strong> Phase 2 exit <em>and</em> Qualcomm AI200/AI250 GA with MAX support. <strong>Kill / pivot:</strong> AI250 slips past mid-2028 or cross-vendor interconnect/numerics immature &rarr; cross-silicon stays a lab program; the endpoint business stands on Phases 0&ndash;2.</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 11.5px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 17%;">FEATURE</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 45%;">REQUIREMENT</th>
+          <th style="font-weight: 500; padding: 0 12px 7px 0; border-bottom: 1.5px solid #16160F; width: 21%;">TARGET METRIC</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">MVP HOOK</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F3.1 Qualcomm silicon pools</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P0</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">AI200 (768GB/card) then AI250 near-memory decode pools behind the same endpoints — the structural cost floor beneath the rented-NVIDIA market, passed to customers via the ledger, proven via the public harness before any pricing claim.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Decode $/tok on AI-series pools independently verified below AMD/NVIDIA at equal SLO</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Pool-role generalization; AI200 BackendAdapter</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F3.2 Cross-silicon disaggregation — rungs 2 and 3</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1 &middot; OPTION</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Rung 1 (route-level cross-vendor placement) already ships in F1.4 with no external dependency. <strong>Rung 2:</strong> request-level NVIDIA-prefill &rarr; AMD/Qualcomm-decode inside our own fleet — KV over RDMA is production-proven at scale (Mooncake-class); the true gates are compiler-controlled KV layout on both ends and cross-vendor FP8/FP4 numerics. <strong>Rung 3:</strong> publish the open KV interchange format (layouts, scaling recipes, transfer semantics) with Qualcomm + AMD as founding implementers — the standard that makes cross-silicon an ecosystem, not a party trick. Resist demo-driven promotion throughout.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Rung 2: decode $/tok &minus;40% vs all-NVIDIA at equal SLO, &ge;1 production customer; Rung 3: spec published, &ge;2 external implementers</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">KV-transport adapter interface; interchange spec draft from state-handle abstraction</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>F3.3 Edge continuum</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P1</span></td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Per-device license via the Qualcomm channel; the same endpoints, routes, and adapters running on-device (Snapdragon &rarr; AI250) — sovereignty&rsquo;s highest-margin expression, with the KV-aware routing hierarchy (F1.4) as its technical spine: personal context never leaves the device. No revenue modeled before silicon GA.</td>
+          <td style="padding: 10px 12px 10px 0; border-bottom: 1px solid #E4E4DC;">Design wins; $/device &times; units ARR at ~70% GM; 1 flagship reference</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Edge runtime profile in service contract</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 12px 0 0;"><strong>F3.4 Outcome-verified task pricing</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: #6F8F1F;">P2</span></td>
+          <td style="padding: 10px 12px 0 0;">For routes with verifiable outcomes (tests pass, schema validates, resolution confirmed): per-verified-task pricing with a token-cost floor, verification running in the customer&rsquo;s harness. The pricing model that finally matches the north star and escapes $/Mtok commoditization.</td>
+          <td style="padding: 10px 12px 0 0;">Outcome-priced routes &ge;10% of platform revenue; dispute rate &lt;1%</td>
+          <td style="padding: 10px 0 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.6;">Verification hooks in custody harness; pricing engine on ledger</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 7 Always-on -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">07</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Always-on tracks</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Neutrality &amp; open source.</strong> License parity held permanently; cross-vendor benchmarks on every release; published placement records and customer audit rights (placement follows the ledger, not the parent); per-silicon coverage SLAs; Mojo compiler open-sourced fall 2026 (Apache 2.0, publicly committed) with published governance; the open-core line held — self-hostable serving open, fleet operations commercial; the open KV interchange format maintained as a public spec with external implementers. Metric: external kernel contributions and agent-authored PRs per quarter, verified through the factory harness.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Benchmarks.</strong> Every release re-runs the public harness; regressions block release; independent-suite presence maintained, win or lose; head-model parity vs best hand-tuned NVIDIA artifacts refreshed per major release.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Capacity.</strong> Committed-burst neocloud contracts sized to signed commitments; 60% utilization floor before expansion; loss-leader budget capped in dollars; no owned capex before Phase 2 exit.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Model freshness.</strong> Day-0 SLA for top-5 families with Western-model depth as an enterprise gate; cheapest-at-SLO within one week of each major release — the standing proof the cost curve regenerates.</p>
+    </div>
+
+    <!-- 8 Success metrics -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">08</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Success metrics by phase</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin: 14px 0 0 0;">
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">PHASE 0 &middot; Q3&ndash;Q4&rsquo;26</div>
+        <p style="font-size: 11.5px; line-height: 1.6; margin: 7px 0 0 0;">License parity live (week 1); MAX in &ge;1 independent suite; MI355X repro published; head-model parity table live; &ge;2 marquee bake-offs; &ge;2 committed contracts signed.</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">PHASE 1 &middot; Q4&rsquo;26&ndash;Q2&rsquo;27</div>
+        <p style="font-size: 11.5px; line-height: 1.6; margin: 7px 0 0 0;">3&ndash;5 marquee accounts live; &ge;70% pool utilization; &ge;30% eligible routes migrated at attested parity; verified &ge;15% savings public; 100% logo retention; 99.9% SLA; &ge;1 lab release partnership; agent benchmark published.</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">PHASE 2 &middot; 2027</div>
+        <p style="font-size: 11.5px; line-height: 1.6; margin: 7px 0 0 0;">&ge;10 enterprise dedicated/BYOC at $25&ndash;50K ACV (&ge;3 via Fleet Maximizer gain-share); &ge;2&times; verified tokens/sec/GPU on Maximizer routes; GM &rarr; 60%; SOC2 + BAA at GA; firewall on 100% frontier routes; &ge;3 tuned routes live; &ge;2 fleet customers on new silicon in &lt;2 weeks; first NRR &ge;110% (H2 cohort).</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">PHASE 3 &middot; 2028+</div>
+        <p style="font-size: 11.5px; line-height: 1.6; margin: 7px 0 0 0;">Qualcomm pools independently verified cheapest at SLO; outcome-priced routes &ge;10% of revenue; edge $/device ARR (gated); cross-silicon &minus;40% (option).</p>
+      </div>
+    </div>
+
+    <!-- 9 MVP -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">09</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The MVP: next 30 days on the reference implementation</h2>
+    </div>
+    <p style="font-size: 13px; line-height: 1.62; margin: 12px 0 0 0;">Phase 0 defines the MVP surface; these five items make it real. Each maps to a committed design contract in <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;">ai-native-pipeline</span>.</p>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>1 &middot; Bake-off kit (F0.3):</strong> route config + harness profile + eval-custody contract packaged so a marquee prospect can run their own traffic against a Modular endpoint in under a week. This is the single highest-leverage artifact in the plan.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>2 &middot; ./dev bench (F0.2):</strong> $/Mtok at fixed SLO for three workload profiles against any adapter (MAX, vLLM, hosted endpoints); publish the first reproducible numbers; open the MI355X-repro and head-model-parity workstreams.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>3 &middot; Committed-capacity ledger (F1.1):</strong> per-pool commit bands, utilization, and $/Mtok rollups on /v1/costs — the term sheet&rsquo;s technical backing.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>4 &middot; Migration skeleton (F1.2 + F1.3):</strong> shadow mode + a signed certification record binding eval-set hash + model build + route config; one frontier pass-through adapter (customer-owned key) + one open-model adapter.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>5 &middot; Hygiene &amp; groundwork:</strong> LICENSE (Apache 2.0), OTel hooks, Stripe metering spike, and an egress-class field on every route (the context-firewall seed).</p>
+    </div>
+
+    <!-- 10 Open questions -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">10</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Open questions</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 26px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Marquee target list</strong> — which 5 accounts, what committed volumes clear the utilization floor, and who owns the relationships through the acquisition quiet period?</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Neutrality made visible</strong> — the guarantees are contractually secured; what publication cadence (placement records, governance reports) makes them legible to a skeptical enterprise buyer fastest?</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Trajectory-level parity on agent routes</strong> — the least-proven claim in the plan; the three Phase-1 design partners answer it, and capacity spend does not scale before they do.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Lab partnership economics</strong> — what do model labs need (compute credits, co-marketing, revenue share?) to release multi-silicon day-0 through us, and does frontier-checkpoint custody create legal exposure?</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Agent benchmark arbitration</strong> — who runs the Mojo-vs-Triton/Helion agent suite so it isn&rsquo;t dismissed as our homework; candidate: an existing independent harness with external rerun rights.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Capacity funding</strong> — Modular P&amp;L or Qualcomm strategic budget for the committed-burst neocloud contracts, and at what dollar cap?</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Fleet Maximizer gain-share accounting</strong> — what savings attribution does the customer&rsquo;s finance team accept (harness-verified tokens/sec/GPU vs their invoice), and what share converts them fastest without leaving margin on the table?</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Kernel provenance in security review</strong> — what signing, SBOM, and reproducibility evidence do enterprise security teams require before agent-authored (factory-verified) kernels are admitted to their VPCs?</p>
+    </div>
+
+  </div>
+</x-import>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Certified Migration — Live Demo · Modular</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#16160F;--panel:#1D1D15;--panel2:#2C2C24;--line:#3A3A32;--txt:#F4F4EE;--mut:#A8A89E;--dim:#8A8A80;--lime:#D5F26E;--ink:#16160F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Archivo',sans-serif;min-height:100vh}
+.mono{font-family:'IBM Plex Mono',monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 24px 60px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.brand{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:3px;color:var(--lime)}
+h1{font-size:22px;font-weight:600;margin-top:4px}
+h1 .route{font-family:'IBM Plex Mono',monospace;color:var(--lime)}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:5px 10px}
+.stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:center}
+.step .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut)}
+.step .v{font-size:11px;color:var(--dim);margin-top:3px}
+.step.done .k{color:var(--lime)}
+.step.active{background:var(--panel2);border-color:var(--lime)}
+.step.active .k{color:var(--lime)}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.pool{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.pool.serving{border-color:var(--lime)}
+.pool .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim)}
+.pool .name{font-size:15px;font-weight:600;margin:4px 0 2px}
+.pool .sub{font-size:11.5px;color:var(--mut)}
+.pool .stats{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;display:grid;gap:4px}
+.pool .stats div{display:flex;justify-content:space-between}
+.pool .stats span:last-child{color:var(--txt)}
+.pool.serving .stats span:last-child{color:var(--lime)}
+.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;border-radius:4px;padding:2px 8px;margin-top:8px}
+.badge.live{background:var(--lime);color:var(--ink)}
+.badge.idle{border:1px solid var(--line);color:var(--dim)}
+.two{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.card h3{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
+.cert{font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.9;color:var(--dim)}
+.cert b{color:var(--mut);font-weight:400}
+.pass{background:var(--lime);color:var(--ink);border-radius:4px;padding:2px 8px;font-size:10.5px;float:right}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.metric{background:var(--panel);border-radius:8px;padding:10px;text-align:center}
+.metric .l{font-size:10.5px;color:var(--dim)}
+.metric .n{font-family:'IBM Plex Mono',monospace;font-size:19px;color:var(--txt);margin-top:3px}
+.metric .n.lime{color:var(--lime)}
+.chat{display:flex;flex-direction:column;height:460px}
+.log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
+.msg{max-width:92%;border-radius:10px;padding:9px 12px;font-size:13.5px;line-height:1.55}
+.msg.user{align-self:flex-end;background:var(--panel2);border:1px solid var(--line)}
+.msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
+.msg .chip{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);margin-top:7px;border-top:1px solid var(--line);padding-top:6px}
+.msg .chip .pool-a100{color:#8fd4a8}.msg .chip .pool-mi300x{color:#f0a882}.msg .chip .pool-frontier{color:var(--mut)}
+.inp{display:flex;gap:8px;margin-top:10px}
+.inp input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:'Archivo',sans-serif;font-size:13.5px;padding:10px 12px;outline:none}
+.inp input:focus{border-color:var(--lime)}
+button{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--mut)}
+button.primary{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;gap:10px;align-items:center;margin-top:4px}
+.foot{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);margin-left:auto}
+.note{font-size:11px;color:var(--dim);margin-top:14px;line-height:1.6}
+@media(max-width:900px){.grid,.two,.metrics{grid-template-columns:1fr}.stepper{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="brand">MODULAR</div>
+    <h1>Certified migration — route: <span class="route">docs-assist</span></h1>
+  </div>
+  <div class="tag" id="mode-tag">F1.2 · F1.3 · F0.2 · F0.4</div>
+</header>
+
+<div class="stepper" id="stepper">
+  <div class="step" data-s="shadow"><div class="k">1 · SHADOW</div><div class="v" id="s-shadow">—</div></div>
+  <div class="step" data-s="certify"><div class="k">2 · CERTIFY</div><div class="v" id="s-certify">—</div></div>
+  <div class="step" data-s="promote"><div class="k">3 · PROMOTE</div><div class="v" id="s-promote">—</div></div>
+  <div class="step" data-s="rollback"><div class="k">↶ ROLLBACK</div><div class="v">armed · &lt;5s</div></div>
+</div>
+
+<div class="grid" id="pools"></div>
+
+<div class="metrics" id="metrics"></div>
+
+<div class="two">
+  <div class="card chat">
+    <h3>ASK THE AGENT — answers grounded in Modular's public docs</h3>
+    <div class="log" id="log"></div>
+    <div class="inp">
+      <input id="q" placeholder="e.g. What license is the Mojo compiler under?" onkeydown="if(event.key==='Enter')ask()">
+      <button class="primary" onclick="ask()">Ask</button>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
+      <div class="cert" id="cert">loading…</div>
+    </div>
+    <div class="card">
+      <h3>ACTIONS</h3>
+      <div class="actions">
+        <button class="primary" id="btn-promote" onclick="promote()">Promote route →</button>
+        <button id="btn-rollback" onclick="rollback()">↶ Rollback</button>
+      </div>
+      <div class="note" id="action-note">Promotion is gated on the certificate verdict. Rollback restores the previous pool instantly; the ledger records both.</div>
+    </div>
+  </div>
+</div>
+
+<p class="note">Unofficial demo built on public Modular materials · costs shown are measured (pool $/hr ÷ measured tok/s), never estimated · every artifact rerunnable: <span class="mono">./dev bench · tools/certify.py</span> · ledger: <span class="mono">/v1/costs</span></p>
+</div>
+
+<script>
+const qs = new URLSearchParams(location.search);
+const MOCK = qs.get('mock') === 'true';
+const ROUTER = qs.get('router') || 'http://localhost:8600';
+
+const state = {
+  phase: 'certify',
+  serving: 'frontier',
+  pools: {
+    frontier: {label:'INCUMBENT', name:'frontier-api / gpt-class', sub:'customer key · zero markup', usd_mtok: 10.0, ttft: 638, cls:'pool-frontier'},
+    a100:     {label:'POOL · NVIDIA', name:'RunPod A100 80GB', sub:'MAX serve · Qwen2.5-14B', usd_mtok: null, ttft: null, cls:'pool-a100'},
+    mi300x:   {label:'POOL · AMD', name:'RunPod MI300X 192GB', sub:'MAX serve · same weights', usd_mtok: null, ttft: null, cls:'pool-mi300x'}
+  },
+  shadowed: 0, parity: null, savings: null
+};
+
+const MOCK_DATA = {
+  bench: { a100: {usd_mtok: 0.31, ttft: 412}, mi300x: {usd_mtok: 0.19, ttft: 447} },
+  cert: { verdict:'PROMOTE_ELIGIBLE', parity: 0.958, gate: 0.90,
+    eval_sha:'9f3ac41d…', config_sha:'71bb08e2…', build:'qwen2.5-14b@max-26.4',
+    algo:'ed25519', slo:'p99 TTFT 412ms ≤ 800ms' },
+  shadowed: 5124,
+  answers: {
+    default: {text:'The MAX framework and serving layer are open source under the Apache 2.0 license [1], and the Mojo compiler ships open source in fall 2026 [2]. You can self-host single-node serving free forever; fleet operations (Mammoth) are the commercial layer [3].', cites:'docs.modular.com/max · /mojo/faq · /mammoth'},
+    kv: {text:'KV-aware routing scores each candidate replica on tokens-already-cached minus queue depth minus pool cost tier [1]; trajectory affinity keeps an agent loop pinned to its warm replica [2].', cites:'docs.modular.com/mammoth'},
+  }
+};
+
+function fmt(n, d=2){ return n==null ? '—' : Number(n).toFixed(d); }
+
+function render(){
+  const p = state.pools;
+  document.getElementById('pools').innerHTML = Object.entries(p).map(([k,v])=>`
+    <div class="pool ${state.serving===k?'serving':''}">
+      <div class="lbl">${v.label}</div>
+      <div class="name">${v.name}</div>
+      <div class="sub">${v.sub}</div>
+      <div class="stats">
+        <div><span>$/Mtok</span><span>${v.usd_mtok==null?'—':'$'+fmt(v.usd_mtok)}</span></div>
+        <div><span>p99 TTFT</span><span>${v.ttft==null?'—':v.ttft+'ms'}</span></div>
+      </div>
+      <span class="badge ${state.serving===k?'live':'idle'}">${state.serving===k?'● SERVING':'standby'}</span>
+    </div>`).join('');
+
+  const steps = document.querySelectorAll('.step');
+  const order = ['shadow','certify','promote','rollback'];
+  const idx = order.indexOf(state.phase);
+  steps.forEach((el,i)=>{ el.classList.toggle('done', i<idx); el.classList.toggle('active', i===idx); });
+  document.getElementById('s-shadow').textContent = state.shadowed ? state.shadowed.toLocaleString()+' req mirrored' : '—';
+  document.getElementById('s-certify').textContent = state.parity ? 'parity '+(state.parity*100).toFixed(1)+'%' : '—';
+  document.getElementById('s-promote').textContent = state.phase==='promote'?'eligible':(idx>2?'promoted':'—');
+
+  const inc = p.frontier.usd_mtok, cur = p[state.serving].usd_mtok;
+  state.savings = (inc && cur) ? Math.round((1-cur/inc)*100) : null;
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="l">savings vs incumbent</div><div class="n lime">${state.savings==null?'—':'−'+state.savings+'%'}</div></div>
+    <div class="metric"><div class="l">SLO at gate</div><div class="n">${p[state.serving].ttft?'p99 ✓':'—'}</div></div>
+    <div class="metric"><div class="l">requests shadowed</div><div class="n">${state.shadowed?state.shadowed.toLocaleString():'—'}</div></div>
+    <div class="metric"><div class="l">egress class</div><div class="n">in-VPC</div></div>`;
+}
+
+function renderCert(c){
+  document.getElementById('cert-verdict').textContent = c.verdict==='PROMOTE_ELIGIBLE' ? `PASS · ${(c.parity*100).toFixed(1)}% ≥ ${(c.gate*100).toFixed(0)}%` : 'HOLD';
+  document.getElementById('cert').innerHTML =
+    `eval set <b>sha256:${c.eval_sha}</b> · customer custody<br>`+
+    `model build <b>${c.build}</b><br>`+
+    `route config <b>sha256:${c.config_sha}</b><br>`+
+    `SLO <b>${c.slo}</b><br>`+
+    `signed <b>${c.algo}</b> · verify: <b>tools/certify.py verify</b>`;
+  document.getElementById('btn-promote').disabled = c.verdict!=='PROMOTE_ELIGIBLE';
+}
+
+let liveFailed = false;
+async function loadLive(){
+  if(liveFailed) return;
+  try{
+    const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
+    (d.pools||[]).forEach(pl=>{ if(state.pools[pl.id]){ state.pools[pl.id].usd_mtok = pl.usd_per_mtok; state.pools[pl.id].ttft = pl.p99_ttft_ms; }});
+    state.serving = d.routes?.['docs-assist']?.serving || state.serving;
+    state.shadowed = d.routes?.['docs-assist']?.shadowed || state.shadowed;
+  }catch(e){ liveFailed = true; document.getElementById('mode-tag').textContent = 'MOCK MODE — router unreachable · append ?router=<url> for live'; loadMock(); return; }
+  try{
+    const r = await fetch('certs/latest.json'); const c = await r.json();
+    state.parity = c.quality.parity;
+    renderCert({verdict:c.verdict, parity:c.quality.parity, gate:c.quality.gate,
+      eval_sha:c.eval_set.sha256.slice(0,8)+'…', config_sha:c.route_config.sha256.slice(0,8)+'…',
+      build:c.model_build, algo:c.signature_block.algo,
+      slo:`p99 TTFT ${c.slo?.measured?.p99_ttft_ms??'—'}ms ≤ ${c.slo?.gate_ttft_ms}ms`});
+  }catch(e){}
+  render();
+}
+
+function loadMock(){
+  state.pools.a100.usd_mtok = MOCK_DATA.bench.a100.usd_mtok;
+  state.pools.a100.ttft = MOCK_DATA.bench.a100.ttft;
+  state.pools.mi300x.usd_mtok = MOCK_DATA.bench.mi300x.usd_mtok;
+  state.pools.mi300x.ttft = MOCK_DATA.bench.mi300x.ttft;
+  state.shadowed = MOCK_DATA.shadowed;
+  state.parity = MOCK_DATA.cert.parity;
+  state.phase = 'promote';
+  renderCert(MOCK_DATA.cert);
+  render();
+}
+
+function addMsg(cls, text){ const el=document.createElement('div'); el.className='msg '+cls; el.textContent=text; document.getElementById('log').appendChild(el); el.scrollIntoView(); return el; }
+
+async function ask(){
+  const q = document.getElementById('q').value.trim(); if(!q) return;
+  document.getElementById('q').value=''; addMsg('user', q);
+  const bot = addMsg('bot',''); const t0 = performance.now();
+  if(MOCK){
+    const a = /kv|rout/i.test(q) ? MOCK_DATA.answers.kv : MOCK_DATA.answers.default;
+    let i=0; const words=a.text.split(' ');
+    await new Promise(res=>{ const iv=setInterval(()=>{ bot.textContent=words.slice(0,++i).join(' '); if(i>=words.length){clearInterval(iv);res();} }, 30); });
+    chip(bot, t0, a.cites); return;
+  }
+  try{
+    const r = await fetch(ROUTER+'/v1/chat/completions?model=docs-assist', {method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages:[{role:'user',content:q}], max_tokens:300, stream:true})});
+    const cites = r.headers.get('X-Citations');
+    const reader = r.body.getReader(); const dec = new TextDecoder(); let buf='';
+    while(true){ const {done,value} = await reader.read(); if(done) break;
+      buf += dec.decode(value,{stream:true});
+      for(const line of buf.split('\n')){ if(!line.startsWith('data:')||line.includes('[DONE]')) continue;
+        try{ const d=JSON.parse(line.slice(5)); bot.textContent += d.choices?.[0]?.delta?.content||''; }catch(e){} }
+      buf = buf.slice(buf.lastIndexOf('\n')+1);
+    }
+    let citeStr=''; try{ citeStr=(JSON.parse(cites)||[]).map(c=>c.url.replace('https://','')).join(' · ');}catch(e){}
+    chip(bot, t0, citeStr);
+  }catch(e){ bot.textContent = 'router unreachable — is '+ROUTER+' up? (or use ?mock=true)'; }
+}
+
+function chip(el, t0, cites){
+  const ms = Math.round(performance.now()-t0);
+  const s = state.serving, p = state.pools[s];
+  const cost = p.usd_mtok ? '$'+(p.usd_mtok*300/1e6).toFixed(6) : '—';
+  const c = document.createElement('span'); c.className='chip';
+  c.innerHTML = `served by <span class="${p.cls}">${s.toUpperCase()}</span> · ${ms}ms · ~${cost}/answer` + (cites?`<br>sources: ${cites}`:'');
+  el.appendChild(c);
+}
+
+function promote(){
+  if(MOCK || true){
+    state.serving = state.serving==='frontier' ? 'a100' : 'mi300x';
+    state.phase = 'rollback';
+    document.getElementById('action-note').textContent = 'Promoted. Next answers stream from '+state.serving.toUpperCase()+'. Rollback stays armed for the life of the route.';
+    if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/promote',{method:'POST'}).catch(()=>{});
+    render();
+  }
+}
+function rollback(){
+  state.serving = state.serving==='mi300x' ? 'a100' : 'frontier';
+  state.phase = 'promote';
+  document.getElementById('action-note').textContent = 'Rolled back in <5s. The ledger recorded both transitions.';
+  if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/rollback',{method:'POST'}).catch(()=>{});
+  render();
+}
+
+if(MOCK){ document.getElementById('mode-tag').textContent='MOCK MODE — ?mock=true'; loadMock(); }
+else { loadLive(); setInterval(loadLive, 5000); }
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #EBEBE6; }
+  </style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="letter" margin="0.8in" hint-size="100%,2200px">
+
+  <div slot="footer" style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: #8A8A80; padding-top: 6px; border-top: 1px solid #E4E4DC;">
+    <span>MODULAR &middot; EXECUTIVE BRIEF &middot; JULY 2026</span>
+    <span>VIKRAM SIWACH &middot; CONFIDENTIAL</span>
+  </div>
+
+  <div data-screen-label="Executive Brief" style="font-family: 'Archivo', sans-serif; color: #16160F;">
+
+    <!-- Masthead -->
+    <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #16160F;">
+      <span style="font-weight: 600;">MODULAR</span>
+      <span style="color: #8A8A80;">EXECUTIVE BRIEF &middot; THE BUSINESS IN PLAIN LANGUAGE</span>
+    </div>
+    <div style="height: 3px; background: #16160F; margin: 10px 0 0 0;"></div>
+
+    <h1 style="font-size: 40px; line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; margin: 30px 0 0 0;">Make enterprise AI affordable.<br>Prove it. <span style="box-shadow: inset 0 -0.34em 0 #D5F26E;">Keep their data home.</span></h1>
+
+    <p style="font-size: 15.5px; line-height: 1.55; color: #55554D; margin: 18px 0 0 0; max-width: 58ch;">Two pages on what Modular does, why it wins, and how it goes to market. Supported by two companions: <em>Winning the Endpoint Game</em> (strategy) and <em>The Endpoint Platform</em> (PRD).</p>
+
+    <div style="display: flex; gap: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8A8A80; margin: 16px 0 0 0;">
+      <span>VIKRAM SIWACH</span><span>JULY 2026</span><span style="color: #6F8F1F;">FOR ERIC JOHNSON &amp; THE PRODUCT TEAM</span>
+    </div>
+
+    <!-- 01 Problem -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 34px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">01</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Agents are about to break every enterprise AI budget</h2>
+    </div>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">Companies are moving from chatbots to agents — AI that completes whole tasks: writing and testing code, processing claims, resolving support tickets. Agents work in long loops and consume roughly <strong>15&times; more compute per request</strong> than a chat query; agent traffic already exceeds human traffic on major platforms. For any company deploying agents seriously, inference — the cost of running AI — is becoming a top-three technology line item. And today most of that spend goes to a few frontier labs at premium prices, on one vendor&rsquo;s chips, with the company&rsquo;s data leaving its walls on every request.</p>
+
+    <!-- 02 What Modular does -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">02</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">What Modular does</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 14px 0 0 0;">
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">THE RIGHT CHIP FOR EACH JOB</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">Serving AI has two phases: reading the input (compute-hungry) and writing the output (memory-hungry). Modular splits them — <strong>disaggregation</strong> — and runs each on the hardware that does it cheapest. Output generation, which dominates agent workloads, runs on memory-rich silicon (AMD today, Qualcomm AI200/AI250 next) that independent analysts measure at <strong>up to 40% lower cost per token</strong>.</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">ONE SOFTWARE LAYER, EVERY CHIP</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">Modular&rsquo;s compiler technology — from the team behind Swift and LLVM — runs the same model on NVIDIA, AMD, or Qualcomm silicon without a rewrite. Customers are never locked in, and when any chipmaker cuts prices, the platform captures the savings automatically. <strong>The advantage isn&rsquo;t one chip; it&rsquo;s being first to the economics of every chip.</strong></p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">THEIR DATA STAYS HOME</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">High-volume, repeatable tasks run on open-weight models the customer controls — deployed inside their own cloud, tuned on their own data — so their know-how never leaves or improves someone else&rsquo;s model. The hardest reasoning still reaches frontier models through a controlled gate. <strong>Frontier quality where needed; 10&times; cheaper everywhere else.</strong></p>
+      </div>
+    </div>
+
+    <div style="background: #16160F; color: #F4F4EE; padding: 16px 20px; margin: 20px 0 0 0;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #C6E96A; margin-bottom: 6px;">IN ONE SENTENCE</div>
+      <p style="font-size: 14.5px; line-height: 1.5; font-weight: 500; margin: 0;">Modular runs a company&rsquo;s AI tasks at the lowest proven cost per task, on whatever silicon is cheapest that month, with the company&rsquo;s data and know-how staying inside its own walls.</p>
+    </div>
+
+    <!-- 03 Why it survives -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">03</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Why this business survives</h2>
+    </div>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">The market has already voted that cheap open-model inference is a real business: Fireworks (~$800M annualized revenue), Together (~$1B), and Baseten ($5B valuation) grow fast serving these workloads. But they all run the same engines on the same rented NVIDIA fleets — a price war between identical cost structures. <strong>Modular is the only player whose advantage comes from the hardware layer itself</strong>, and — with Qualcomm — the only one with preferential access to a new class of inference silicon in 2026&ndash;27. When margins compress industry-wide, the structural low-cost producer wins. That is our seat.</p>
+
+    <!-- 04 GTM -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">04</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Go-to-market: three motions, in strict order</h2>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 12.5px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 15%;">MOTION</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 33%;">WHO WE WIN</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">WHY THIS ORDER</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 11px 14px 11px 0; border-bottom: 1px solid #E4E4DC;"><strong>1 &middot; Prove</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8A80;">2026</span></td>
+          <td style="padding: 11px 14px 11px 0; border-bottom: 1px solid #E4E4DC;">3&ndash;5 marquee AI-native companies — coding agents, voice, healthcare AI — on committed dedicated capacity.</td>
+          <td style="padding: 11px 0; border-bottom: 1px solid #E4E4DC;">The only buyers today with volume where our economics fully pay off — and they can verify our claims in a week. Margins will be thin; that&rsquo;s acceptable. They buy our cost curve; we get utilization and public proof no marketing budget could produce.</td>
+        </tr>
+        <tr>
+          <td style="padding: 11px 14px 11px 0; border-bottom: 1px solid #E4E4DC;"><strong>2 &middot; Convert</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8A80;">2027</span></td>
+          <td style="padding: 11px 14px 11px 0; border-bottom: 1px solid #E4E4DC;">Enterprises deploying agents at scale — dedicated and in-their-cloud (BYOC) contracts, sold top-down with the Qualcomm channel.</td>
+          <td style="padding: 11px 0; border-bottom: 1px solid #E4E4DC;">Where margins are made. Enterprises buy the Phase-1 proof plus what no discount API offers: data, models, and tuning inside their perimeter, with an audited bill per task. Their agent cost pain arrives on exactly this timeline.</td>
+        </tr>
+        <tr>
+          <td style="padding: 11px 14px 0 0;"><strong>3 &middot; Feed</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8A80;">ALWAYS ON</span></td>
+          <td style="padding: 11px 14px 0 0;">Developers, via self-serve endpoints.</td>
+          <td style="padding: 11px 0 0 0;">A funnel and credibility layer, not a revenue engine. Switching providers is trivially easy, so bottom-up usage alone never converts to enterprise commitments — fund it modestly, judge it as marketing.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 13px; line-height: 1.6; margin: 14px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>The discipline:</strong> marquee accounts are the wedge, enterprise dedicated is the business, developer self-serve is marketing — in that order. Motion two does not scale spend until motion one has produced public, independently verifiable numbers.</p>
+
+    <!-- 05 Scoreboard -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">05</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">How we&rsquo;ll know it&rsquo;s working</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 14px 0 0 0;">
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">END OF 2026</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">Performance published in &ge;1 independent industry benchmark — win or lose. 3&ndash;5 marquee customers live. Verified 15%+ savings per task at equal quality, measured on their real traffic.</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">THROUGH 2027</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">Ten or more enterprise dedicated / BYOC contracts. Compliance certifications in hand. Gross margin climbing toward 60% as revenue shifts from whale contracts to enterprise commitments.</p>
+      </div>
+      <div style="border-top: 2px solid #16160F; padding-top: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">STANDING TEST</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">Can a customer rerun our numbers themselves? If a cost claim can&rsquo;t be independently reproduced, we don&rsquo;t make it.</p>
+      </div>
+    </div>
+
+    <!-- 06 Risks -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">06</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The risks, honestly</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 26px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>NVIDIA cuts prices or gives software away.</strong> It already does the latter. We don&rsquo;t sell a static discount — we sell the machine that always finds the cheapest silicon, whoever makes it. Chip price wars help us.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>Marquee customers squeeze margins and can leave.</strong> True. We contract committed volumes, keep the roster small, and treat them as lighthouses funding the enterprise phase — not the end state.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>Neutrality doubts under Qualcomm.</strong> Customers must believe we route to the best chip, not the parent&rsquo;s. Neutrality is contractually secured in the acquisition agreement — independent benchmarks, published routing records, audit rights — and made visible every release, so it is observed, not claimed.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>Discipline on new silicon.</strong> The plan assumes nothing from Qualcomm chips before 2028. AI200/AI250 and the enterprise channel are upside, not load-bearing — the 2026&ndash;27 business stands on hardware that exists today.</p>
+    </div>
+
+    <!-- Closing -->
+    <div style="margin: 30px 0 0 0; border-top: 3px solid #16160F; padding-top: 18px;">
+      <p style="font-size: 18px; line-height: 1.45; font-weight: 600; letter-spacing: -0.01em; margin: 0; max-width: 60ch;">&ldquo;Every company will soon run thousands of AI tasks an hour. Someone has to run them at the lowest cost, prove the bill, and keep the company&rsquo;s knowledge its own. <span style="box-shadow: inset 0 -0.34em 0 #D5F26E;">That is Modular.</span>&rdquo;</p>
+    </div>
+
+  </div>
+</x-import>
+</x-dc>
+</body>
+</html>

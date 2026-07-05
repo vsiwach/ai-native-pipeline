@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #EBEBE6; }
+  </style>
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="letter" margin="0.8in" hint-size="100%,9000px">
+
+  <div slot="footer" style="display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: #8A8A80; padding-top: 6px; border-top: 1px solid #E4E4DC;">
+    <span>MODULAR &middot; INFERENCE PLATFORM STRATEGY &middot; JULY 2026</span>
+    <span>VIKRAM SIWACH &middot; CONFIDENTIAL</span>
+  </div>
+
+  <div data-screen-label="Strategy" style="font-family: 'Archivo', sans-serif; color: #16160F;">
+
+    <!-- Masthead -->
+    <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em;">
+      <span style="font-weight: 600;">MODULAR</span>
+      <span style="color: #8A8A80;">INFERENCE PLATFORM STRATEGY &middot; JULY 2026</span>
+    </div>
+    <div style="height: 3px; background: #16160F; margin: 10px 0 0 0;"></div>
+
+    <h1 style="font-size: 52px; line-height: 1.02; font-weight: 800; letter-spacing: -0.028em; margin: 34px 0 0 0;">Winning the<br><span style="box-shadow: inset 0 -0.3em 0 #D5F26E;">endpoint game</span></h1>
+
+    <p style="font-size: 16px; line-height: 1.55; color: #55554D; margin: 20px 0 0 0; max-width: 62ch;">Every company will soon run thousands of AI tasks an hour. Someone has to run them at the lowest proven cost, on whatever silicon is available, with the company&rsquo;s knowledge staying its own. This document explains why that someone is Modular — and exactly how we win.</p>
+
+    <div style="background: #16160F; color: #F4F4EE; padding: 18px 22px; margin: 24px 0 0 0;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #C6E96A; margin-bottom: 7px;">THE THESIS</div>
+      <p style="font-size: 14px; line-height: 1.55; font-weight: 500; margin: 0;">Our competitors serve AI from identical NVIDIA fleets on identical open-source engines — a price war between companies with the same cost structure. Modular is the only endpoint provider whose cost curve is hardware-derived and self-regenerating: a compiler that makes every chip usable, agents that make every model portable, and a harness that proves every claim. In a commoditizing game, the structural low-cost producer wins.</p>
+    </div>
+
+    <div style="display: flex; gap: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8A8A80; margin: 16px 0 0 0;">
+      <span>VIKRAM SIWACH</span><span>JULY 2026</span><span>COMPANIONS: EXECUTIVE BRIEF &middot; PLATFORM PRD</span><span>ALL CLAIMS SOURCED &sect;10</span>
+    </div>
+
+    <!-- 1 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 36px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">01</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Why we exist</h2>
+    </div>
+    <p style="font-size: 13px; line-height: 1.62; margin: 12px 0 0 0;">Enterprises are moving from chatbots to agents — AI that completes whole tasks: writing and testing code, processing claims, resolving tickets, researching accounts. Agents work in long loops, consuming roughly 15&times; more compute per request than chat; agent traffic already exceeds human-initiated traffic on major platforms. For any company deploying agents seriously, inference is becoming a top-three technology line item — paid mostly to a few frontier labs at premium prices, on one vendor&rsquo;s chips, with the company&rsquo;s data leaving its walls on every request.</p>
+    <p style="font-size: 13px; line-height: 1.62; margin: 10px 0 0 0;">Those companies will run their tasks with their own context on open-weight and tuned models if — and only if — someone makes it decisively cheaper at proven quality. The market has confirmed this is a real business: Fireworks (~$800M annualized revenue), Together (~$1B ARR), and Baseten ($5B valuation) are growing fast serving exactly these workloads. But all of them rent the same NVIDIA fleets and run the same open-source engines, so their cost structures are identical and their margins converge to the price war.</p>
+    <p style="font-size: 14px; line-height: 1.6; margin: 12px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>Modular is the only endpoint provider with a structural, regenerating cost advantage: the compiler layer beneath everyone else&rsquo;s stack.</strong> That is our reason for existence. Everything else in this document is machinery.</p>
+
+    <!-- 2 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">02</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The game: market, physics, and the winner&rsquo;s profile</h2>
+    </div>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 18px 0 0 0;">2.1 &middot; The endpoint market is proven and compounding</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">Endpoints — APIs serving open-weight and customer-tuned models, from shared serverless to dedicated capacity to deployments inside the customer&rsquo;s own cloud — are how this market buys. Demand today is led by AI-native companies (coding agents, voice, avatars, healthcare AI) for whom tokens are cost-of-goods-sold and a 20&ndash;40% cost delta is existential. Behind them, enterprise agent deployments arrive on a 12&ndash;24 month lag with the same cost pain plus one requirement the AI-natives don&rsquo;t have: context, adapters, and evaluation data must stay inside their perimeter. Modular Cloud already has the right commercial shape — shared endpoints, dedicated endpoints, custom models, our-cloud or your-cloud — serving the latest open models (MiniMax M3, GLM-5.2, Kimi K2.7, DeepSeek, Gemma 4) with day-0 coverage on NVIDIA and AMD.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">2.2 &middot; The physics favor us: decode dominates, and decode is a memory problem</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">Serving AI has two phases: reading the input (compute-hungry) and generating the output (memory-hungry). Agentic and high-volume workloads are dominated by generation, which is bandwidth-bound. That makes memory-rich silicon structurally cheaper for the dominant phase — independently measured at up to 40% lower cost per million tokens (AMD MI355X vs NVIDIA B200) — and makes <strong>disaggregation</strong> (running each phase on independently scaled, independently chosen hardware pools) the highest-leverage serving architecture in the industry. It is why NVIDIA built Dynamo. The difference: Dynamo disaggregates across NVIDIA chips only. <strong>We disaggregate across vendors.</strong></p>
+
+    <!-- Figure 1 -->
+    <figure style="margin: 20px 0 0 0; border: 1.5px solid #16160F; padding: 18px 20px 16px 20px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600; margin-bottom: 14px;">FIGURE 1 &middot; WHY DISAGGREGATION WINS</div>
+      <div style="display: grid; grid-template-columns: 90px 24px 1fr 24px 1fr 24px 78px; gap: 0; align-items: stretch;">
+        <div style="display: flex; flex-direction: column; justify-content: center; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; line-height: 1.5; color: #55554D;">AI TASK<br><span style="color: #8A8A80;">prompt + context</span></div>
+        <div style="display: flex; align-items: center; justify-content: center; color: #8A8A80;">&rarr;</div>
+        <div style="border: 1.5px solid #16160F; background: #F7F7F1; padding: 10px 12px;">
+          <div style="font-weight: 700; font-size: 12.5px;">PREFILL</div>
+          <div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 3px;">reads the input &middot; compute-bound</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; margin-top: 8px; border-top: 1px solid #E4E4DC; padding-top: 6px;">compute-rich pool<br><span style="color: #8A8A80;">NVIDIA Blackwell / Hopper</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8A8A80; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px;"><span>&rarr;</span><span style="margin-top: 2px;">KV</span></div>
+        <div style="border: 1.5px solid #16160F; background: #EDF6D4; padding: 10px 12px;">
+          <div style="font-weight: 700; font-size: 12.5px;">DECODE</div>
+          <div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 3px;">generates every output token &middot; memory-bandwidth-bound &middot; dominates agent cost</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; margin-top: 8px; border-top: 1px solid #D9E6B0; padding-top: 6px;">memory-rich pool<br><span style="color: #6F8F1F;">AMD MI355X &rarr; Qualcomm AI250</span></div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; color: #8A8A80;">&rarr;</div>
+        <div style="display: flex; flex-direction: column; justify-content: center; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; line-height: 1.5; color: #55554D;">TOKENS OUT</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 3px; margin-top: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; line-height: 1.5;">
+        <div style="color: #8A8A80;">Same chip for both phases = overpaying for one of them.</div>
+        <div style="color: #16160F;">Independent pools, cheapest silicon per phase: <strong>up to 40% lower decode $/Mtok</strong> (verified) &middot; <strong>&ge;15% blended at equal SLO</strong> (our gate)</div>
+      </div>
+      <figcaption style="font-size: 11px; line-height: 1.55; color: #8A8A80; margin-top: 12px;">The two phases of serving have opposite hardware appetites. Everyone else runs both on the same rented NVIDIA fleet; we place each phase on the silicon that runs it cheapest — across vendors — and pass the difference through the ledger.</figcaption>
+    </figure>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 22px 0 0 0;">2.3 &middot; The winner&rsquo;s profile</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">Endpoint serving commoditizes: OpenAI-compatible APIs make switching trivial, so price-per-quality is the whole game. When every competitor&rsquo;s cost structure is &ldquo;NVIDIA list price plus a free engine,&rdquo; nobody wins the price war — they fund it. The durable winner needs a cost curve competitors cannot copy by adopting the same open source. Ours has three layers:</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 12px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 22%;">LAYER</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 44%;">THE ADVANTAGE</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">WHY IT CAN&rsquo;T BE COPIED</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Compiler-portable kernel stack</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6F8F1F;">Mojo &rarr; MAX</span></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">The same model runs day-0 on NVIDIA (Ampere, Hopper, Blackwell), AMD, Apple, and CPU without a rewrite. New silicon becomes usable economics in weeks, not quarters. ~500K lines of kernels already open; 26k GitHub stars; a real day-0 record.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">A decade of compiler engineering (LLVM, MLIR, Swift lineage). Competitors wrap vendor runtimes and pay a per-chip rewrite tax — the &ldquo;three separate porting teams&rdquo; problem that afflicts even frontier labs.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Cross-vendor disaggregation</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6F8F1F;">Mammoth</span></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Prefill on compute-rich pools, decode on memory-rich pools, across mixed NVIDIA + AMD fleets today and Qualcomm pools next — a blended cost per token no single-vendor fleet can reach.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Requires the kernel layer above it. Dynamo is NVIDIA-to-NVIDIA only; vLLM/SGLang users inherit single-vendor economics.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>Silicon partnership floor</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6F8F1F;">Qualcomm</span></td>
+          <td style="padding: 10px 14px 0 0;">Preferential capacity and pricing on AI200 (2026, 768GB/card) and AI250 near-memory (2027) — a cost floor beneath the entire rented-fleet market.</td>
+          <td style="padding: 10px 0 0 0;">Ownership. Unavailable to Fireworks, Together, or Baseten at any price. Held strictly as upside — nothing in the 2026&ndash;27 plan depends on the new silicon&rsquo;s timing.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 13px; line-height: 1.6; margin: 14px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>The honest gap, stated plainly:</strong> the 40% decode advantage is today independently verified on a competitor&rsquo;s engine (SGLang), not on MAX — and MAX appears in no independent benchmark suite. The technology is real; the public proof is not yet. Closing that gap is Phase 0 of the PRD and gates all go-to-market spend, because in a commodity market an unproven cost advantage is marketing, and a proven one is the business.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 22px 0 0 0;">2.4 &middot; The memory wall: why every roadmap in the industry now agrees with us</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">The physics of &sect;2.2 has a market beneath it. HBM — the fast memory decode depends on — is 35&ndash;47% of an AI chip&rsquo;s build cost, draws roughly a quarter of its power, carries a 5&ndash;6&times; per-GB premium over commodity DRAM, and all three suppliers&rsquo; 2026 output sold out by Q1, driving the worst memory price shock in fifteen years. Meanwhile KV cache grows with every concurrent user and every token of context, so the scarcest, most expensive component is the binding one. The interconnect makes it worse: PCIe Gen5 moves ~2% of HBM bandwidth, so any context that transits the host CPU dies waiting — a 50GB KV state that moves in 15ms inside HBM takes ~800ms over PCIe. Every serious player is now answering the same question — how to serve more tokens with less HBM — and their answers converge on our thesis:</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin: 12px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 13%;">PLAYER</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 47%;">MEMORY-WALL ANSWER</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">WHAT IT CONCEDES</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>NVIDIA</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Rubin CPX: a prefill-only GPU with 128GB of GDDR7 and no HBM at all, racked beside HBM decode GPUs (end-2026); Grace NVLink-C2C (900GB/s, ~14&times; PCIe) making LPDDR a KV spillover tier; Dynamo/NIXL KV offload.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Prefill/decode disaggregation burned into the product line — NVIDIA conceding, in silicon, the split in Figure 1. Theirs is single-vendor; ours crosses vendors.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>AMD</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Brute capacity: 288GB HBM3E today, MI450 at 432GB HBM4 / 19.6TB/s in 2H2026; UALink as the open scale-up fabric (70+ adopters).</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Memory capacity per dollar is the battleground — exactly where our decode placement monetizes.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Apple</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Unified memory: the CPU/GPU transfer simply doesn&rsquo;t exist; 512GB-class capacity at desktop power; Apple-silicon AI servers entering production for its own cloud.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">The PCIe problem is an architectural choice, not physics. But the Neural Engine stays closed — silicon nobody can program is silicon nobody can maximize.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>Qualcomm</strong></td>
+          <td style="padding: 10px 14px 0 0;">Sidestep HBM entirely: AI200 with 768GB LPDDR per card (~4&times; an HBM GPU&rsquo;s capacity at a fraction of the cost and power); AI250 near-memory compute (&gt;10&times; claimed effective bandwidth); $2.4B Alphawave interconnect IP; custom Oryon datacenter CPUs.</td>
+          <td style="padding: 10px 0 0 0;">A memory-first, HBM-free inference stack — worthless without a compiler that can program a novel memory hierarchy. That compiler is why they bought us.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size: 13px; line-height: 1.6; margin: 14px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>The strategic reading:</strong> the industry&rsquo;s own roadmaps have converged on programming the memory hierarchy — HBM to LPDDR to DRAM to SSD, stitched by fabrics that bypass the CPU — as the decisive battleground. That is a control-plane-plus-compiler problem. It is our problem, and nobody else owns both layers.</p>
+
+    <!-- 3 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">03</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">What we learned, and how it shapes the strategy</h2>
+    </div>
+    <p style="font-size: 13px; line-height: 1.62; margin: 12px 0 0 0;">Every load-bearing belief in this strategy was independently validated against published evidence. The findings, in plain language:</p>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Intelligence is jagged.</strong> Model capability varies sharply by task, tracking training data and the reward functions of RL post-training, which concentrate gains on verifiable domains (math, code, agentic tool use). Consequence: quality bars must be set per task, not per model — which makes migrating a route to a cheaper model a certifiable engineering decision rather than a leap of faith. Certification is our conversion machinery.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Tuned open models win narrow, verifiable, high-volume tasks.</strong> Reinforcement fine-tuning against checkable rewards reliably converts a small model&rsquo;s latent ability into deployed reliability: documented cases show 8&ndash;14B open models matching or beating frontier APIs on specific enterprise tasks at 10&ndash;64&times; lower cost. Scope is strict — narrow tasks, verifiable outcomes, behavior not knowledge — and we sell it only that way: &ldquo;attested parity on your route at a fraction of the cost,&rdquo; never &ldquo;smarter than frontier.&rdquo;</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Sovereignty gates the deployment envelope, not the vendor.</strong> Enterprise anxiety about data leaving the perimeter is real and measurable, but enterprises still send 88% of API spend to three closed labs. We do not claim they will stop. We sell the envelope: in-perimeter deployment for what must stay home, and a policy firewall that decides — and proves — what may go out to frontier models, stripped of protected context.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Open weights do not win by default.</strong> Enterprise open-weight share actually declined in 2025. Open models win where someone makes them decisively cheaper at proven quality, or where policy forces the perimeter. Both are our product. We are the mechanism by which the share reverses for the segments we serve — we do not assume the market does it for us.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The frontier labs&rsquo; own pain validates the compiler bet.</strong> Even the best-funded labs run three separate teams porting models across GPU, TPU, and custom silicon — and it works badly. Hardware diversity is increasing, kernel engineers are the scarcest talent in the industry, and per-target teams do not scale. One portable stack is the only answer that compounds.</p>
+    </div>
+
+    <!-- 4 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">04</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The agentic kernel supply chain: day-0 optimized on any silicon</h2>
+    </div>
+    <p style="font-size: 12px; line-height: 1.6; margin: 10px 0 0 0; color: #55554D; font-style: italic;">Two settled facts anchor this section: the Mojo compiler ships open source (Apache 2.0) in fall 2026 — publicly committed by the CEO and reaffirmed after the acquisition announcement — and vendor neutrality is contractually secured in the acquisition agreement.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 18px 0 0 0;">4.1 &middot; Compute is scarce; software is the real bottleneck</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">In a compute-scarce market, buyers increasingly take whatever silicon they can procure. The binding constraint is time-to-economics on that silicon: every new chip ships quarters ahead of the optimized software that makes it worth running. Whoever converts new hardware into certified, optimized serving fastest captures the scarcity premium on every generation. That is a compiler-and-agents problem, and it is the problem we are structurally built for.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">4.2 &middot; The flywheel: open compiler &rarr; agents that write Mojo &rarr; harness as reward function</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; margin: 10px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Open source is the training-data strategy.</strong> Agents get good at languages they see in the wild. Opening the Mojo compiler — with the stdlib and ~500K lines of kernels already public — makes every AI coding agent progressively better at writing Mojo. Deepening Python interoperability gives developers the full capability of the hardware without understanding compilers or kernels: stay in Python, drop into Mojo only where performance demands it.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>The agent skills already work in production.</strong> Modular ships an open skills repo (import-model, debug-model, kernel translation) that plugs into AI coding tools. Proven results: CUDA kernels translated to Mojo running on NVIDIA, AMD, and Apple silicon; a 192-expert MoE brought up via agent-driven scaffolding with layer-by-layer numerical verification; a customer&rsquo;s agent-ported kernel beating its hand-written original unoptimized.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>Kernels are the perfect verifiable-reward task.</strong> Correctness is machine-checkable and speedup is measurable — exactly the regime where reinforcement learning demonstrably works. Our public benchmark harness doubles as the reward function: agents propose kernels, the harness verifies numerics and measures cost at SLO, and fine-tuning improves the kernel-writing policy over time. Our proof infrastructure and our kernel supply chain become the same asset.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0;"><strong>The payoff compounds into the moat.</strong> &ldquo;First to the economics of every chip&rdquo; today costs compiler-engineer headcount; with the agentic pipeline it compresses from quarters to weeks and scales without hiring.</p>
+    </div>
+
+    <!-- Figure 2 -->
+    <figure style="margin: 20px 0 0 0; border: 1.5px solid #16160F; padding: 18px 20px 16px 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">FIGURE 2 &middot; THE AGENTIC KERNEL FLYWHEEL</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.08em; color: #8A8A80;">TIME-TO-ECONOMICS MOAT: new chip or model &rarr; optimized serving in weeks, without hiring</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <div style="border: 1px solid #C9C9C0; padding: 9px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6F8F1F;">1 &middot; COMPILER + KERNELS OPEN</div><div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">Apache 2.0 &middot; Mojo code grows in the wild</div></div>
+        <div style="border: 1px solid #C9C9C0; padding: 9px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6F8F1F;">2 &middot; AGENTS LEARN MOJO</div><div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">every coding agent improves on public code</div></div>
+        <div style="border: 1px solid #C9C9C0; padding: 9px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6F8F1F;">3 &middot; AGENTS PORT MODELS + KERNELS</div><div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">skills repo: import-model, kernel translation</div></div>
+        <div style="border: 1px solid #16160F; background: #EDF6D4; padding: 9px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #16160F;">4 &middot; HARNESS VERIFIES + REWARDS</div><div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">numerics + $/Mtok at SLO = RLVR signal</div></div>
+        <div style="border: 1px solid #C9C9C0; padding: 9px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6F8F1F;">5 &middot; DAY-0 ON NEW SILICON + MODELS</div><div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">bring-up compresses quarters &rarr; weeks</div></div>
+        <div style="border: 1px solid #C9C9C0; padding: 9px 11px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #6F8F1F;">6 &middot; CHEAPEST ENDPOINTS WIN ROUTES</div><div style="font-size: 11px; line-height: 1.5; color: #55554D; margin-top: 4px;">more usage &rarr; more Mojo in the wild &rarr; (1)</div></div>
+      </div>
+      <figcaption style="font-size: 11px; line-height: 1.55; color: #8A8A80; margin-top: 12px;">Each loop makes the next one cheaper: more public Mojo makes agents better, better agents make bring-up faster, faster bring-up makes endpoints cheaper, cheaper endpoints win more routes, and every won route produces more code and reward signal. The harness (4) is the safety-critical node — it is both our public proof and the RL reward function, which is why it must be adversarially hardened before any external claim.</figcaption>
+    </figure>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 22px 0 0 0;">4.3 &middot; The hardest question: can a language beat NVIDIA at its own game?</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">The sharpest threat is not competitors&rsquo; kernels — it is silicon-specific model artifacts. Optimizers now release checkpoints quantized in NVIDIA-native formats (NVFP4), validated on named NVIDIA SKUs. If the canonical release of every open model ships pre-married to NVIDIA, every other chip starts a step behind before our compiler ever sees the weights. Three answers:</p>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Formats are a translation problem, and the compiler is the best-placed layer to absorb them.</strong> MAX already serves FP8/FP4; open format standards (MXFP4) exist. We ingest NVIDIA-native checkpoints and run them at parity on NVIDIA, and requantize to open formats for other silicon with published accuracy deltas. Hand-tuners cannot do the reverse.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Specialists win cells; we win the matrix.</strong> Hand-tuning one model for one SKU is the &ldquo;three porting teams&rdquo; problem at ecosystem scale. The matrix — models &times; SKUs &times; formats — grows faster than any specialist roster. But revenue concentrates in the head of that matrix, so we must also match hand-tuned artifacts on NVIDIA&rsquo;s own silicon for the top models, publicly, per release. Win the head at parity, and the tail plus every new chip is an unanswerable compound. Lose the head, and the matrix is a consolation prize. This is why the public harness gates everything.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The upstream counter: model-lab release partnerships.</strong> The durable answer to artifact lock-in is to make the canonical checkpoint multi-silicon from birth. We offer the model labs (Zhipu, Moonshot, MiniMax, DeepSeek, Google/Gemma) our day-0 pipeline and agent skills as a release service: launch with us and your model ships optimized on NVIDIA, AMD, and Qualcomm simultaneously, in open formats, with parity reports. Every lab that releases this way makes NVIDIA-native packaging one option among several instead of the default.</p>
+    </div>
+
+    <!-- Figure 3 -->
+    <figure style="margin: 20px 0 0 0; border: 1.5px solid #16160F; padding: 18px 20px 16px 20px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600; margin-bottom: 14px;">FIGURE 3 &middot; WIN THE HEAD, OWN THE MATRIX</div>
+      <div style="display: grid; grid-template-columns: 130px repeat(5, 1fr); gap: 3px; font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; line-height: 1.35;">
+        <div></div>
+        <div style="text-align: center; color: #55554D; padding: 4px 2px;">NVIDIA<br>BLACKWELL</div>
+        <div style="text-align: center; color: #55554D; padding: 4px 2px;">NVIDIA<br>HOPPER</div>
+        <div style="text-align: center; color: #55554D; padding: 4px 2px;">AMD<br>MI355X</div>
+        <div style="text-align: center; color: #55554D; padding: 4px 2px;">QUALCOMM<br>AI200/250</div>
+        <div style="text-align: center; color: #55554D; padding: 4px 2px;">SOHU-CLASS<br>ASIC</div>
+        <div style="color: #55554D; padding: 6px 4px 6px 0; display: flex; align-items: center;">DEEPSEEK V4</div>
+        <div style="background: #16160F;"></div><div style="background: #16160F;"></div><div style="background: #D5F26E;"></div><div style="background: #EDF6D4;"></div><div style="background: #F1F1EA;"></div>
+        <div style="color: #55554D; padding: 6px 4px 6px 0; display: flex; align-items: center;">KIMI K2.7</div>
+        <div style="background: #16160F;"></div><div style="background: #16160F;"></div><div style="background: #D5F26E;"></div><div style="background: #EDF6D4;"></div><div style="background: #F1F1EA;"></div>
+        <div style="color: #55554D; padding: 6px 4px 6px 0; display: flex; align-items: center;">GLM-5.2 &middot; GEMMA 4</div>
+        <div style="background: #16160F;"></div><div style="background: #3A3A32;"></div><div style="background: #D5F26E;"></div><div style="background: #EDF6D4;"></div><div style="background: #F1F1EA;"></div>
+        <div style="color: #55554D; padding: 6px 4px 6px 0; display: flex; align-items: center;">LLAMA &middot; MISTRAL &middot; GPT-OSS</div>
+        <div style="background: #3A3A32;"></div><div style="background: #3A3A32;"></div><div style="background: #EDF6D4;"></div><div style="background: #EDF6D4;"></div><div style="background: #F1F1EA;"></div>
+        <div style="color: #8A8A80; padding: 6px 4px 6px 0; display: flex; align-items: center;">NEXT RELEASE (WEEKS AWAY)</div>
+        <div style="background: #F1F1EA; border: 1px dashed #C9C9C0;"></div><div style="background: #F1F1EA; border: 1px dashed #C9C9C0;"></div><div style="background: #F1F1EA; border: 1px dashed #C9C9C0;"></div><div style="background: #F1F1EA; border: 1px dashed #C9C9C0;"></div><div style="background: #F1F1EA; border: 1px dashed #C9C9C0;"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px;">
+        <div style="border-top: 2px solid #16160F; padding-top: 8px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em;">THE HEAD <span style="color: #8A8A80; font-weight: 400;">~80% of paid volume today</span></div>
+          <div style="font-size: 11px; line-height: 1.55; color: #55554D; margin-top: 4px;">Specialists fight for head cells: hand-tuned NVFP4 artifacts, per-SKU optimizers, transformer ASICs. We must match them here, publicly, per release — or the head funds them.</div>
+        </div>
+        <div style="border-top: 2px solid #6F8F1F; padding-top: 8px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em; color: #6F8F1F;">THE MATRIX <span style="color: #8A8A80; font-weight: 400;">models &times; chips &times; formats</span></div>
+          <div style="font-size: 11px; line-height: 1.55; color: #55554D; margin-top: 4px;">A new frontier model every few weeks, new silicon every year, a new quant format every quarter. Only a compiler serves the matrix; agents drive the marginal cost of each new cell toward zero.</div>
+        </div>
+      </div>
+      <figcaption style="font-size: 11px; line-height: 1.55; color: #8A8A80; margin-top: 12px;">Revenue concentrates in the head (top open models on NVIDIA silicon), so per-SKU specialists can afford to hand-tune those cells — that fight is won with public, per-release parity proof (P1). But the grid grows in both directions, and no roster of specialists scales with it. Fixed-function ASICs are the extreme case: they collapse to a single architecture column and must re-tape-out silicon to follow model drift — if their numbers survive independent benchmarks when racks ship, they become another decode pool behind our endpoints, not a competitor to the plane.</figcaption>
+    </figure>
+
+    <p style="font-size: 13px; line-height: 1.62; margin: 14px 0 0 0;">The same logic disposes of the newest specialization extreme. Transformer-only ASICs (Etched&rsquo;s Sohu: ~$1B raised, $1B+ in claimed contracts, first racks promised summer 2026) are the maximum-lock-in bet — the model architecture burned into silicon. Their weakness is the matrix&rsquo;s growth: the original design predated MoE dominance and had to be reworked, silicon cycles run 18&ndash;24 months while model architectures shift every six, and decode remains bound by the same HBM everyone buys. Their claims today are entirely company-published — pre-Phase-0 by our own standards. If they ship and survive independent benchmarks, heterogeneity increases and the buyer&rsquo;s need for certified, reversible placement across pool types increases with it: an ASIC pool for stable head routes, programmable silicon for everything else, our harness and ledger arbitrating. <strong>Either way, the plane wins.</strong></p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 22px 0 0 0;">4.4 &middot; The enterprise product: day-0 hardware adoption as a service</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">For enterprises and neoclouds with owned or committed fleets, the offer is simple: <strong>whatever hardware you can get, we make it serve optimally — in days.</strong> New chip lands &rarr; the agent pipeline ports and optimizes their models, adapters, and tuned checkpoints &rarr; the harness certifies quality and cost &rarr; endpoints go live inside their perimeter. Compute scarcity converts from their problem into our sales motion, and every silicon generation becomes a renewal event instead of a migration crisis.</p>
+    <p style="font-size: 13px; line-height: 1.6; margin: 12px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>Honest bounds:</strong> today&rsquo;s proven claim is that agents compress model bring-up and porting — demonstrated on real MoE bring-ups — not that agents write our fastest kernels; expert production kernels still win, and the agent-written-kernel claim is a 2027 bet gated on hardened, anti-gaming verification. The industry&rsquo;s loudest failure in this space was a gamed correctness check that inflated claimed speedups by 10&times;; our proof-first brand cannot afford that mistake, so no public agentic-kernel claim ships before the harness is adversarially hardened.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 22px 0 0 0;">4.5 &middot; The factory and the field: how agent-written kernels actually ship</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">Software-defined networking solved this exact deployment problem twenty years ago: programs authored and validated centrally, compiled artifacts pushed to devices, a control plane deciding what runs where. Mojo plays the role of P4 — the portable language that programs silicon the operator doesn&rsquo;t fully control — with one advantage P4 never had: a hardware champion (Qualcomm) that doesn&rsquo;t demand exclusivity. We apply the same split. Most of the win isn&rsquo;t agents at all — it is <strong>the compiler, deterministically</strong>: fed the customer&rsquo;s observed workload shapes from the ledger, MAX recompiles and autotunes generic serving into workload-specialized serving, in-perimeter, with no code generation and no access to customer code. Agents do the expensive creative work in the factory — new architectures, new devices, new fusion patterns — made smarter by the open Mojo corpus and community contributions, verified by the harness, human-gated, and shipped as signed artifacts. The field selects, composes, and specializes from that verified library against live traffic. Genuinely novel needs route back to the factory — or, for sovereign customers, through an in-perimeter replica of the harness with identical gates.</p>
+
+    <!-- Figure 4 -->
+    <figure style="margin: 20px 0 0 0; border: 1.5px solid #16160F; padding: 18px 20px 16px 20px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600; margin-bottom: 14px;">FIGURE 4 &middot; THE FACTORY / FIELD SPLIT</div>
+      <div style="display: grid; grid-template-columns: 1fr 46px 1fr; align-items: stretch;">
+        <div style="border: 1.5px solid #16160F; padding: 12px 14px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em;">THE FACTORY <span style="color: #8A8A80; font-weight: 400;">at Modular</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+            <div style="background: #F7F7F1; padding: 7px 10px; font-size: 11px; line-height: 1.45;"><strong>Agents generate</strong> — trained on the open Mojo corpus</div>
+            <div style="background: #F7F7F1; padding: 7px 10px; font-size: 11px; line-height: 1.45;"><strong>Harness verifies</strong> — numerics &middot; anti-gaming</div>
+            <div style="background: #EDF6D4; padding: 7px 10px; font-size: 11px; line-height: 1.45;"><strong>Signed, pre-verified kernel artifacts</strong> — human-gated &middot; reproducible from harness record</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #6F8F1F; flex-direction: column; gap: 2px;"><span>SHIP</span><span>&rarr;</span></div>
+        <div style="border: 1.5px solid #16160F; padding: 12px 14px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 0.1em;">THE FIELD <span style="color: #8A8A80; font-weight: 400;">in the customer&rsquo;s VPC</span></div>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+            <div style="background: #F7F7F1; padding: 7px 10px; font-size: 11px; line-height: 1.45;"><strong>Ledger observes</strong> — shapes &middot; batches &middot; cache stats</div>
+            <div style="background: #F7F7F1; padding: 7px 10px; font-size: 11px; line-height: 1.45;"><strong>Compiler specializes</strong> — select &middot; fuse &middot; autotune</div>
+            <div style="background: #EDF6D4; padding: 7px 10px; font-size: 11px; line-height: 1.45;"><strong>Canary &rarr; promote &rarr; serve</strong> — instant rollback &middot; no customer code needed</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: #8A8A80; margin-top: 12px; text-align: center;">&larr; novel gaps + aggregate shape patterns (never payloads, never code) flow back — every customer makes the library better for all</div>
+      <figcaption style="font-size: 11px; line-height: 1.55; color: #8A8A80; margin-top: 12px;">Generation and verification stay central, where the harness is hardened and learning compounds fleet-wide; the field applies signed artifacts and deterministic compiler specialization against live traffic. The one customer-facing sentence: agents write the kernels, the harness proves them, and only proven, signed kernels ever touch your fleet.</figcaption>
+    </figure>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 22px 0 0 0;">4.6 &middot; Cross-silicon disaggregation: the three-rung ladder</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">The fair objection to cross-vendor serving is that it seems to need industry adoption Modular cannot force. It doesn&rsquo;t — if climbed in order:</p>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Rung 1 — route-level placement (now, nobody&rsquo;s permission needed).</strong> Whole routes land on whole pools: this route on AMD, that one on NVIDIA. No KV state ever crosses a vendor boundary; the &ldquo;interconnect&rdquo; is a load balancer. This is most of the economic win, and it ships in 2026 regardless of what any chipmaker does.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Rung 2 — request-level disaggregation inside our own fleet (2027, engineering-gated, not adoption-gated).</strong> NVIDIA prefill feeding AMD/Qualcomm decode. The common intuition that this needs a shared memory fabric is wrong: KV transfer over standard RDMA Ethernet runs in production at extreme scale today (Moonshot&rsquo;s Mooncake streams KV layer-by-layer across thousands of nodes). What actually gates it is KV layout control on both ends — which a compiler that owns the kernels on both sides uniquely has — and cross-vendor FP8/FP4 numerics, which is why the PRD gates this honestly. Done inside our fleet, where we control both ends; no vendor can practically block it.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Rung 3 — the open standard (the coalition play).</strong> For this to become an ecosystem rather than our party trick: publish an open KV interchange format — layouts, quantization scaling recipes, transfer semantics; the ONNX of inference state — with Qualcomm and AMD as founding implementers, Apple as the unified-memory proof point and quiet UALink ally, and NVIDIA arriving last, dragged by its own customers the same way hyperscaler pressure opened NVLink into Fusion. This is the LLVM playbook run a third time: author the neutral substrate everyone standardizes on.</p>
+    </div>
+
+    <!-- 5 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">05</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The open-source strategy: how trust and compatibility move the cloud business</h2>
+    </div>
+    <p style="font-size: 13px; line-height: 1.62; margin: 12px 0 0 0;">An inference platform asks a customer to do something unreasonable: put production traffic, model weights, and perimeter data on a young company. Every layer of closedness makes that ask harder. Open source is not community goodwill here — it is the answer to the four objections that actually stall deals: <strong>lock-in</strong> (&ldquo;if Modular disappoints, we self-host the same Apache stack — leaving is a config change, not a rewrite&rdquo;), <strong>auditability</strong> (&ldquo;the kernels serving our traffic are inspectable source, not closed vendor blobs&rdquo;), <strong>verification</strong> (&ldquo;their benchmark harness and their kernels rerun on our machines&rdquo;), and <strong>longevity</strong> (&ldquo;the code outlives any corporate decision&rdquo;). The funnel that follows is the proven one — developer adopts free and self-hosted, trust accumulates through use, the workload graduates to Modular Cloud for capacity, operations, and day-0 SLAs, and converts to dedicated or BYOC. Spark built Databricks this way.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">5.1 &middot; What is open today, and the line we draw once</h3>
+    <table style="width: 100%; border-collapse: collapse; margin: 10px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 30%;">LAYER</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 26%;">STATUS</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">ROLE IN THE TRUST FUNNEL</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Mojo stdlib + ~500K lines of MAX kernels</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Open &middot; Apache 2.0 (since 2024/2025)</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">The auditability layer: every kernel serving customer traffic is inspectable and community-improvable.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>MAX framework + serving layer</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Open &middot; Apache 2.0</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">The self-host exit option — the same engine, single-node, free forever. The customer&rsquo;s leverage over us, by design.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Mojo compiler</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Ships Apache 2.0, fall 2026 — publicly committed by the CEO</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Completes the stack&rsquo;s independence and feeds the agent flywheel (&sect;4.2): the more Mojo in the wild, the smarter every coding agent gets at writing it.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>Mammoth control plane &middot; route ledger &middot; enterprise wrap &middot; Fleet Maximizer</strong></td>
+          <td style="padding: 10px 14px 0 0;">Commercial</td>
+          <td style="padding: 10px 0 0 0;">What customers pay for: fleet operations, capacity, certification, compliance — never withheld performance.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 13px; line-height: 1.6; margin: 14px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>The open-core line, drawn once and never moved:</strong> everything needed to self-host excellent single-node serving is open; fleet operations and proof infrastructure are commercial. We sell operations, never speed. Withholding performance from the open tier would destroy in one release the trust the funnel depends on — the industry&rsquo;s license rug-pulls are a documented graveyard, and we will not join it.</p>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">5.2 &middot; What the Mojo team owes the cloud business</h3>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 10px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Stability over brilliance.</strong> After 1.0, the language surface freezes and stays boring: great error messages, great docs, no feature churn taxing the kernel contributors, the MAX team, and the agent factory that build on it. Every roadmap item carries a tag: which endpoint metric does this move?</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Python interop is the funnel&rsquo;s mouth.</strong> Nobody adopts a new language to serve a model; they adopt a Python API that quietly got 30% cheaper. The team&rsquo;s business KPI is not Mojo adoption — it is &ldquo;the Python developer never left Python, and their endpoint cost dropped anyway.&rdquo;</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>Agents are the primary developers now.</strong> The skills repo means coding agents write more new Mojo than humans will. Compiler diagnostics are reward signals; documentation is agent context. Designing for this is the strongest form of the typed-feedback bet against the Python-DSL ecosystem — and no other language team is positioned to make it.</p>
+    </div>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">5.3 &middot; What the MAX team owes the cloud business</h3>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 10px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The drumbeat is the marketing.</strong> The six-week release cadence — new architectures, quantization coverage, speculative decoders, OpenAI-compatibility hardening — is the visible pulse that tells the market the stack is alive. The unglamorous work converts best: compatibility flags that make real-world requests just work do more for funnel conversion than a hero benchmark, because switching cost, not peak speed, is what keeps a customer on their incumbent.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The strip-mining objection answers itself.</strong> Once MAX is excellent, a hyperscaler can serve it — the classic attack on OSS companies. But this strategy already holds that the engine is not the moat; the ledger, the fleet-wide shape library, the agent factory, the hardware channel, and the day-0 SLA are. Anyone arguing against openness on competitive grounds is really arguing we don&rsquo;t believe our own moat thesis — the cleanest internal test of strategic honesty we have.</p>
+      <p style="font-size: 12.5px; line-height: 1.6; margin: 0; padding-left: 16px; border-left: 2px solid #D5F26E;"><strong>The community is an extension of the factory.</strong> External kernel contributions run through the same harness as factory agents&rsquo; — numerics, anti-gaming, $/Mtok — and ship with the same signed provenance enterprises require. One verification pipeline, three sources of supply: staff, agents, community. That turns &ldquo;contributions per quarter&rdquo; from a vanity metric into kernel supply-chain growth.</p>
+    </div>
+
+    <h3 style="font-size: 14.5px; font-weight: 700; margin: 20px 0 0 0;">5.4 &middot; The scoreboard that ties both teams to the cloud</h3>
+    <p style="font-size: 13px; line-height: 1.62; margin: 8px 0 0 0;">Time-to-first-endpoint for an open-source user (minutes, not days); OSS-to-cloud conversion per quarter; share of cloud incidents traced to engine regressions — MAX reliability is cloud reliability; day-0 lag on top-5 model families; external benchmark reruns within &plusmn;10%; agent success rate writing Mojo vs Python DSLs, published; community kernels passing harness verification. Move those seven numbers and the cloud becomes the inference platform of choice as a consequence: trust in, workloads follow, operations monetize.</p>
+
+    <!-- 6 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">06</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Go-to-market: Prove, Convert, Feed — in strict order</h2>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 12%;">MOTION</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 30%;">TARGET &amp; OFFER</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 36%;">WHY THIS ORDER</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">ECONOMICS</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>1 &middot; Prove</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8A80;">2026</span></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">3&ndash;5 marquee AI-native companies (coding agents, voice, healthcare AI) on committed dedicated capacity, with certified migration of their highest-volume routes.</td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">They are the only buyers today with volume where disaggregated heterogeneous economics fully pay off, and they can verify our claims in a week. They negotiate hard and churn upward — acceptable: they are lighthouses, not the end state. They buy our cost curve; we get utilization and public proof no marketing budget could produce.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Thin margin, high utilization, reference value. Committed volumes; small roster.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>2 &middot; Convert</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8A80;">2027</span></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Enterprises deploying agents at scale. Landing SKU: <strong>Fleet Maximizer</strong> — recover the 50&ndash;70% of utilization they waste on hardware they already own, gain-share priced against a harness-verified baseline. Expansion: dedicated + BYOC with compliance, the context firewall, and tuning on their own routes; Qualcomm channel post-close.</td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Where margins are made — and Fleet Maximizer removes every landing objection at once: no model change, no hardware change, no data movement, paid only on proven savings. From there they buy the Phase-1 proof plus what no discount API offers: perimeter, audited $/task, and each new silicon generation onboarded in days. Their agent cost pain arrives on exactly this timeline.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Gross margin &rarr; 60%; contracts $25&ndash;50K growing to $100K+; retention compounds as tuned assets accumulate in-perimeter.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>3 &middot; Feed</strong><br><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8A8A80;">ALWAYS ON</span></td>
+          <td style="padding: 10px 14px 0 0;">Developers via self-serve serverless endpoints, day-0 top models, free tier; the open-source community around Mojo and the skills repo.</td>
+          <td style="padding: 10px 14px 0 0;">Funnel and credibility, not revenue. OpenAI-compatible switching is trivial, so bottom-up usage alone never converts — it seeds the pipeline and keeps the ecosystem engine running.</td>
+          <td style="padding: 10px 0 0 0;">Loss-leader capped in dollars; judged as marketing.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 13px; line-height: 1.6; margin: 14px 0 0 0; padding: 10px 14px; background: #F2F2EA; border-left: 3px solid #B7DB4A;"><strong>The discipline:</strong> motion 2 does not scale spend until motion 1 has produced public, independently verifiable numbers. Kill gates live in the PRD. Marquee accounts buy our cost curve; enterprises buy the proof plus the perimeter; developers keep us honest and visible.</p>
+
+    <!-- 7 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">07</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The six commitments</h2>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 22%;">PILLAR</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F;">COMMITMENT</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F; width: 15%;">PRD MAPPING</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P1 &middot; Proof before promotion</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">License parity across all silicon shipped week one, CEO-owned (today&rsquo;s license caps non-NVIDIA accelerators — including AMD and Qualcomm&rsquo;s own — at 8 production devices; that ends immediately and publicly). MAX submitted to at least one independent benchmark suite within 90 days, published win or lose. The third-party AMD decode result reproduced on MAX or the gap publicly explained. Every cost claim third-party rerunnable. Our proof is our pricing power.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">Phase 0 &middot; F0.1&ndash;F0.4</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P2 &middot; Win routes with certified migration</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">The conversion machine: shadow a customer&rsquo;s route — from a frontier API or a competitor&rsquo;s endpoint — onto a Modular endpoint, certify quality parity against the customer&rsquo;s own hash-attested evaluation sets, promote with instant rollback. Trajectory-granular for agents. Frontier legs pass through customer-owned keys at zero markup; we monetize serving and proof, never resold tokens.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">Phase 1 &middot; F1.2&ndash;F1.3</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P3 &middot; The cheapest serve, structurally</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Disaggregated serving with decode on memory-rich silicon across mixed-vendor fleets, climbed rung by rung (&sect;4.6); KV-aware global routing — the balancer routes each request and each agent trajectory to the replica that already holds its state, scored against load, pool cost, and egress class; day-0 coverage of top model families (Western-model depth as an enterprise-readiness gate); tuned specialists driving routes down the cost curve. Sold as &ldquo;never overpay again, whoever is cheapest.&rdquo;</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">Phases 1&ndash;2 &middot; F1.1, F1.4&ndash;F1.6</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P4 &middot; Convert enterprises on the perimeter</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">BYOC and dedicated with weights, adapters, context, evals, and the cost ledger in-perimeter; compliance certifications shipped with GA, not after; a context firewall with a signed egress ledger on any frontier-bound traffic; reinforcement fine-tuning as a service on the customer&rsquo;s own routes and reward harness.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">Phase 2 &middot; F2.1&ndash;F2.3</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>P5 &middot; Structural neutrality</strong></td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;">Contractual, because under Qualcomm ownership it is load-bearing — and secured as part of the acquisition agreement: independent benchmark governance, published placement records, customer audit rights verifying placement follows the ledger and not the parent, license parity held permanently, per-silicon SLAs. Our job now is to make it verifiable in public, release after release, so customers never have to take it on faith.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">Phase 0 + always-on</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>P6 &middot; Agentic kernel supply chain</strong></td>
+          <td style="padding: 10px 14px 0 0;">Mojo compiler open-sourced on the committed timeline with the skills repo as the front door; the factory/field discipline (&sect;4.5): agents generate centrally, the hardened harness verifies, only signed artifacts reach customer fleets; bring-up compression used internally first, then productized as day-0 hardware adoption; model-lab release partnerships making canonical checkpoints multi-silicon from birth; the open KV interchange format published with Qualcomm and AMD as founding implementers (&sect;4.6); the Mojo-vs-Python-DSL agent claim published as a benchmark, win or lose.</td>
+          <td style="padding: 10px 0 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">Phases 1&ndash;3 &middot; F1.6&ndash;F1.8, F2.0, F2.7</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 8 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">08</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">What we explicitly do not believe</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 26px; margin: 12px 0 0 0;">
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>That the router is the business.</strong> Routing is commoditized from above and below. Routing and certification are how we win routes onto our endpoints — the endpoint serve is the business.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>That a static cost advantage is a moat.</strong> NVIDIA has 75 points of gross margin to compress any spread. The moat is the machine that regenerates advantage: compiler portability, cross-vendor disaggregation, agentic bring-up, and first-to-economics on each new chip.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>That token resale is a business.</strong> Customer-owned keys, zero markup, keys in customer KMS. We monetize serving and proof, never other people&rsquo;s tokens.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>That developer self-serve converts to enterprise revenue by itself.</strong> Commits come from capacity pricing, the perimeter, and accumulated tuned assets. Self-serve is funded as marketing.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>That open weights win by default.</strong> They win where we make them decisively cheaper at certified quality, or where policy forces the perimeter. We build the mechanism; we do not assume the market.</p>
+      <p style="font-size: 12.5px; line-height: 1.58; margin: 8px 0 0 0;"><strong>That fine-tuned models out-reason frontier models.</strong> Tuning narrow verifiable routes is economics with a certification harness — never an intelligence claim.</p>
+    </div>
+
+    <!-- 9 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">09</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Principal risks</h2>
+    </div>
+    <table style="width: 100%; border-collapse: collapse; margin: 14px 0 0 0; font-size: 12px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F; width: 40%;">RISK</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">MITIGATION</th>
+        </tr>
+      </thead>
+      <tbody style="vertical-align: top;">
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Proof gap</strong> — our cost advantage is verified on competitors&rsquo; engines, not ours.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Phase 0 is a blocking gate: independent suite within 90 days; AMD decode result reproduced on MAX or the gap published. No go-to-market scaling on unproven claims.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Artifact lock-in</strong> — canonical model releases ship NVIDIA-quantized, validated on NVIDIA SKUs.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Format absorption in the compiler (ingest NVIDIA-native, requantize to open formats with published deltas); match hand-tuned artifacts on head models publicly per release; model-lab release partnerships making checkpoints multi-silicon from birth.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Fixed-function ASICs win the head</strong> — Sohu-class transformer chips undercut everyone&rsquo;s decode $/Mtok on stable, massive-volume routes.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">SLO-constrained harness comparison the day racks ship and independent numbers exist (none do yet). If real: ASIC pools become a placement target behind our endpoints — stable head routes pinned to fixed-function silicon, everything else programmable, certified migration de-risking the commitment. Architecture drift (MoE forced their redesign once already) is our structural hedge.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Price war</strong> — incumbents at $800M&ndash;$1B revenue cut prices; NVIDIA compresses the spread.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Our floor is structural (heterogeneous decode, silicon partnership); theirs is NVIDIA list price. The ledger passes every vendor price cut to customers automatically — chip price wars are our tailwind.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Whale concentration</strong> — marquee accounts squeeze margins and vertically integrate.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Committed-volume contracts, small roster, treated as lighthouses funding the enterprise phase. The margin structure inverts by design in 2027.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Enterprise catalog risk</strong> — today&rsquo;s marquee open models are heavily Chinese-origin; enterprise procurement resists.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Western-model depth (Gemma, GPT-OSS, Mistral, Llama) held to the same tuning quality as an explicit enterprise-readiness gate before Phase 2 scales.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Neutrality perception under Qualcomm</strong> — customers doubt placement decisions regardless of the contract.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Make the contract visible: benchmark governance, published placement records, audit rights, permanent license parity — verifiable every release, so neutrality is observed rather than claimed.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Parent-company gravity</strong> — roadmap pressure toward Qualcomm silicon over what the harness says is cheapest.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Placement follows the ledger by contract and by published record; nothing Qualcomm-silicon-dependent is load-bearing before 2028; the 2026&ndash;27 plan stands entirely on AMD + NVIDIA fleets.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC;"><strong>Agentic-kernel overclaim</strong> — a gamed reward or inflated speedup destroys the proof-first brand.</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC;">Harness adversarially hardened before any public claim; claims bounded to demonstrated bring-up compression; the Mojo-vs-DSL agent benchmark published win or lose.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 14px 0 0;"><strong>Agentic parity risk</strong> — trajectory-level quality on migrated agent routes is the least-proven claim.</td>
+          <td style="padding: 10px 0 0 0;">Three Phase-1 design partners prove or kill it at trajectory granularity; explicit kill gates in the PRD; spend does not scale before they do.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background: #16160F; color: #F4F4EE; padding: 18px 22px; margin: 24px 0 0 0;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: #C6E96A; margin-bottom: 7px;">THE ONE-LINE STRATEGY</div>
+      <p style="font-size: 14px; line-height: 1.55; font-weight: 500; margin: 0;">Win the endpoint game by being the structural low-cost producer — prove the economics in public, land marquee agent workloads on committed capacity, convert enterprises on proof plus perimeter, and let the open compiler and the agentic kernel pipeline make every new chip our next price cut, in days instead of quarters.</p>
+    </div>
+
+    <!-- 10 -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 30px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 20px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">10</span>
+      <h2 style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Evidence base — key sources</h2>
+    </div>
+    <p style="font-size: 10.5px; line-height: 1.7; color: #55554D; margin: 12px 0 0 0; font-family: 'IBM Plex Mono', monospace;">Qualcomm&ndash;Modular acquisition announcement, June 24 2026 (investor.qualcomm.com; modular.com/blog) &middot; Qualcomm AI200/AI250 rack-scale inference roadmap, Oct 2025 (qualcomm.com) &middot; Modular Community License rev. March 2026 (modular.com/legal/community) &middot; Modular 26.4 release &amp; Modular Cloud (modular.com/blog, June 18 2026) &middot; &ldquo;Translating to Mojo via AI Agents&rdquo; (modular.com/blog, May 13 2026) &middot; Mojo 1.0 roadmap &amp; compiler OSS commitment (docs.modular.com/mojo/faq; modular.com/blog/the-path-to-mojo-1-0) &middot; SemiAnalysis InferenceX: MI355X vs B200 decode economics (inferencex.semianalysis.com) &middot; NVIDIA Dynamo 1.0 production release, March 2026 (investor.nvidia.com) &middot; Menlo Ventures, State of GenAI in the Enterprise 2025 + mid-year update (menlovc.com) &middot; Epoch AI open&ndash;closed capability gap, May 2026 (epoch.ai) &middot; Dell&rsquo;Acqua, Mollick et al., &ldquo;Jagged Technological Frontier&rdquo; (SSRN 4573321) &middot; OpenAI GDPval (openai.com) &middot; Yue et al., RLVR pass@k boundary studies (openreview.net) &middot; Databricks TAO (databricks.com/blog) &middot; OpenPipe ART&middot;E (openpipe.ai/blog) &middot; RouteLLM, ICLR 2025 (lmsys.org) &middot; OpenRouter State of AI token study (openrouter.ai/state-of-ai) &middot; METR automated kernel engineering (metr.org) &middot; Sacra revenue estimates: Fireworks, OpenRouter (sacra.com) &middot; Cisco Data Privacy Benchmark 2025 (cisco.com) &middot; Etched exit-from-stealth: ~$1B raised, $1B+ contracts, A0 tapeout, June 30 2026 (etched.com; semiconductorreports.com).</p>
+
+  </div>
+</x-import>
+</x-dc>
+</body>
+</html>

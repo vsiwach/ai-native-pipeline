@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #0E0E09; }
+  </style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <!-- 1 · Title -->
+  <section data-label="Title" data-speaker-notes="The whole brief in three imperatives. Prepared for Eric Johnson and the Modular product team." style="background: #16160F; color: #F4F4EE; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; justify-content: space-between; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em;">
+      <span style="font-weight: 600;">MODULAR</span>
+      <span style="color: #8A8A80;">EXECUTIVE BRIEF &middot; JULY 2026</span>
+    </div>
+    <div>
+      <h1 style="font-size: 120px; line-height: 1.02; font-weight: 800; letter-spacing: -0.03em; margin: 0;">Make enterprise AI affordable.<br>Prove it. <span style="color: #D5F26E;">Keep their data home.</span></h1>
+      <p style="font-size: 34px; line-height: 1.5; color: #A8A89E; margin: 44px 0 0 0; max-width: 30ch;">The business in plain language — what Modular does, why it wins, how it goes to market.</p>
+    </div>
+    <div style="display: flex; gap: 48px; font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #8A8A80;">
+      <span style="white-space: nowrap;">VIKRAM SIWACH</span><span style="color: #D5F26E; white-space: nowrap;">FOR ERIC JOHNSON &amp; THE PRODUCT TEAM</span><span style="white-space: nowrap;">CONFIDENTIAL</span>
+    </div>
+  </section>
+
+  <!-- 2 · The problem -->
+  <section data-label="The problem" data-speaker-notes="Agents work in long loops — 15x more compute per request than chat. Inference becomes a top-three technology line item, paid to a few frontier labs, on one vendor's chips, with data leaving on every request." style="background: #F4F4EE; color: #16160F; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">01 &middot; THE PROBLEM</div>
+    <h2 style="font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin: 40px 0 0 0; max-width: 24ch;">Agents are about to break every enterprise AI budget</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 56px; margin-top: auto;">
+      <div style="border-top: 4px solid #16160F; padding-top: 28px;">
+        <div style="font-size: 110px; font-weight: 800; letter-spacing: -0.03em; line-height: 1;">15&times;</div>
+        <p style="font-size: 28px; line-height: 1.45; color: #55554D; margin: 18px 0 0 0;">more compute per request than a chat query — agents work in long loops, completing whole tasks</p>
+      </div>
+      <div style="border-top: 4px solid #16160F; padding-top: 28px;">
+        <div style="font-size: 110px; font-weight: 800; letter-spacing: -0.03em; line-height: 1;">&gt;50%</div>
+        <p style="font-size: 28px; line-height: 1.45; color: #55554D; margin: 18px 0 0 0;">of traffic on major AI platforms is already agents, not humans</p>
+      </div>
+      <div style="border-top: 4px solid #16160F; padding-top: 28px;">
+        <div style="font-size: 110px; font-weight: 800; letter-spacing: -0.03em; line-height: 1;">Top 3</div>
+        <p style="font-size: 28px; line-height: 1.45; color: #55554D; margin: 18px 0 0 0;">technology line item — paid to a few frontier labs, on one vendor&rsquo;s chips, data leaving on every request</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · What Modular does -->
+  <section data-label="What Modular does" data-speaker-notes="Three mechanisms: disaggregation puts each serving phase on the cheapest silicon; the compiler makes every chip usable without rewrites; the perimeter keeps customer data and tuned models inside their cloud." style="background: #F4F4EE; color: #16160F; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">02 &middot; WHAT MODULAR DOES</div>
+    <h2 style="font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin: 40px 0 0 0;">Three mechanisms, one machine</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-top: auto;">
+      <div style="background: #FFFFFF; border: 2px solid #16160F; padding: 44px 40px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">THE RIGHT CHIP FOR EACH JOB</div>
+        <p style="font-size: 28px; line-height: 1.5; margin: 24px 0 0 0;">Split serving into its two phases — <strong>disaggregation</strong> — and run each on the silicon that does it cheapest. Output generation runs on memory-rich chips: <strong>up to 40% lower cost per token</strong>, independently measured.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 2px solid #16160F; padding: 44px 40px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">ONE SOFTWARE LAYER, EVERY CHIP</div>
+        <p style="font-size: 28px; line-height: 1.5; margin: 24px 0 0 0;">Compiler technology from the team behind Swift and LLVM runs the same model on NVIDIA, AMD, or Qualcomm — no rewrite, no lock-in. <strong>First to the economics of every chip.</strong></p>
+      </div>
+      <div style="background: #FFFFFF; border: 2px solid #16160F; padding: 44px 40px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">THEIR DATA STAYS HOME</div>
+        <p style="font-size: 28px; line-height: 1.5; margin: 24px 0 0 0;">High-volume tasks run on open-weight models the customer controls, inside their own cloud. Frontier models only through a controlled gate. <strong>Frontier quality where needed; 10&times; cheaper everywhere else.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · In one sentence -->
+  <section data-label="In one sentence" data-speaker-notes="Pause here. This is the whole company in one sentence." style="background: #16160F; color: #F4F4EE; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; justify-content: center; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #C6E96A; font-weight: 600;">IN ONE SENTENCE</div>
+    <p style="font-size: 68px; line-height: 1.25; font-weight: 600; letter-spacing: -0.02em; margin: 48px 0 0 0; max-width: 28ch;">Modular runs a company&rsquo;s AI tasks at the <span style="color: #D5F26E;">lowest proven cost per task</span>, on whatever silicon is cheapest that month, with the company&rsquo;s data and know-how <span style="color: #D5F26E;">staying inside its own walls</span>.</p>
+  </section>
+
+  <!-- 5 · Why it survives -->
+  <section data-label="Why this business survives" data-speaker-notes="The market already voted: Fireworks ~$800M, Together ~$1B, Baseten $5B valuation. But they share one cost structure — rented NVIDIA plus a free engine. Modular's advantage comes from the hardware layer itself, plus preferential Qualcomm silicon access." style="background: #F4F4EE; color: #16160F; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">03 &middot; WHY THIS BUSINESS SURVIVES</div>
+    <h2 style="font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin: 40px 0 0 0; max-width: 26ch;">A proven market, fought with identical cost structures</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: auto; align-items: end;">
+      <div>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #DDDDD4; padding-bottom: 18px;">
+            <span style="font-size: 34px; font-weight: 600;">Fireworks</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; color: #55554D;">~$800M annualized</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #DDDDD4; padding-bottom: 18px;">
+            <span style="font-size: 34px; font-weight: 600;">Together</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; color: #55554D;">~$1B ARR</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #DDDDD4; padding-bottom: 18px;">
+            <span style="font-size: 34px; font-weight: 600;">Baseten</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; color: #55554D;">$5B valuation</span>
+          </div>
+        </div>
+        <p style="font-size: 26px; line-height: 1.5; color: #55554D; margin: 28px 0 0 0;">All rent the same NVIDIA fleets and run the same open-source engines — a price war they fund, not win.</p>
+      </div>
+      <div style="background: #16160F; color: #F4F4EE; padding: 48px 44px;">
+        <p style="font-size: 32px; line-height: 1.45; font-weight: 500; margin: 0;">Modular is the only player whose advantage comes from the <span style="color: #D5F26E;">hardware layer itself</span> — and, with Qualcomm, the only one with preferential access to a new class of inference silicon in 2026&ndash;27. When margins compress, the structural low-cost producer wins.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Go-to-market -->
+  <section data-label="Go-to-market" data-speaker-notes="Strict order. Marquee accounts are the wedge, enterprise dedicated is the business, developer self-serve is marketing. Motion two does not scale spend until motion one has produced public, independently verifiable numbers." style="background: #F4F4EE; color: #16160F; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">04 &middot; GO-TO-MARKET</div>
+    <h2 style="font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin: 40px 0 0 0;">Three motions, in strict order</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-top: auto;">
+      <div style="border-top: 4px solid #16160F; padding-top: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 42px; font-weight: 800;">1 &middot; Prove</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; color: #6F8F1F;">2026</span>
+        </div>
+        <p style="font-size: 27px; line-height: 1.5; margin: 22px 0 0 0;"><strong>3&ndash;5 marquee AI-native companies</strong> on committed dedicated capacity. They can verify our claims in a week; margins thin by design. They buy our cost curve — we get utilization and public proof.</p>
+      </div>
+      <div style="border-top: 4px solid #16160F; padding-top: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 42px; font-weight: 800;">2 &middot; Convert</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; color: #6F8F1F;">2027</span>
+        </div>
+        <p style="font-size: 27px; line-height: 1.5; margin: 22px 0 0 0;"><strong>Enterprises deploying agents at scale</strong> — dedicated and BYOC, sold top-down with the Qualcomm channel. Where margins are made: proof plus perimeter plus an audited bill per task.</p>
+      </div>
+      <div style="border-top: 4px solid #16160F; padding-top: 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <span style="font-size: 42px; font-weight: 800;">3 &middot; Feed</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; color: #6F8F1F;">ALWAYS ON</span>
+        </div>
+        <p style="font-size: 27px; line-height: 1.5; margin: 22px 0 0 0;"><strong>Developers via self-serve endpoints.</strong> A funnel and credibility layer, not a revenue engine — fund it modestly, judge it as marketing.</p>
+      </div>
+    </div>
+    <p style="font-size: 28px; line-height: 1.5; margin: 48px 0 0 0; padding: 26px 34px; background: #EDF6D4; border-left: 6px solid #B7DB4A;"><strong>The discipline:</strong> motion two does not scale spend until motion one has produced public, independently verifiable numbers.</p>
+  </section>
+
+  <!-- 7 · Scoreboard -->
+  <section data-label="How we know it's working" data-speaker-notes="Concrete, dated, and reproducible. The standing test is the cultural one: if a cost claim can't be independently rerun, we don't make it." style="background: #F4F4EE; color: #16160F; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">05 &middot; THE SCOREBOARD</div>
+    <h2 style="font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin: 40px 0 0 0;">How we&rsquo;ll know it&rsquo;s working</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; margin-top: auto;">
+      <div style="background: #FFFFFF; border: 2px solid #16160F; padding: 44px 40px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">END OF 2026</div>
+        <p style="font-size: 28px; line-height: 1.5; margin: 24px 0 0 0;">Published in &ge;1 independent benchmark — <strong>win or lose</strong>. 3&ndash;5 marquee customers live. Verified <strong>15%+ savings per task</strong> at equal quality, from real traffic.</p>
+      </div>
+      <div style="background: #FFFFFF; border: 2px solid #16160F; padding: 44px 40px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">THROUGH 2027</div>
+        <p style="font-size: 28px; line-height: 1.5; margin: 24px 0 0 0;"><strong>&ge;10 enterprise dedicated / BYOC contracts.</strong> Compliance certifications in hand. Gross margin climbing toward <strong>60%</strong> as the mix shifts to enterprise commitments.</p>
+      </div>
+      <div style="background: #16160F; color: #F4F4EE; border: 2px solid #16160F; padding: 44px 40px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #C6E96A; font-weight: 600;">STANDING TEST</div>
+        <p style="font-size: 28px; line-height: 1.5; margin: 24px 0 0 0;">Can a customer rerun our numbers themselves? <strong>If a cost claim can&rsquo;t be independently reproduced, we don&rsquo;t make it.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Risks -->
+  <section data-label="The risks, honestly" data-speaker-notes="Every risk paired with its structural answer. Note the last one: nothing Qualcomm-silicon-dependent is load-bearing before 2028 — the 2026-27 business stands on hardware that exists today." style="background: #F4F4EE; color: #16160F; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em; color: #6F8F1F; font-weight: 600;">06 &middot; THE RISKS, HONESTLY</div>
+    <h2 style="font-size: 76px; line-height: 1.05; font-weight: 800; letter-spacing: -0.025em; margin: 40px 0 0 0;">Four objections, four structural answers</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 36px 56px; margin-top: auto;">
+      <div style="border-top: 3px solid #16160F; padding-top: 22px;">
+        <div style="font-size: 32px; font-weight: 700;">NVIDIA cuts prices or gives software away</div>
+        <p style="font-size: 26px; line-height: 1.45; color: #55554D; margin: 14px 0 0 0;">We don&rsquo;t sell a static discount — we sell the machine that always finds the cheapest silicon, whoever makes it. Chip price wars help us.</p>
+      </div>
+      <div style="border-top: 3px solid #16160F; padding-top: 22px;">
+        <div style="font-size: 32px; font-weight: 700;">Marquee customers squeeze margins and can leave</div>
+        <p style="font-size: 26px; line-height: 1.45; color: #55554D; margin: 14px 0 0 0;">True. Committed volumes, small roster — lighthouses funding the enterprise phase, not the end state.</p>
+      </div>
+      <div style="border-top: 3px solid #16160F; padding-top: 22px;">
+        <div style="font-size: 32px; font-weight: 700;">Neutrality doubts under Qualcomm</div>
+        <p style="font-size: 26px; line-height: 1.45; color: #55554D; margin: 14px 0 0 0;">Contractually secured in the acquisition agreement — independent benchmarks, published routing records, audit rights — and made visible every release. Observed, not claimed.</p>
+      </div>
+      <div style="border-top: 3px solid #16160F; padding-top: 22px;">
+        <div style="font-size: 32px; font-weight: 700;">Discipline on new silicon</div>
+        <p style="font-size: 26px; line-height: 1.45; color: #55554D; margin: 14px 0 0 0;">The plan assumes nothing from Qualcomm chips before 2028. AI200/AI250 are upside, not load-bearing — the 2026&ndash;27 business stands on hardware that exists today.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · Closing -->
+  <section data-label="Closing" data-speaker-notes="Close on the one-line thesis. Companion documents: the full Strategy and the Platform PRD." style="background: #16160F; color: #F4F4EE; font-family: 'Archivo', sans-serif; display: flex; flex-direction: column; justify-content: space-between; padding: 100px 110px 80px 110px; box-sizing: border-box;">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.14em;">
+      <span style="font-weight: 600;">MODULAR</span>
+      <span style="color: #8A8A80;">EXECUTIVE BRIEF &middot; JULY 2026</span>
+    </div>
+    <p style="font-size: 64px; line-height: 1.25; font-weight: 600; letter-spacing: -0.02em; margin: 0; max-width: 30ch;">&ldquo;Every company will soon run thousands of AI tasks an hour. Someone has to run them at the lowest cost, prove the bill, and keep the company&rsquo;s knowledge its own. <span style="color: #D5F26E;">That is Modular.</span>&rdquo;</p>
+    <div style="display: flex; gap: 48px; font-family: 'IBM Plex Mono', monospace; font-size: 24px; letter-spacing: 0.1em; color: #8A8A80;">
+      <span style="line-height: 1.6;">COMPANIONS &middot; WINNING THE ENDPOINT GAME (STRATEGY) &middot; THE ENDPOINT PLATFORM (PRD)</span>
+    </div>
+  </section>
+
+</x-import>
+</x-dc>
+</body>
+</html>
