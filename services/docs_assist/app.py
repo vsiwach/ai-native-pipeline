@@ -28,6 +28,9 @@ from retrieval import Retriever, build_context
 UPSTREAM = os.environ.get("UPSTREAM_BASE_URL", "http://localhost:8000/v1").rstrip("/")
 MODEL = os.environ.get("UPSTREAM_MODEL", "Qwen/Qwen2.5-14B-Instruct")
 API_KEY = os.environ.get("UPSTREAM_API_KEY", "")
+# Dev-only: allow the certified-migration console to re-point this
+# instance's upstream at a freshly rented GPU pod without a restart.
+DEV_UPSTREAM = os.environ.get("DEV_UPSTREAM_SWITCH", "0") == "1"
 KB = os.environ.get("KB_INDEX", str(Path(__file__).parent / "kb" / "modular_kb.sqlite"))
 
 SYSTEM = (
@@ -65,6 +68,22 @@ async def info():
         "kb_index": KB,
         "disclosure": "unofficial demo built on public Modular docs",
     }
+
+
+@app.post("/dev/upstream")
+async def dev_upstream(request: Request):
+    """Switch UPSTREAM_BASE_URL/UPSTREAM_MODEL at runtime. Gated behind
+    DEV_UPSTREAM_SWITCH=1 (the compose/dev stack); 404 otherwise so the
+    surface does not exist in anything production-shaped."""
+    global UPSTREAM, MODEL
+    if not DEV_UPSTREAM:
+        return JSONResponse(status_code=404, content={"error": "not enabled"})
+    body = await request.json()
+    if body.get("base_url"):
+        UPSTREAM = str(body["base_url"]).rstrip("/")
+    if body.get("model"):
+        MODEL = str(body["model"])
+    return {"upstream": UPSTREAM, "model": MODEL}
 
 
 @app.post("/v1/chat/completions")

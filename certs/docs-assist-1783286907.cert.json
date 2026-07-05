@@ -1,0 +1,39 @@
+{
+  "kind": "modular-demo/certification-record",
+  "version": 1,
+  "route": "docs-assist",
+  "created": "2026-07-05T17:28:27Z",
+  "eval_set": {
+    "path": "evals/docs_qa.jsonl",
+    "sha256": "31d7e4214ab7bb0a0b010f5ebe3a8921d2b12098b35bb1d63f7cd9e78e8079d4",
+    "custody": "customer"
+  },
+  "model_build": "qwen2.5-14b-instruct@26.4.0+a100",
+  "route_config": {
+    "path": "routing-policy.yaml",
+    "sha256": "f40bc04a72dbdaa16e1665b16a40d3cc46697913a85720b4f119c41a85296f53"
+  },
+  "quality": {
+    "parity": 0.75,
+    "gate": 0.9,
+    "pass": false,
+    "scored": 12,
+    "passed": 9,
+    "method": "grounding+rubric"
+  },
+  "slo": {
+    "gate_ttft_ms": 800.0,
+    "measured": {
+      "p99_ttft_ms": 308.5,
+      "p99_tpot_ms": 20.8,
+      "usd_per_mtok": 2.039
+    },
+    "pass": true
+  },
+  "verdict": "HOLD",
+  "signature_block": {
+    "algo": "ed25519",
+    "public_key": "8835b5bf571458579456cdd2180bfeb3a23c4ad73797dc1b176c43ec134acf4c",
+    "signature": "e8a0ad67e814b1e3461aa26ae5acf8ed6fd2ce3067e3cafeb5d98bc43d3e86e0859f73ac4fba5df5e0dbdb4b2b476f28176727922e873f4a06667703bc86f60a"
+  }
+}

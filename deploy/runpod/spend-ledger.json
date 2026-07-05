@@ -42,6 +42,24 @@
       "start_ts": 1783036848.51573,
       "usd_per_hr": 0.7,
       "end_ts": 1783037579.581155
+    },
+    {
+      "what": "runpod NVIDIA A100 80GB PCIe pod m5urqsu7knad09 (phase-6 MAX bench)",
+      "start_ts": 1783285687.809006,
+      "usd_per_hr": 1.39,
+      "end_ts": 1783287418.542578
+    },
+    {
+      "what": "runpod AMD Instinct MI300X OAM pod 65w5tzxtzhsdqv (phase-6 MAX bench)",
+      "start_ts": 1783285726.8271282,
+      "usd_per_hr": 2.19,
+      "end_ts": 1783286414.5875452
+    },
+    {
+      "what": "runpod AMD Instinct MI300X OAM pod kzin4b09mqtidn (console launch)",
+      "start_ts": 1783286432.404193,
+      "usd_per_hr": 2.19,
+      "end_ts": 1783287312.6614919
     }
   ]
 }

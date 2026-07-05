@@ -1,0 +1,39 @@
+{
+  "kind": "modular-demo/certification-record",
+  "version": 1,
+  "route": "docs-assist",
+  "created": "2026-07-05T17:33:51Z",
+  "eval_set": {
+    "path": "evals/docs_qa.jsonl",
+    "sha256": "8b273bcf40a30c08406585e9afa5cfd90300de415f65f02075470da003ac199c",
+    "custody": "customer"
+  },
+  "model_build": "qwen2.5-14b-instruct@26.4.0+a100",
+  "route_config": {
+    "path": "routing-policy.yaml",
+    "sha256": "f40bc04a72dbdaa16e1665b16a40d3cc46697913a85720b4f119c41a85296f53"
+  },
+  "quality": {
+    "parity": 1.0,
+    "gate": 0.9,
+    "pass": true,
+    "scored": 12,
+    "passed": 12,
+    "method": "grounding+rubric"
+  },
+  "slo": {
+    "gate_ttft_ms": 800.0,
+    "measured": {
+      "p99_ttft_ms": 308.5,
+      "p99_tpot_ms": 20.8,
+      "usd_per_mtok": 2.039
+    },
+    "pass": true
+  },
+  "verdict": "PROMOTE_ELIGIBLE",
+  "signature_block": {
+    "algo": "ed25519",
+    "public_key": "8835b5bf571458579456cdd2180bfeb3a23c4ad73797dc1b176c43ec134acf4c",
+    "signature": "199e97199234fbbbd35893ce162e2e4e4d3d37b6fb77602110f95c344f1e095495fa2808a7090dff6e43d3a1fcffc8404e6acf36cf995552cb7e37c1e640de0b"
+  }
+}

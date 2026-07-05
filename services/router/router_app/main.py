@@ -974,6 +974,104 @@ def get_app(registry_path: Path | None = None,
         run.start()
         return run.status()
 
+    # Dev-mode GPU pool ops (console GPU card): the router wraps RunPod
+    # server-side — key stays in env, spend guard enforced here. Exists only
+    # when RUNPOD_API_KEY is set (local dev / demo driving).
+    def _gpuops():
+        key = os.environ.get("RUNPOD_API_KEY", "")
+        if not key:
+            return None
+        if getattr(state, "gpuops", None) is None:
+            from router_app.gpuops import GpuOps
+            root = Path(os.environ.get("GPUOPS_ROOT",
+                                       cfg._default_root()))
+            state.gpuops = GpuOps(key, root, emit=state.events.emit)
+        return state.gpuops
+
+    @app.get("/v1/dev/gpu")
+    def gpu_status():
+        ops = _gpuops()
+        if ops is None:
+            return {"enabled": False}
+        return {"enabled": True, "budget": ops.budget(),
+                "pods": ops.list_pods(), "jobs": ops.jobs_status()}
+
+    @app.post("/v1/dev/gpu")
+    async def gpu_ctl(request: Request):
+        ops = _gpuops()
+        if ops is None:
+            return _error(501, "gpu_ops_disabled",
+                          "RUNPOD_API_KEY not set on the router")
+        body = await request.json()
+        action = body.get("action")
+        try:
+            if action == "launch":
+                kind = body.get("kind")
+                if kind not in ("a100", "mi300x"):
+                    return _error(400, "bad_kind", "kind: a100|mi300x")
+                return ops.launch(kind)
+            if action == "terminate":
+                return ops.terminate(body["pod_id"])
+            if action == "bench":
+                pods = {p["id"]: p for p in ops.list_pods()}
+                pod = pods.get(body.get("pod_id"))
+                if pod is None or not pod["ready"]:
+                    return _error(409, "pod_not_ready",
+                                  "pod unknown or /v1/models not serving yet")
+                return ops.start_bench(pod, os.environ.get(
+                    "BENCH_REPORTS_DIR", "bench-reports"))
+            if action == "adopt":
+                # point the route's shadow candidate at the pod and rotate
+                # the shadow log — the cert cohort starts clean
+                route = body.get("route", "docs-assist")
+                pods = {p["id"]: p for p in ops.list_pods()}
+                pod = pods.get(body.get("pod_id"))
+                if pod is None or not pod["ready"]:
+                    return _error(409, "pod_not_ready",
+                                  "pod unknown or /v1/models not serving yet")
+                route_cfg = state.policy.get("routes", {}).get(route) or {}
+                cand = (route_cfg.get("shadow_candidate") or "").rstrip("/")
+                if not cand:
+                    return _error(404, "no_shadow_candidate", route)
+                cand_root = cand[:-3] if cand.endswith("/v1") else cand
+                from router_app.gpuops import MODEL
+                r = httpx.post(f"{cand_root}/dev/upstream",
+                               json={"base_url": pod["url"], "model": MODEL},
+                               timeout=10)
+                # rotate BY PATH (a restart empties state.shadows but the
+                # old log file survives — the cert cohort must start clean)
+                mirror = state.shadow_for(route)
+                state.shadows.pop(route, None)
+                rotated = None
+                if mirror is not None and mirror.log_path.exists():
+                    rotated = mirror.log_path.with_suffix(
+                        f".pre-{pod['kind']}-{int(time.time())}.jsonl")
+                    mirror.log_path.rename(rotated)
+                state.events.emit("gpu_ops", action="adopt", route=route,
+                                  pod=pod["id"], upstream=pod["url"],
+                                  rotated=str(rotated) if rotated else None)
+                return {"route": route, "candidate": cand,
+                        "upstream": r.json(),
+                        "shadow_log_rotated": str(rotated) if rotated
+                        else None}
+            if action == "certify":
+                route = body.get("route", "docs-assist")
+                pool = body.get("pool")
+                if pool not in ("a100", "mi300x"):
+                    return _error(400, "bad_pool", "pool: a100|mi300x")
+                mirror = state.shadow_for(route)
+                if mirror is None:
+                    return _error(404, "no_shadow_candidate", route)
+                from router_app.gpuops import KINDS
+                return ops.start_certify(
+                    pool, str(mirror.log_path),
+                    str(state.policy_path or "routing-policy.yaml"),
+                    KINDS[pool]["image"])
+            return _error(400, "bad_action",
+                          "action: launch|terminate|bench|adopt|certify")
+        except RuntimeError as exc:   # budget guard / RunPod API errors
+            return _error(409, "gpu_ops_failed", str(exc))
+
     # Dev surface for the incident agent + chaos drills (not in the board's
     # read contract): open / act / resolve.
     @app.post("/v1/incidents")

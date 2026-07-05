@@ -120,6 +120,7 @@ async def _fire(client, args, req: PlannedRequest, rows: list[dict],
                      {"role": "user", "content": req.question}],
         "max_tokens": req.max_tokens,
         "stream": req.stream,
+        "temperature": 0,   # reproducible answers for certification cohorts
     }
     url = f"{args.router}/v1/chat/completions"
     row = {"t_offset_s": req.t_offset_s, "profile": req.profile,

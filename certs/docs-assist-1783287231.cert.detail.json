@@ -1,0 +1,74 @@
+[
+  {
+    "q": "Under what open-source license are the MAX framework libraries and serving layer released?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "Which parts of Mojo are open source, and what did Modular open up beyond the source code?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "What is Mammoth in the Modular stack?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "Which hardware vendors does MAX support for serving on day 0?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "What is the role of the Mojo standard library and kernels \u2014 are they open source?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "How does KV-aware routing decide where a request lands?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "What is disaggregated serving and why does it lower cost?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "Can I self-host MAX for single-node serving for free?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "What skills does the Modular skills repo provide for coding agents?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "What Python interoperability does Mojo offer?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "Which open model families does Modular serve with day-0 coverage?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  },
+  {
+    "q": "What does the OpenAI-compatible endpoint on MAX expose?",
+    "grounding": true,
+    "rubric": true,
+    "pass": true
+  }
+]

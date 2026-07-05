@@ -4,11 +4,11 @@
   "index_sha256": "9db58084145c650b6ce1a5b7a2e9a4f64b1cc3af3b951009a5a30e7b7d71f234",
   "evals": "evals/docs_qa.jsonl",
   "k": 8,
-  "checked_at": "2026-07-05T16:18:38Z",
+  "checked_at": "2026-07-05T17:30:31Z",
   "items": [
     {
       "id": "q01",
-      "question": "What license is the MAX framework and serving layer released under?",
+      "question": "Under what open-source license are the MAX framework libraries and serving layer released?",
       "keywords": [
         {
           "keyword": "apache",
@@ -17,9 +17,9 @@
       ],
       "status": "RETRIEVED",
       "top_urls": [
-        "https://docs.modular.com/max/container/",
         "https://www.modular.com/blog/the-next-big-step-in-mojo-open-source",
-        "https://www.modular.com/blog/why-llm-inference-needs-a-new-kind-of-router-part-1"
+        "https://www.modular.com/blog/modular-platform-25-3-450k-lines-of-open-source-code-and-pip-install-modular",
+        "https://www.modular.com/blog/the-next-big-step-in-mojo-open-source"
       ]
     },
     {
@@ -47,7 +47,7 @@
       "question": "What is Mammoth in the Modular stack?",
       "keywords": [
         {
-          "keyword": "control plane",
+          "keyword": "kubernetes",
           "status": "RETRIEVED"
         }
       ],
@@ -151,7 +151,7 @@
       "question": "What skills does the Modular skills repo provide for coding agents?",
       "keywords": [
         {
-          "keyword": "import-model",
+          "keyword": "import",
           "status": "RETRIEVED"
         }
       ],

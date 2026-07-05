@@ -19,16 +19,23 @@ import time
 
 import httpx
 
-# Load content is irrelevant to serving economics — any prompt exercises
-# retrieval + generation. A built-in pool keeps the router image
-# self-contained (evals/ does not ship in the container).
+# EXACT copies of evals/docs_qa.jsonl questions (certify matches shadow
+# records to eval items by question text, so console-driven load must ask
+# the eval questions verbatim). Built-in because evals/ does not ship in
+# the router container; keep in sync when the eval set changes.
 DEFAULT_QUESTIONS = [
-    "What license is the MAX framework released under?",
+    "Under what open-source license are the MAX framework libraries and serving layer released?",
+    "Which parts of Mojo are open source, and what did Modular open up beyond the source code?",
+    "What is Mammoth in the Modular stack?",
+    "Which hardware vendors does MAX support for serving on day 0?",
+    "What is the role of the Mojo standard library and kernels — are they open source?",
     "How does KV-aware routing decide where a request lands?",
     "What is disaggregated serving and why does it lower cost?",
     "Can I self-host MAX for single-node serving for free?",
+    "What skills does the Modular skills repo provide for coding agents?",
+    "What Python interoperability does Mojo offer?",
+    "Which open model families does Modular serve with day-0 coverage?",
     "What does the OpenAI-compatible endpoint on MAX expose?",
-    "What is Mammoth in the Modular stack?",
 ]
 MAX_DURATION_S = 600.0
 MAX_RPS = 20.0
@@ -88,8 +95,10 @@ class LoadRun:
     # -- the loop ----------------------------------------------------------
     async def _one(self, client: httpx.AsyncClient, question: str,
                    stream: bool) -> None:
+        # temperature 0: certification cohorts should be reproducible —
+        # same question, same context, same answer
         body = {"messages": [{"role": "user", "content": question}],
-                "max_tokens": 120, "stream": stream}
+                "max_tokens": 120, "stream": stream, "temperature": 0}
         url = f"{self.target}/v1/chat/completions"
         async with self._sem:
             try:

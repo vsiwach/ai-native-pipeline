@@ -93,12 +93,24 @@ button:disabled{opacity:.4;cursor:not-allowed}
   </div>
 </div>
 
+<div class="card" id="gpu-card" style="display:none">
+  <h3>GPU POOLS — rented per second, driven from here <span class="pass" id="gpu-budget">—</span></h3>
+  <div id="gpu-pods" class="note">no pods</div>
+  <div class="actions">
+    <button onclick="gpuLaunch('a100', this)">▲ Launch A100 (NVIDIA · MAX 26.4)</button>
+    <button onclick="gpuLaunch('mi300x', this)">▲ Launch MI300X (AMD · MAX 26.4)</button>
+  </div>
+  <div class="note">Flow per pool: wait READY → <b>Adopt as candidate</b> (shadow log rotates, cohort starts clean) → <b>Generate load</b> above (eval questions, verbatim) → <b>Bench</b> (measured $/Mtok at the actual $/hr) → <b>Certify</b> (0.90 parity gate; a pass relinks the cert above) → <b>Terminate</b>. The router holds the RunPod key and the spend ledger; this page never sees either.</div>
+  <div class="note mono" id="gpu-jobs"></div>
+</div>
+
 <p class="note">Unofficial demo built on public Modular materials · costs shown are measured (pool $/hr ÷ measured tok/s), never estimated · every artifact rerunnable: <span class="mono">./dev bench · tools/certify.py</span> · ledger: <span class="mono">/v1/costs</span></p>
 </div>
 
 <script>
 const qs = new URLSearchParams(location.search);
 const MOCK = qs.get('mock') === 'true';
+const REPLAY = qs.get('replay') === 'true';
 const ROUTER = qs.get('router') || 'http://localhost:8600';
 
 const state = {
@@ -167,22 +179,28 @@ function renderCert(c){
 }
 
 let liveFailed = false;
-async function loadLive(){
-  if(liveFailed) return;
+function applyCosts(d){
+  (d.pools||[]).forEach(pl=>{ if(state.pools[pl.id]){ state.pools[pl.id].usd_mtok = pl.usd_per_mtok; state.pools[pl.id].ttft = pl.p99_ttft_ms; }});
+  state.serving = d.routes?.['docs-assist']?.serving || state.serving;
+  state.shadowed = d.routes?.['docs-assist']?.shadowed || state.shadowed;
+}
+async function loadCert(){
   try{
-    const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
-    (d.pools||[]).forEach(pl=>{ if(state.pools[pl.id]){ state.pools[pl.id].usd_mtok = pl.usd_per_mtok; state.pools[pl.id].ttft = pl.p99_ttft_ms; }});
-    state.serving = d.routes?.['docs-assist']?.serving || state.serving;
-    state.shadowed = d.routes?.['docs-assist']?.shadowed || state.shadowed;
-  }catch(e){ liveFailed = true; document.getElementById('mode-tag').textContent = 'MOCK MODE — router unreachable · append ?router=<url> for live'; loadMock(); return; }
-  try{
-    const r = await fetch('certs/latest.json'); const c = await r.json();
+    const r = await fetch('certs/latest.json', {cache:'no-store'}); const c = await r.json();
     state.parity = c.quality.parity;
     renderCert({verdict:c.verdict, parity:c.quality.parity, gate:c.quality.gate,
       eval_sha:c.eval_set.sha256.slice(0,8)+'…', config_sha:c.route_config.sha256.slice(0,8)+'…',
       build:c.model_build, algo:c.signature_block.algo,
       slo:`p99 TTFT ${c.slo?.measured?.p99_ttft_ms??'—'}ms ≤ ${c.slo?.gate_ttft_ms}ms`});
   }catch(e){}
+}
+async function loadLive(){
+  if(liveFailed) return;
+  try{
+    const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
+    applyCosts(d);
+  }catch(e){ liveFailed = true; document.getElementById('mode-tag').textContent = 'MOCK MODE — router unreachable · append ?router=<url> for live'; loadMock(); return; }
+  await loadCert();
   render();
 }
 
@@ -245,8 +263,101 @@ async function pollLoad(){
   catch(e){}
 }
 
+// GPU pool ops — the router wraps RunPod server-side (/v1/dev/gpu); this
+// page only clicks. Money actions arm on first click, fire on the second.
+const gpuArm = {};
+function armTwice(key, btn, warn){
+  if(gpuArm[key] && Date.now() - gpuArm[key] < 6000){ delete gpuArm[key]; return true; }
+  gpuArm[key] = Date.now(); const prev = btn.textContent; btn.textContent = warn;
+  setTimeout(()=>{ if(gpuArm[key]) btn.textContent = prev; }, 6000);
+  return false;
+}
+async function gpuPost(body){
+  const r = await fetch(ROUTER+'/v1/dev/gpu', {method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const d = await r.json();
+  if(d.error) document.getElementById('gpu-jobs').textContent = d.error.message || JSON.stringify(d.error);
+  return d;
+}
+async function gpuLaunch(kind, btn){
+  if(!armTwice('launch-'+kind, btn, 'rents a GPU by the second — click again')) return;
+  await gpuPost({action:'launch', kind}); pollGpu();
+}
+async function gpuAct(action, pod, btn){
+  if(action==='terminate' && !armTwice('term-'+pod, btn, 'really terminate? click again')) return;
+  await gpuPost({action, pod_id: pod}); pollGpu();
+}
+async function gpuCert(pool){ await gpuPost({action:'certify', pool}); pollGpu(); }
+function renderGpu(d){
+  const card = document.getElementById('gpu-card');
+  if(!d.enabled){ card.style.display='none'; return; }
+  card.style.display='';
+  document.getElementById('gpu-budget').textContent =
+    `ledger $${d.budget.spent_usd} / cap $${d.budget.cap_usd}`;
+  const noBtns = REPLAY ? 'disabled' : '';
+  document.getElementById('gpu-pods').innerHTML = d.pods.length ? d.pods.map(p=>`
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:8px 0">
+      <span class="mono">${p.kind.toUpperCase()} · ${p.gpu||''} · $${p.usd_hr}/hr · ${p.ready?'● READY':(p.uptime_s?'starting…':'provisioning…')}</span>
+      <span style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="gpuAct('adopt','${p.id}',this)" ${p.ready&&!REPLAY?'':'disabled'}>Adopt as candidate</button>
+        <button onclick="gpuAct('bench','${p.id}',this)" ${p.ready&&!REPLAY?'':'disabled'}>Bench</button>
+        <button onclick="gpuCert('${p.kind}')" ${noBtns}>Certify</button>
+        <button onclick="gpuAct('terminate','${p.id}',this)" ${noBtns}>✕ Terminate</button>
+      </span>
+    </div>`).join('') : 'no pods — launch one below';
+  const jobs = Object.values(d.jobs||{});
+  document.getElementById('gpu-jobs').innerHTML = jobs.map(j=>
+    `${j.name}: ${j.running?'running':'exit '+j.rc} · ${j.elapsed_s}s<br>` +
+    (j.tail||[]).slice(-3).map(t=>t.replace(/</g,'&lt;')).join('<br>')).join('<hr>');
+}
+async function pollGpu(){
+  if(MOCK || REPLAY) return;
+  try{ renderGpu(await (await fetch(ROUTER+'/v1/dev/gpu')).json()); }catch(e){}
+}
+
+// REPLAY: play a RECORDED real run (tools/record_console.py trace) through
+// the same render paths the live mode uses. Nothing is fabricated — when
+// the GPU provider is flaky on demo day, the audience sees the real
+// recorded run instead. ?replay=true [&speed=N]
+async function runReplay(){
+  const speed = Number(qs.get('speed')) || 10;
+  let events;
+  try{
+    const text = await (await fetch('replay/console-trace.jsonl')).text();
+    events = text.split('\n').filter(l=>l.trim()).map(l=>JSON.parse(l));
+  }catch(e){
+    document.getElementById('mode-tag').textContent = 'REPLAY — no trace found (replay/console-trace.jsonl)';
+    return;
+  }
+  const meta = events.find(e=>e.src==='meta')?.data || {};
+  const total = events[events.length-1].t;
+  await loadCert();
+  document.getElementById('btn-load').disabled = true;
+  document.getElementById('btn-promote').disabled = true;
+  document.getElementById('btn-rollback').disabled = true;
+  const t0 = performance.now();
+  let i = 0;
+  const tick = setInterval(()=>{
+    const now = (performance.now()-t0)/1000*speed;
+    while(i < events.length && events[i].t <= now){
+      const ev = events[i++];
+      if(ev.src==='costs') applyCosts(ev.data);
+      if(ev.src==='gpu') renderGpu(ev.data);
+      if(ev.src==='loadgen') renderLoad(ev.data);
+      if(ev.src==='shadow' && ev.data.submitted!=null) state.shadowed = ev.data.submitted;
+    }
+    render();
+    document.getElementById('mode-tag').textContent =
+      `REPLAY — real run recorded ${meta.started||''} · ${speed}× · t+${Math.min(now,total).toFixed(0)}s / ${total.toFixed(0)}s`;
+    if(i >= events.length){ clearInterval(tick);
+      document.getElementById('mode-tag').textContent =
+        `REPLAY complete — real run recorded ${meta.started||''} (${total.toFixed(0)}s at ${speed}×)`; }
+  }, 200);
+}
+
 if(MOCK){ document.getElementById('mode-tag').textContent='MOCK MODE — ?mock=true'; loadMock(); }
-else { loadLive(); pollLoad(); setInterval(loadLive, 5000); setInterval(pollLoad, 2000); }
+else if(REPLAY){ runReplay(); }
+else { loadLive(); pollLoad(); pollGpu(); setInterval(loadLive, 5000); setInterval(pollLoad, 2000); setInterval(pollGpu, 5000); }
 render();
 </script>
 </body>
