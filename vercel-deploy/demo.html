@@ -97,6 +97,13 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <div class="card" id="run-card">
     <h3>BYOC MIGRATION RUN <span class="pass" id="gpu-budget">—</span></h3>
 
+    <div class="runstep" id="step-auto">
+      <div class="runstep-body">
+        <button class="primary" id="btn-migrate" onclick="runMigration(this)">⚡ Run migration</button>
+        <span class="note" id="migrate-status">One click, the whole story: wake pool → adopt → voice traffic → bench → certify → on a PASS, traffic moves from the frontier incumbent to the open-model pool. The gate cannot be skipped — a HOLD ends the run on the incumbent. Or drive the steps yourself below.</span>
+      </div>
+    </div>
+
     <div class="runstep" id="step-pool">
       <div class="runstep-head"><span class="stepnum">1</span> PREPARE GPU POOL — MAX runtime · scale-to-zero</div>
       <div class="runstep-body">
@@ -431,6 +438,30 @@ async function pollJob(name, timeout_s){
   return null;
 }
 
+// ONE CLICK — server-side orchestration; survives closing the tab.
+async function runMigration(btn){
+  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
+  const r = await fetch(ROUTER+'/v1/dev/migrate', {method:'POST',
+    headers:{'Content-Type':'application/json', ...devHeaders()},
+    body: JSON.stringify({action:'start', route:ROUTE})});
+  renderMigration(await r.json());
+}
+function renderMigration(m){
+  if(!m || !m.stage || m.stage==='idle') return;
+  const btn = document.getElementById('btn-migrate');
+  const st = document.getElementById('migrate-status');
+  btn.disabled = !!m.running;
+  const label = {wake_pool:'waking pool', adopt:'adopting candidate',
+    traffic:'voice traffic', bench:'benching', certify:'certifying',
+    promote:'PROMOTING', done: m.error ? 'failed' : (m.verdict==='PROMOTE_ELIGIBLE' ? 'MIGRATED ✓' : 'gate refused')}[m.stage] || m.stage;
+  btn.textContent = m.running ? `⚡ ${label} · ${Math.round(m.elapsed_s)}s` : (m.finished ? `⚡ ${label} — run again` : '⚡ Run migration');
+  st.textContent = (m.detail || '') + (m.error ? ' — '+m.error : '');
+}
+async function pollMigration(){
+  if(MOCK || REPLAY) return;
+  try{ renderMigration(await (await fetch(ROUTER+'/v1/dev/migrate')).json()); }catch(e){}
+}
+
 // STEP 3 — certify against the adopted pool; a PASS unlocks Promote.
 async function certifyRun(btn){
   if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
@@ -471,7 +502,7 @@ async function runReplay(){
   const capEl = document.getElementById('replay-caption');
   if(captions.length) capEl.style.display='';
   await loadCert();
-  for (const id of ['btn-load','btn-promote','btn-rollback','btn-pool','btn-certify']){
+  for (const id of ['btn-load','btn-promote','btn-rollback','btn-pool','btn-certify','btn-migrate']){
     const b = document.getElementById(id);
     b.disabled = true;
     b.title = 'Replay of a recorded run — controls need a live router (?router=<url>)';
@@ -506,7 +537,7 @@ async function runReplay(){
 
 if(MOCK){ document.getElementById('mode-tag').textContent='MOCK MODE — ?mock=true'; loadMock(); }
 else if(REPLAY){ runReplay(); }
-else { loadLive(); pollLoad(); pollGpu(); setInterval(loadLive, 5000); setInterval(pollLoad, 2000); setInterval(pollGpu, 5000); }
+else { loadLive(); pollLoad(); pollGpu(); pollMigration(); setInterval(loadLive, 5000); setInterval(pollLoad, 2000); setInterval(pollGpu, 5000); setInterval(pollMigration, 3000); }
 render();
 </script>
 </body>

@@ -746,7 +746,13 @@ def get_app(registry_path: Path | None = None,
         """Newest signed certification record. The console prefers this
         over its static copy so a cert minted on a hosted stack shows up
         without a site redeploy."""
-        certs_dir = Path(os.environ.get("CERTS_DIR", "certs"))
+        certs_dir = os.environ.get("CERTS_DIR")
+        if certs_dir:
+            certs_dir = Path(certs_dir)
+        else:
+            # certify jobs run with cwd = GPUOPS_ROOT — read where they write
+            root = os.environ.get("GPUOPS_ROOT")
+            certs_dir = Path(root) / "certs" if root else Path("certs")
         certs = sorted(certs_dir.glob("*.cert.json"),
                        key=lambda p: p.stat().st_mtime)
         if not certs:
@@ -1132,6 +1138,39 @@ def get_app(registry_path: Path | None = None,
                           "action: launch|terminate|bench|adopt|certify")
         except RuntimeError as exc:   # budget guard / RunPod API errors
             return _error(409, "gpu_ops_failed", str(exc))
+
+    # One-click certified migration (console "Run migration"): server-side
+    # orchestration of pool->adopt->traffic->bench->certify->promote, gated
+    # exactly like the manual buttons (it drives them).
+    @app.get("/v1/dev/migrate")
+    def migrate_status():
+        run = getattr(state, "migration", None)
+        return run.status() if run else {"running": False, "stage": "idle"}
+
+    @app.post("/v1/dev/migrate")
+    async def migrate_ctl(request: Request):
+        denied = _dev_denied(request)
+        if denied is not None:
+            return denied
+        from router_app.migrate import MigrationRun
+        body = await request.json()
+        run = getattr(state, "migration", None)
+        if body.get("action") == "start":
+            if run is not None and run.running:
+                return JSONResponse(status_code=409, content={
+                    "error": {"code": "already_running",
+                              "message": "a migration run is active"},
+                    **run.status()})
+            run = MigrationRun(
+                route=body.get("route", "voice-agent"),
+                token=os.environ.get("ROUTER_DEV_TOKEN", ""),
+                traffic_s=float(body.get("traffic_s", 120.0)),
+                rps=float(body.get("rps", 2.0)))
+            state.migration = run
+            run.start()
+            state.events.emit("migration", action="start", route=run.route)
+            return run.status()
+        return _error(400, "bad_action", "action: start")
 
     # Dev surface for the incident agent + chaos drills (not in the board's
     # read contract): open / act / resolve.
