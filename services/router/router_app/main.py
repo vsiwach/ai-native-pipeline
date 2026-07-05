@@ -530,6 +530,18 @@ def get_app(registry_path: Path | None = None,
     app = FastAPI(title="inference-router", version=ROUTER_VERSION)
     app.state.router_state = state
 
+    # Dev-only: the demo console (vercel-deploy/demo.html) is served from a
+    # separate static origin and polls this router from the browser. Off by
+    # default; set ROUTER_CORS_ORIGINS=<comma-list|*> to enable.
+    cors_origins = os.environ.get("ROUTER_CORS_ORIGINS", "")
+    if cors_origins:
+        from fastapi.middleware.cors import CORSMiddleware
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[o.strip() for o in cors_origins.split(",")],
+            allow_methods=["*"], allow_headers=["*"],
+            expose_headers=["*"])  # X-Replica/X-Citations/... readable in JS
+
     if start_background:
         state.poller.start()
         state.worker.start()
