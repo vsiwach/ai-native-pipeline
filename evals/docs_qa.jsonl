@@ -1,5 +1,5 @@
 {"id": "q01", "question": "What license is the MAX framework and serving layer released under?", "must_include": ["apache"], "must_not_include": ["proprietary only"]}
-{"id": "q02", "question": "When does the Mojo compiler ship as open source?", "must_include": ["fall 2026"], "must_not_include": []}
+{"id": "q02", "question": "Which parts of Mojo are open source, and what did Modular open up beyond the source code?", "must_include": ["standard library", "nightly"], "must_not_include": []}
 {"id": "q03", "question": "What is Mammoth in the Modular stack?", "must_include": ["control plane"], "must_not_include": []}
 {"id": "q04", "question": "Which hardware vendors does MAX support for serving on day 0?", "must_include": ["nvidia", "amd"], "must_not_include": []}
 {"id": "q05", "question": "What is the role of the Mojo standard library and kernels — are they open source?", "must_include": ["open"], "must_not_include": []}

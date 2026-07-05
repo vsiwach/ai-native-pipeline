@@ -1,0 +1,209 @@
+{
+  "kind": "modular-demo/eval-verification",
+  "index": "services/docs_assist/kb/modular_kb.sqlite",
+  "index_sha256": "9db58084145c650b6ce1a5b7a2e9a4f64b1cc3af3b951009a5a30e7b7d71f234",
+  "evals": "evals/docs_qa.jsonl",
+  "k": 8,
+  "checked_at": "2026-07-05T16:18:38Z",
+  "items": [
+    {
+      "id": "q01",
+      "question": "What license is the MAX framework and serving layer released under?",
+      "keywords": [
+        {
+          "keyword": "apache",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://docs.modular.com/max/container/",
+        "https://www.modular.com/blog/the-next-big-step-in-mojo-open-source",
+        "https://www.modular.com/blog/why-llm-inference-needs-a-new-kind-of-router-part-1"
+      ]
+    },
+    {
+      "id": "q02",
+      "question": "Which parts of Mojo are open source, and what did Modular open up beyond the source code?",
+      "keywords": [
+        {
+          "keyword": "standard library",
+          "status": "RETRIEVED"
+        },
+        {
+          "keyword": "nightly",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/the-next-big-step-in-mojo-open-source",
+        "https://www.modular.com/blog/max-24-2-is-here-whats-new",
+        "https://www.modular.com/blog/modular-2025-year-in-review"
+      ]
+    },
+    {
+      "id": "q03",
+      "question": "What is Mammoth in the Modular stack?",
+      "keywords": [
+        {
+          "keyword": "control plane",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/introducing-mammoth-enterprise-scale-genai-deployments-made-simple",
+        "https://www.modular.com/blog/introducing-mammoth-enterprise-scale-genai-deployments-made-simple",
+        "https://www.modular.com/blog/how-is-modular-democratizing-ai-compute"
+      ]
+    },
+    {
+      "id": "q04",
+      "question": "Which hardware vendors does MAX support for serving on day 0?",
+      "keywords": [
+        {
+          "keyword": "nvidia",
+          "status": "RETRIEVED"
+        },
+        {
+          "keyword": "amd",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/three-trends-from-mlsys-2026",
+        "https://www.modular.com/blog/achieving-state-of-the-art-performance-on-amd-mi355----in-just-14-days",
+        "https://www.modular.com/blog/modulars-bet-to-break-out-of-the-matrix-democratizing-ai-compute-part-10"
+      ]
+    },
+    {
+      "id": "q05",
+      "question": "What is the role of the Mojo standard library and kernels \u2014 are they open source?",
+      "keywords": [
+        {
+          "keyword": "open",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://docs.modular.com/max/changelog/",
+        "https://www.modular.com/blog/the-next-big-step-in-mojo-open-source",
+        "https://www.modular.com/blog/modular-platform-25-3-450k-lines-of-open-source-code-and-pip-install-modular"
+      ]
+    },
+    {
+      "id": "q06",
+      "question": "How does KV-aware routing decide where a request lands?",
+      "keywords": [
+        {
+          "keyword": "cache",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/why-llm-inference-needs-a-new-kind-of-router-part-3",
+        "https://www.modular.com/blog/why-llm-inference-needs-a-new-kind-of-router-part-1",
+        "https://www.modular.com/blog/why-llm-inference-needs-a-new-kind-of-router-part-1"
+      ]
+    },
+    {
+      "id": "q07",
+      "question": "What is disaggregated serving and why does it lower cost?",
+      "keywords": [
+        {
+          "keyword": "prefill",
+          "status": "RETRIEVED"
+        },
+        {
+          "keyword": "decode",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/three-trends-from-mlsys-2026",
+        "https://www.modular.com/blog/why-llm-inference-needs-a-new-kind-of-router-part-3",
+        "https://www.modular.com/blog/if-ai-serving-tech-cant-solve-todays-problems-how-do-we-scale-into-the-future"
+      ]
+    },
+    {
+      "id": "q08",
+      "question": "Can I self-host MAX for single-node serving for free?",
+      "keywords": [
+        {
+          "keyword": "self-host",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/build-a-continuous-chat-interface-with-llama-3-and-max-serve",
+        "https://www.modular.com/blog/agentic-building-blocks-creating-ai-agents-with-max-serve-and-openai-function-calling",
+        "https://docs.modular.com/max/changelog/"
+      ]
+    },
+    {
+      "id": "q09",
+      "question": "What skills does the Modular skills repo provide for coding agents?",
+      "keywords": [
+        {
+          "keyword": "import-model",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://docs.modular.com/max/changelog/",
+        "https://docs.modular.com/max/coding-assistants/",
+        "https://docs.modular.com/max/coding-assistants/"
+      ]
+    },
+    {
+      "id": "q10",
+      "question": "What Python interoperability does Mojo offer?",
+      "keywords": [
+        {
+          "keyword": "python",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://www.modular.com/blog/mojo-python-calculating-and-plotting-a-valentines-day-using-mojo-and-python",
+        "https://www.modular.com/blog/developer-voices-deep-dive-with-chris-lattner-on-mojo",
+        "https://www.modular.com/blog/semantic-search-with-max-engine"
+      ]
+    },
+    {
+      "id": "q11",
+      "question": "Which open model families does Modular serve with day-0 coverage?",
+      "keywords": [],
+      "status": "NO_KEYWORDS",
+      "top_urls": [
+        "https://www.modular.com/blog/llama-guard-with-max-24-6-and-hugging-face-2",
+        "https://docs.modular.com/max/container/",
+        "https://www.modular.com/blog/modular-26-4-sota-moe-serving-model-bringup-via-agent-skills-mojo-1-0-beta-2-and-more"
+      ]
+    },
+    {
+      "id": "q12",
+      "question": "What does the OpenAI-compatible endpoint on MAX expose?",
+      "keywords": [
+        {
+          "keyword": "chat",
+          "status": "RETRIEVED"
+        }
+      ],
+      "status": "RETRIEVED",
+      "top_urls": [
+        "https://docs.modular.com/max/deploy/local-to-cloud/",
+        "https://docs.modular.com/max/cli/serve/",
+        "https://www.modular.com/blog/modular-raises-250m-to-scale-ais-unified-compute-layer"
+      ]
+    }
+  ]
+}

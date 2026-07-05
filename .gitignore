@@ -11,3 +11,9 @@ bazel-*
 .claude/settings.local.json
 .pod-state.json
 runpod/.pod-state.json
+# Phase 6 certified-migration runtime artifacts (evidence worth keeping is
+# copied into demo-artifacts/ deliberately, never committed by accident)
+services/docs_assist/kb/*.sqlite
+shadow-logs/
+.certify-keys/
+kb_build.err

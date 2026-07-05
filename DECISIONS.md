@@ -37,3 +37,60 @@ Each entry: what was decided, why, and what a human may want to revisit.
 - Added missing required artifacts: `BUILD.bazel` (tests-only, like other
   services), `tests/bazel_runner.py`, `tests/__init__.py`, `README.md`,
   and `kb/README.md` (the sqlite index is a built artifact, not committed).
+
+## B2 — shadow wiring
+- The drop's `shadow.py` scheduled mirrors with
+  `asyncio.get_event_loop().create_task(...)`, which raises in the chat
+  proxy's threadpool threads (no running loop). Adapted: a module-owned
+  background loop thread (lazy) + `run_coroutine_threadsafe`, and a
+  `flush()` helper; counters land only after the JSONL line is on disk so
+  `flush()` implies evidence exists.
+- Mirroring hooks the **non-streaming** chat path only (what
+  `tools/replay.py` sends). Streaming primaries are not mirrored: the
+  primary's content isn't buffered on the streaming path, and the mirror
+  compares full completions by design (it strips `stream`). Revisit only if
+  the replayer goes streaming.
+- Promote/rollback are **in-memory** traffic shifts (same semantics as the
+  existing `POST /v1/policy/placement`): a SIGHUP policy reload restores the
+  file's endpoints. Deliberate — the file stays the durable source of truth
+  and a human edit is the durable promote.
+- Promote uses `Release(mode=canary, steps=(100,))` — start → advance →
+  COMPLETE with warmup+drain recorded — because the phase defines promote as
+  a full swap, not a staged canary. The shadow phase itself is evidenced by
+  the mirror's stats/log rather than a `Release(mode=shadow)` object (the
+  release engine's shadow mode models traffic weights, not evidence capture).
+- Governance: nothing agent-facing calls promote; `prod-shift` stays
+  human-only in `agent-policy.yaml`. The endpoints are dev/staging controls
+  on a local router.
+
+## B3 — SSE
+- The streaming path was ALREADY unbuffered (verified 12ms first-token
+  passthrough while the backend was mid-generation) — Phase 6's task was
+  satisfied by pinning it with a contract test. Starlette's TestClient
+  buffers streamed responses, so the timing assertion runs at the
+  generator level; the HTTP-layer test covers media type + headers.
+
+## C — KB index (LIVE, not fixture)
+- Network was available; built from the real sitemaps
+  (docs.modular.com + modular.com/blog): **2690 chunks, index sha256
+  ac3a4da77cc0093f51aaa34f04e3e367da7a959242991700f50cc4548f200843**
+  (2026-07-05, `--max-pages 400`). The sqlite artifact is gitignored;
+  rebuild with `tools/ragindex/build_index.py` (the sha will drift as docs
+  change — certs embed the eval-set sha, and the verification report embeds
+  the index sha).
+
+## D — eval fact verification
+- Added `tools/ragindex/verify_evals.py`: every `must_include` keyword is
+  classified RETRIEVED (in top-k for its question) / IN_CORPUS / MISSING;
+  report committed at `evals/docs_qa.verification.json` (embeds index sha).
+- **q02 rewritten.** The seed asserted the Mojo compiler open-sources
+  "fall 2026" — that string exists NOWHERE in the crawled corpus (Mojo docs
+  moved to mojolang.org, outside the indexer's allow-list), so the agent
+  could never ground it. Replaced with the corpus-supported fact (stdlib
+  core modules open source + nightly compiler builds, per the "Next Big
+  Step in Mojo Open Source" post). The old claim was a drop-provided seed
+  the MVP_README itself said to re-verify. If mojolang.org is added to the
+  crawler allow-list later, a dated-timeline question can return.
+- q11 has only `must_not_include` guards (by design) — flagged NO_KEYWORDS,
+  nothing to verify positively.
+- Result after fix: 12/12 items clean, 0 MISSING.

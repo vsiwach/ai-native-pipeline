@@ -86,6 +86,8 @@ accessibility 100; `?mock=true` needs no token.
 | `./dev build` | `bazel build //...` |
 | `./dev run <name> [--port]` | Docker build + run a service, wait for `/healthz` |
 | `./dev check [--action]` | Everything required before pushing |
+| `./dev bench <args…>` | Measured $/Mtok at fixed SLO against any OpenAI-compatible endpoint (`tools/bench.py`) |
+| `./dev certify <args…>` | Signed parity certs gating promotion; a passing run relinks `vercel-deploy/certs/latest.json` (`tools/certify.py`) |
 
 ---
 
@@ -175,6 +177,12 @@ applied to humans and CI.
 | ⑧ | Benchmarks | `benchmarks/` | Harness + summarizer; every displayed number traces to `benchmarks/raw/*.csv` (SLO-AUDITOR) |
 | ⑧ | Chaos + MTTR drills | `tools/chaos.py` | CHAOS-AGENT arsenal: inject latency/5xx, kill pool, exhaust concurrency — plus `drill --suite`: scripted fault → incident agent detects/quarantines/verifies/resolves → MTTR timeline lands in `benchmarks/raw/` |
 | ⑧ | Eval agents | `.claude/agents/` | SLO-AUDITOR, CHAOS-AGENT, STAFF-SKEPTIC — all three gate every feature (`evals/<feature>/`) |
+| ⑨ Certified migration | docs-assist route | `services/docs_assist` | Retrieval-grounded docs agent (OpenAI-compatible, SSE, `X-Citations`); KB = sqlite FTS5 built by `tools/ragindex/` from public docs |
+| ⑨ | Shadow mirror | `router_app/shadow.py` + `routing-policy.yaml` `routes:` | Primary serves the client; the candidate gets a mirror of every request; evidence appends to `shadow-logs/<route>.shadow.jsonl` |
+| ⑨ | Release controls | `POST /v1/routes/<r>/promote` · `…/rollback` · `GET …/shadow-stats` | Promote swaps the route's primary for the candidate via the release engine (events recorded); rollback restores the saved endpoints |
+| ⑨ | Certifier | `tools/certify.py` (`./dev certify`) | Grounding+rubric parity + bench SLO evidence → ed25519/HMAC-signed cert; `verify` validates, tampering invalidates; eval facts re-checked by `tools/ragindex/verify_evals.py` |
+| ⑨ | Bench + replay | `tools/bench.py` (`./dev bench`), `tools/replay.py` | Measured $/Mtok = declared pool $/hr ÷ measured tok/s; timed eval replay drives the shadow phase; `scripts/run_migration_loop.sh` runs the whole loop on the sim |
+| ⑨ | Demo console | `vercel-deploy/` | Unified site (hub/brief/strategy/prd/mvp/demo); `demo.html` polls `/v1/costs` + `certs/latest.json`, `?mock=true` runs backendless |
 
 ### Request lifecycle (runtime)
 
