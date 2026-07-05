@@ -20,8 +20,26 @@ cost_table: # $/1M requests, maintained by ops — router just reads it
   # Hosted Model APIs: per-token billed; ranking value only (real cost is
   # measured per request from the catalog's per-token prices).
   baseten-model-api: 3.00
+  # Certified migration (Phase 6): the incumbent frontier API vs the
+  # candidate pool. Ranking values only — REAL $/Mtok is measured by
+  # tools/bench.py and served from /v1/costs `pools`.
+  frontier-api: 10.00
+  shadow-candidate: 0.50
 
 cache: {enabled: true, ttl_s: 300, backend: in_memory} # swap for redis later
+
+# Certified migration (Phase 6): per-route release flags. While a route's
+# primary serves the client, the router mirrors each request to
+# shadow_candidate (fire-and-forget; failures logged, never surfaced) and
+# appends (request, primary, candidate) to shadow-logs/<route>.shadow.jsonl —
+# the evidence tools/certify.py scores. POST /v1/routes/<route>/promote swaps
+# the primary for the candidate (in-memory, like /v1/policy/placement);
+# /rollback restores the previous endpoints.
+routes:
+  docs-assist:
+    shadow_candidate: http://docs-assist-candidate:8080/v1
+    shadow_id: docs-assist-candidate
+    shadow_provider: shadow-candidate
 
 # Stateful KV/prefix-aware routing (Phase 7). consistent_hash keeps a prompt
 # prefix landing on the same replica so its KV is a hit, not an expensive
@@ -35,6 +53,13 @@ endpoints:
   house-price-reg:
     - provider: local-docker
       url: http://inference:8080
+  # Certified-migration route: primary is the incumbent docs-assist instance
+  # (UPSTREAM_BASE_URL -> frontier API or llm-sim); the candidate instance
+  # (UPSTREAM_BASE_URL -> MAX/vLLM pod) is in `routes:` above until promoted.
+  docs-assist:
+    - id: frontier
+      provider: frontier-api
+      url: http://docs-assist:8080
   llm-sim:
     - provider: local-docker
       url: http://llm:8080

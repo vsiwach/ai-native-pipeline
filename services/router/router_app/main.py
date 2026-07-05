@@ -31,6 +31,8 @@ from router_app.metrics import MetricsWindow
 from router_app.placement import eligible_pools
 from router_app.policy import (NoHealthyBackend, UnknownModel, resolve_tier,
                                select, select_replica)
+from router_app.release import CANARY, Release
+from router_app.shadow import ShadowMirror
 
 ROUTER_VERSION = "1.0"
 FORWARDED_HEADERS = ("token",)
@@ -46,6 +48,12 @@ class RouterState:
         self.metrics = MetricsWindow()
         self.incidents = IncidentStore(emit=self.events.emit)
         self.release = None            # F5 wires live canary control
+        # Certified migration (Phase 6): per-route shadow mirrors + release
+        # state. Mirrors are created lazily from policy `routes:` config and
+        # survive reload() so their counters/log handles persist.
+        self.shadows: dict[str, ShadowMirror] = {}
+        self.releases: dict[str, Release] = {}
+        self.route_prev: dict[str, list] = {}
         self.goodput_curves = self._load_goodput_curves()
         self.reload()
         self.poller = HealthPoller(
@@ -100,6 +108,78 @@ class RouterState:
                         self.policy["endpoints"].get(name):
                     return name
         return None
+
+    def shadow_for(self, route: str) -> ShadowMirror | None:
+        """The route's shadow mirror, if `routes.<route>.shadow_candidate`
+        is configured. Lazy; recreated only when the candidate URL changes
+        (counters and the JSONL log survive policy reloads)."""
+        route_cfg = self.policy.get("routes", {}).get(route) or {}
+        candidate = route_cfg.get("shadow_candidate")
+        if not candidate:
+            return None
+        mirror = self.shadows.get(route)
+        if mirror is None or mirror.candidate_url != candidate.rstrip("/"):
+            mirror = ShadowMirror(
+                route=route, candidate_url=candidate,
+                log_dir=os.environ.get("SHADOW_LOG_DIR", "shadow-logs"),
+                api_key=os.environ.get("SHADOW_CANDIDATE_API_KEY", ""))
+            self.shadows[route] = mirror
+            self.events.emit("shadow_start", route=route,
+                             candidate=mirror.candidate_url,
+                             log=str(mirror.log_path))
+        return mirror
+
+    def promote_route(self, route: str) -> dict:
+        """Swap the route's primary backend for its shadow candidate. The
+        release engine records the shift (warm candidate -> 100% -> drain
+        stable); the endpoints swap is what actually moves traffic. In-memory
+        like POST /v1/policy/placement: applies to the next request, does not
+        rewrite routing-policy.yaml."""
+        route_cfg = self.policy.get("routes", {}).get(route) or {}
+        candidate = (route_cfg.get("shadow_candidate") or "").rstrip("/")
+        if not candidate:
+            raise UnknownModel(route)
+        current = list(self.policy["endpoints"].get(route, []))
+        cand_id = route_cfg.get("shadow_id", f"{route}-candidate")
+        if current and current[0].get("id") == cand_id:
+            return {"route": route, "status": "already_promoted",
+                    "serving": cand_id}
+        # replicas get /v1/chat/completions appended; the mirror URL carries
+        # the OpenAI-style /v1 suffix — strip it for the replica base url
+        base = candidate[:-3] if candidate.endswith("/v1") else candidate
+        stable_id = current[0].get("id", current[0].get("url")) \
+            if current else "none"
+        rel = Release(stable=stable_id, candidate=cand_id, mode=CANARY,
+                      steps=(100,))
+        rel.start()
+        rel.advance(probe_ok=True)   # single-step swap: -> COMPLETE + drain
+        self.route_prev[route] = current
+        self.policy["endpoints"][route] = [{
+            "id": cand_id,
+            "provider": route_cfg.get("shadow_provider", "shadow-candidate"),
+            "url": base,
+        }]
+        self.releases[route] = rel
+        self.events.emit("release", route=route, action="promote",
+                         stable=stable_id, candidate=cand_id,
+                         state=rel.state, url=base)
+        return {"route": route, "status": "promoted", "serving": cand_id,
+                "previous": stable_id, "release": rel.history}
+
+    def rollback_route(self, route: str) -> dict:
+        """Restore the route's pre-promote endpoints."""
+        prev = self.route_prev.get(route)
+        if prev is None:
+            return {"route": route, "status": "nothing_to_rollback"}
+        rel = self.releases.get(route)
+        if rel is not None:
+            rel.rollback(reason="manual")
+        self.policy["endpoints"][route] = prev
+        del self.route_prev[route]
+        serving = prev[0].get("id", prev[0].get("url")) if prev else "none"
+        self.events.emit("release", route=route, action="rollback",
+                         restored=serving)
+        return {"route": route, "status": "rolled_back", "serving": serving}
 
     def _autoscaler(self, model: str) -> AutoScaler:
         if model not in self.autoscalers:
@@ -258,6 +338,15 @@ class RouterState:
                               http_ok=resp.status_code < 500
                               and resp.status_code != 429)
             if resp.status_code < 500:
+                # Shadow mirror (certified migration): the candidate sees the
+                # same request while the client only ever sees the primary.
+                # Fire-and-forget; a mirror failure is logged, never surfaced.
+                mirror = self.shadow_for(model)
+                if mirror is not None and resp.status_code < 400:
+                    try:
+                        mirror.submit(body, resp.json())
+                    except ValueError:
+                        pass  # non-JSON primary body — nothing to compare
                 return resp, choice
             # backend 5xx: the sample is recorded against the sick pool —
             # now try a different replica instead of punting to the client
@@ -594,6 +683,41 @@ def get_app(registry_path: Path | None = None,
         # never be laundered into a 200 (staff-skeptic finding)
         return JSONResponse(content=payload, status_code=resp.status_code,
                             headers=headers)
+
+    # ---- certified migration (Phase 6): shadow -> certify -> promote ------
+    @app.get("/v1/routes/{route}/shadow-stats")
+    def shadow_stats(route: str):
+        mirror = state.shadow_for(route)
+        if mirror is None:
+            return _error(404, "no_shadow_candidate",
+                          f"route '{route}' has no shadow_candidate in "
+                          "routing-policy.yaml routes:", route=route)
+        rel = state.releases.get(route)
+        endpoints = state.policy["endpoints"].get(route, [])
+        head = endpoints[0] if endpoints else {}
+        return {
+            **mirror.stats(),
+            "candidate": mirror.candidate_url,
+            "serving": head.get("id", head.get("url")),
+            "release": {"state": rel.state, "mode": rel.mode,
+                        "history": rel.history} if rel else None,
+        }
+
+    @app.post("/v1/routes/{route}/promote")
+    def promote_route(route: str):
+        try:
+            return state.promote_route(route)
+        except UnknownModel:
+            return _error(404, "no_shadow_candidate",
+                          f"route '{route}' has no shadow_candidate to "
+                          "promote", route=route)
+
+    @app.post("/v1/routes/{route}/rollback")
+    def rollback_route(route: str):
+        result = state.rollback_route(route)
+        if result["status"] == "nothing_to_rollback":
+            return JSONResponse(status_code=409, content=result)
+        return result
 
     @app.get("/v1/events")
     def events(limit: int = 100, kind: str | None = None):

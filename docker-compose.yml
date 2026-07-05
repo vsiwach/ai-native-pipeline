@@ -66,6 +66,33 @@ services:
       COLD_START_S: "120.0"
       USD_PER_1M_COMPLETION: "0.60"
 
+  # Certified migration (Phase 6): incumbent + candidate docs-assist
+  # instances, same image, different upstream. Both default to the llm sim
+  # (`llm` service) so the shadow -> certify -> promote loop runs with no
+  # keys/GPU; point UPSTREAM_BASE_URL at a frontier API / MAX pod to go live.
+  # Build the KB first: python3 tools/ragindex/build_index.py
+  docs-assist:
+    build:
+      context: .
+      dockerfile: services/docs_assist/Dockerfile
+    ports:
+      - "8103:8080"
+    environment:
+      UPSTREAM_BASE_URL: ${DOCS_ASSIST_UPSTREAM:-http://llm:8080/v1}
+      UPSTREAM_MODEL: ${DOCS_ASSIST_MODEL:-llm-sim}
+      KB_INDEX: /srv/kb/modular_kb.sqlite
+
+  docs-assist-candidate:
+    build:
+      context: .
+      dockerfile: services/docs_assist/Dockerfile
+    ports:
+      - "8104:8080"
+    environment:
+      UPSTREAM_BASE_URL: ${DOCS_ASSIST_CANDIDATE_UPSTREAM:-http://llm:8080/v1}
+      UPSTREAM_MODEL: ${DOCS_ASSIST_CANDIDATE_MODEL:-llm-sim}
+      KB_INDEX: /srv/kb/modular_kb.sqlite
+
   router:
     build:
       context: .
@@ -78,3 +105,5 @@ services:
       - inference
       - pool-baseten
       - pool-vllm
+      - docs-assist
+      - docs-assist-candidate

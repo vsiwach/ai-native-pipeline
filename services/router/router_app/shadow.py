@@ -16,11 +16,28 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 import uuid
 from pathlib import Path
 
 import httpx
+
+# The chat proxy runs in a threadpool (no event loop in that thread), so
+# mirrors run on one shared background loop owned by this module. Lazy: no
+# thread exists until the first route actually shadows.
+_loop: asyncio.AbstractEventLoop | None = None
+_loop_lock = threading.Lock()
+
+
+def _mirror_loop() -> asyncio.AbstractEventLoop:
+    global _loop
+    with _loop_lock:
+        if _loop is None:
+            _loop = asyncio.new_event_loop()
+            threading.Thread(target=_loop.run_forever, daemon=True,
+                             name="shadow-mirror").start()
+        return _loop
 
 
 class ShadowMirror:
@@ -45,11 +62,26 @@ class ShadowMirror:
         self.failed = 0
 
     def submit(self, request_payload: dict, primary_response: dict) -> None:
-        """Fire-and-forget mirror. Never raises into the serving path."""
+        """Fire-and-forget mirror. Never raises into the serving path.
+        Safe from any thread: schedules onto the running loop when there is
+        one, else onto the module's background mirror loop."""
         self.submitted += 1
-        asyncio.get_event_loop().create_task(
-            self._mirror(dict(request_payload), primary_response)
-        )
+        coro = self._mirror(dict(request_payload), primary_response)
+        try:
+            asyncio.get_running_loop().create_task(coro)
+        except RuntimeError:
+            asyncio.run_coroutine_threadsafe(coro, _mirror_loop())
+
+    def flush(self, timeout_s: float = 10.0) -> bool:
+        """Block until every submitted mirror has landed (tests + scripts).
+        Returns False on timeout instead of raising — shadow never breaks
+        the caller."""
+        deadline = time.monotonic() + timeout_s
+        while self.completed + self.failed < self.submitted:
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.02)
+        return True
 
     async def _mirror(self, payload: dict, primary_response: dict) -> None:
         rec = {
@@ -75,12 +107,17 @@ class ShadowMirror:
                     "usage": body.get("usage", {}),
                     "citations": r.headers.get("X-Citations"),
                 }
-                self.completed += 1
+                ok = True
             except Exception as e:  # noqa: BLE001 — shadow must never break serving
                 rec["candidate"] = {"error": str(e)}
-                self.failed += 1
+                ok = False
         with self.log_path.open("a") as f:
             f.write(json.dumps(rec) + "\n")
+        # counters last so flush() implies the log line is on disk
+        if ok:
+            self.completed += 1
+        else:
+            self.failed += 1
 
     def stats(self) -> dict:
         return {

@@ -53,6 +53,9 @@ def load_policy(path: Path | None = None) -> dict:
     data.setdefault("endpoints", {})
     data.setdefault("affinity", {"enabled": False, "prefix_tokens": 32,
                                  "capacity": 8})
+    # Per-route release config (Phase 6 certified migration): e.g.
+    #   routes: {docs-assist: {shadow_candidate: http://cand:8080/v1}}
+    data.setdefault("routes", {})
     return data
 
 
