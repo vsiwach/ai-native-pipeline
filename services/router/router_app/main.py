@@ -720,7 +720,10 @@ def get_app(registry_path: Path | None = None,
         }
 
     @app.post("/v1/routes/{route}/promote")
-    def promote_route(route: str):
+    def promote_route(route: str, request: Request):
+        denied = _dev_denied(request)
+        if denied is not None:
+            return denied
         try:
             return state.promote_route(route)
         except UnknownModel:
@@ -729,7 +732,10 @@ def get_app(registry_path: Path | None = None,
                           "promote", route=route)
 
     @app.post("/v1/routes/{route}/rollback")
-    def rollback_route(route: str):
+    def rollback_route(route: str, request: Request):
+        denied = _dev_denied(request)
+        if denied is not None:
+            return denied
         result = state.rollback_route(route)
         if result["status"] == "nothing_to_rollback":
             return JSONResponse(status_code=409, content=result)
@@ -917,6 +923,9 @@ def get_app(registry_path: Path | None = None,
 
     @app.post("/v1/dev/chaos")
     async def dev_chaos(request: Request):
+        denied = _dev_denied(request)
+        if denied is not None:
+            return denied
         body = await request.json()
         ctx = _board_ctx()
         if ctx is None:
@@ -937,6 +946,23 @@ def get_app(registry_path: Path | None = None,
                              ("pool_id", "latency_ms", "error_rate")})
         return results
 
+    # Dev-surface gate for PUBLIC deployments: when ROUTER_DEV_TOKEN is set,
+    # every mutating dev control (loadgen/gpu/chaos POSTs, promote/rollback)
+    # requires the token — the console passes ?token=... along. Read-only
+    # surfaces stay open. Unset (local dev): everything open as before.
+    dev_token = os.environ.get("ROUTER_DEV_TOKEN", "")
+
+    def _dev_denied(request: Request):
+        if not dev_token:
+            return None
+        supplied = request.headers.get("X-Dev-Token") \
+            or request.query_params.get("dev_token")
+        if supplied == dev_token:
+            return None
+        return _error(403, "dev_token_required",
+                      "this deployment gates controls — append "
+                      "?token=<dev token> to the console URL")
+
     # Dev-mode synthetic load: the demo console's "generate load" button.
     # One bounded run at a time; requests go through the ordinary chat path
     # so shadow/metrics/ledger behave exactly as under real traffic.
@@ -947,6 +973,9 @@ def get_app(registry_path: Path | None = None,
 
     @app.post("/v1/dev/loadgen")
     async def loadgen_ctl(request: Request):
+        denied = _dev_denied(request)
+        if denied is not None:
+            return denied
         from router_app.loadgen import LoadRun
         body = await request.json()
         run = getattr(state, "loadgen", None)
@@ -960,8 +989,12 @@ def get_app(registry_path: Path | None = None,
                           "message": "a load run is active — stop it first"},
                 **run.status()})
         # default target = this router, so the run exercises the real
-        # routing/shadow path; tests may point it elsewhere
-        target = body.get("target") or str(request.base_url)
+        # routing/shadow path. LOADGEN_TARGET overrides for deployments
+        # where the public base_url can't be hairpinned from inside the
+        # container (e.g. the Modal stack targets 127.0.0.1 directly).
+        target = body.get("target") \
+            or os.environ.get("LOADGEN_TARGET") \
+            or str(request.base_url)
         run = LoadRun(
             target=target,
             route=body.get("route", state.devboard_model() or "docs-assist"),
@@ -998,6 +1031,9 @@ def get_app(registry_path: Path | None = None,
 
     @app.post("/v1/dev/gpu")
     async def gpu_ctl(request: Request):
+        denied = _dev_denied(request)
+        if denied is not None:
+            return denied
         ops = _gpuops()
         if ops is None:
             return _error(501, "gpu_ops_disabled",
@@ -1011,6 +1047,10 @@ def get_app(registry_path: Path | None = None,
                     return _error(400, "bad_kind", "kind: a100|mi300x")
                 return ops.launch(kind)
             if action == "terminate":
+                if body.get("pod_id") == "modal-a100":
+                    return {"id": "modal-a100", "terminated": False,
+                            "note": "Modal scales to zero on idle — "
+                                    "nothing to terminate"}
                 return ops.terminate(body["pod_id"])
             if action == "bench":
                 pods = {p["id"]: p for p in ops.list_pods()}
@@ -1057,16 +1097,19 @@ def get_app(registry_path: Path | None = None,
             if action == "certify":
                 route = body.get("route", "docs-assist")
                 pool = body.get("pool")
-                if pool not in ("a100", "mi300x"):
-                    return _error(400, "bad_pool", "pool: a100|mi300x")
+                from router_app.gpuops import KINDS
+                kind = next((k for k, v in KINDS.items()
+                             if k == pool or v["pool"] == pool), None)
+                if kind is None:
+                    return _error(400, "bad_pool",
+                                  f"pool: one of {sorted(KINDS)}")
                 mirror = state.shadow_for(route)
                 if mirror is None:
                     return _error(404, "no_shadow_candidate", route)
-                from router_app.gpuops import KINDS
                 return ops.start_certify(
-                    pool, str(mirror.log_path),
+                    KINDS[kind]["pool"], str(mirror.log_path),
                     str(state.policy_path or "routing-policy.yaml"),
-                    KINDS[pool]["image"])
+                    KINDS[kind]["image"])
             return _error(400, "bad_action",
                           "action: launch|terminate|bench|adopt|certify")
         except RuntimeError as exc:   # budget guard / RunPod API errors

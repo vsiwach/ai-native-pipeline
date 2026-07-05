@@ -1,0 +1,46 @@
+[
+ {
+  "t": 0.0,
+  "text": "Recorded real run \u2014 every number below was measured, none simulated for display."
+ },
+ {
+  "t": 1.7,
+  "text": "GPU pool MI300X rented at $2.19/hr (GPU) \u2014 billing started, serving not yet up."
+ },
+ {
+  "t": 1.7,
+  "text": "GPU pool A100 rented at $1.39/hr (GPU) \u2014 billing started, serving not yet up."
+ },
+ {
+  "t": 1.7,
+  "text": "Bench started: real streamed traffic against the pool \u2014 $/Mtok is derived from measured tokens/sec at the declared $/hr."
+ },
+ {
+  "t": 11.1,
+  "text": "Certifying: grounding + rubric parity on the shadow log, p99 SLO from the bench report, ed25519 signature."
+ },
+ {
+  "t": 164.7,
+  "text": "Synthetic load started: the 12 eval questions replay through the router; the primary answers the client while every request is mirrored to the candidate \u2014 the shadow log is the cert evidence."
+ },
+ {
+  "t": 285.5,
+  "text": "Load run finished: 231 sent, 0 errors."
+ },
+ {
+  "t": 375.6,
+  "text": "PROMOTED \u2014 the route's primary swapped to the GPU candidate; clients now get its answers."
+ },
+ {
+  "t": 413.8,
+  "text": "ROLLED BACK \u2014 the incumbent serves again; the release engine recorded both transitions."
+ },
+ {
+  "t": 418.0,
+  "text": "MI300X pod terminated from the console \u2014 the ledger entry closes; per-second billing stops."
+ },
+ {
+  "t": 522.3,
+  "text": "A100 pod terminated from the console \u2014 the ledger entry closes; per-second billing stops."
+ }
+]

@@ -135,6 +135,29 @@ Each entry: what was decided, why, and what a human may want to revisit.
   run may count its aborted in-flight request as 1 error — honest artifact
   of hard-stop.
 
+## Public live console (user-driven, 07-05 late)
+- The whole demo stack (llm-sim + docs-assist ×2 + router) runs as ONE
+  Modal web app (`deploy/modal/router_stack.py`) so the Vercel console can
+  be DRIVEN by an external reviewer with no laptop involved. The router is
+  the only exposed port (repo architecture rule survives the hosting hop).
+- `max_containers=1`: the router is stateful (shadow log, loadgen run,
+  ledger, releases); Modal auto-scaling split state across two containers
+  in testing — a GET landed on a different replica than the POST that
+  started the run. Singleton or bust.
+- `LOADGEN_TARGET=http://127.0.0.1:8114`: the in-container loadgen cannot
+  hairpin through its own public *.modal.run URL (100% connection errors);
+  self-load targets localhost. Loadgen status now carries `last_error`.
+- Mutating surfaces (loadgen/gpu/chaos POSTs, promote/rollback) gate on
+  ROUTER_DEV_TOKEN when set (Modal Secret; console passes ?token=...).
+  RunPod key lives in the same Secret; browser never sees either.
+- Modal MAX endpoint registered as a first-class pool (`GPU_MODAL_URL` →
+  `modal-a100` entry: adopt/bench/certify; no launch/terminate — the
+  platform scales to zero on idle, and terminate answers with that note).
+- Replay narration: `tools/replay_captions.py` derives captions from the
+  recorded trace (pod rented/ready, load start/finish, cert verdict,
+  promote/rollback, teardown) — shown in a REPLAY NARRATION card;
+  captions are generated from events, never authored fiction.
+
 ## F — quality gates
 - `./dev check` surfaced two PRE-EXISTING artifact gaps (not Phase 6's):
   `services/model_apis` and `services/qwen3_8b` had no BUILD.bazel or

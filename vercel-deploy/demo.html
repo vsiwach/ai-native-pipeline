@@ -77,6 +77,11 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 <div class="metrics" id="metrics"></div>
 
+<div class="card" id="replay-caption" style="display:none;border-color:var(--lime)">
+  <div class="mono" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--lime)">REPLAY NARRATION</div>
+  <div id="caption-text" style="font-size:14px;line-height:1.5;margin-top:6px">—</div>
+</div>
+
 <div class="two">
   <div class="card">
     <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
@@ -111,6 +116,9 @@ button:disabled{opacity:.4;cursor:not-allowed}
 const qs = new URLSearchParams(location.search);
 const MOCK = qs.get('mock') === 'true';
 let REPLAY = qs.get('replay') === 'true';
+// Public deployments gate the mutating controls; pass ?token=<dev token>
+const TOKEN = qs.get('token') || '';
+const devHeaders = () => TOKEN ? {'X-Dev-Token': TOKEN} : {};
 const ROUTER = qs.get('router') || 'http://localhost:8600';
 
 const state = {
@@ -119,7 +127,8 @@ const state = {
   pools: {
     frontier: {label:'INCUMBENT', name:'frontier-api / gpt-class', sub:'customer key · zero markup', usd_mtok: 10.0, ttft: 638, cls:'pool-frontier'},
     a100:     {label:'POOL · NVIDIA', name:'RunPod A100 80GB', sub:'MAX serve · Qwen2.5-14B', usd_mtok: null, ttft: null, cls:'pool-a100'},
-    mi300x:   {label:'POOL · AMD', name:'RunPod MI300X 192GB', sub:'MAX serve · same weights', usd_mtok: null, ttft: null, cls:'pool-mi300x'}
+    mi300x:   {label:'POOL · AMD', name:'RunPod MI300X 192GB', sub:'MAX serve · same weights', usd_mtok: null, ttft: null, cls:'pool-mi300x'},
+    'modal-a100': {label:'POOL · MODAL', name:'Modal A100 80GB', sub:'MAX serve · scale-to-zero', usd_mtok: null, ttft: null, cls:'pool-a100'}
   },
   shadowed: 0, parity: null, savings: null
 };
@@ -230,7 +239,7 @@ function promote(){
     state.serving = state.serving==='frontier' ? 'a100' : 'mi300x';
     state.phase = 'rollback';
     document.getElementById('action-note').textContent = 'Promoted. Traffic now serves from '+state.serving.toUpperCase()+'. Rollback stays armed for the life of the route.';
-    if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/promote',{method:'POST'}).catch(()=>{});
+    if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/promote',{method:'POST',headers:devHeaders()}).catch(()=>{});
     render();
   }
 }
@@ -238,7 +247,7 @@ function rollback(){
   state.serving = state.serving==='mi300x' ? 'a100' : 'frontier';
   state.phase = 'promote';
   document.getElementById('action-note').textContent = 'Rolled back in <5s. The ledger recorded both transitions.';
-  if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/rollback',{method:'POST'}).catch(()=>{});
+  if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/rollback',{method:'POST',headers:devHeaders()}).catch(()=>{});
   render();
 }
 
@@ -253,7 +262,7 @@ async function toggleLoad(){
     const body = loadRunning ? {action:'stop'}
       : {action:'start', route:'docs-assist', rps:2, duration_s:120, stream_ratio:0.5};
     const r = await fetch(ROUTER+'/v1/dev/loadgen', {method:'POST',
-      headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      headers:{'Content-Type':'application/json', ...devHeaders()}, body: JSON.stringify(body)});
     renderLoad(await r.json());
     setTimeout(pollLoad, 1200);   // stop cancels async — re-poll for the settled state
   }catch(e){ btn.textContent = 'router unreachable'; }
@@ -283,7 +292,7 @@ function armTwice(key, btn, warn){
 }
 async function gpuPost(body){
   const r = await fetch(ROUTER+'/v1/dev/gpu', {method:'POST',
-    headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    headers:{'Content-Type':'application/json', ...devHeaders()}, body: JSON.stringify(body)});
   const d = await r.json();
   if(d.error) document.getElementById('gpu-jobs').textContent = d.error.message || JSON.stringify(d.error);
   return d;
@@ -340,6 +349,11 @@ async function runReplay(){
   }
   const meta = events.find(e=>e.src==='meta')?.data || {};
   const total = events[events.length-1].t;
+  // narration: generated from the recorded events (tools/replay_captions.py)
+  let captions = [];
+  try{ captions = await (await fetch('replay/captions.json')).json(); }catch(e){}
+  const capEl = document.getElementById('replay-caption');
+  if(captions.length) capEl.style.display='';
   await loadCert();
   for (const id of ['btn-load','btn-promote','btn-rollback']){
     const b = document.getElementById(id);
@@ -360,6 +374,9 @@ async function runReplay(){
       if(ev.src==='shadow' && ev.data.submitted!=null) state.shadowed = ev.data.submitted;
     }
     render();
+    const cap = captions.filter(c=>c.t <= now).pop();
+    if(cap) document.getElementById('caption-text').textContent =
+      `t+${Math.round(cap.t)}s — ${cap.text}`;
     document.getElementById('mode-tag').textContent =
       `REPLAY — real run recorded ${meta.started||''} · ${speed}× · t+${Math.min(now,total).toFixed(0)}s / ${total.toFixed(0)}s`;
     if(i >= events.length){ clearInterval(tick);

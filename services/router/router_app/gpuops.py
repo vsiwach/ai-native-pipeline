@@ -47,6 +47,16 @@ KINDS = {
         "label": "MI300X 192GB (AMD)",
         "est_usd_hr": 2.5,
     },
+    # Alternate NVIDIA provider (deploy/modal/max_serve.py): billed per
+    # second ONLY while hot, scales to zero on idle — no launch/terminate
+    # buttons, the platform handles both. Registered via GPU_MODAL_URL.
+    "modal": {
+        "gpu": "A100-80GB (Modal, scale-to-zero)",
+        "image": "modular/max-nvidia-full:26.4.0",
+        "pool": "modal-a100",
+        "label": "A100 80GB (Modal)",
+        "est_usd_hr": 2.5,
+    },
 }
 MODEL = "Qwen/Qwen2.5-14B-Instruct"
 
@@ -126,6 +136,25 @@ class GpuOps:
     def list_pods(self) -> list[dict]:
         pods = self._call("GET", "/pods")
         out = []
+        modal_url = os.environ.get("GPU_MODAL_URL", "").rstrip("/")
+        if modal_url:
+            if not modal_url.endswith("/v1"):
+                modal_url += "/v1"
+            try:
+                ready = httpx.get(f"{modal_url}/models",
+                                  timeout=4).status_code == 200
+            except httpx.HTTPError:
+                ready = False   # cold — first request wakes it
+            out.append({
+                "id": "modal-a100",
+                "kind": "modal",
+                "gpu": KINDS["modal"]["gpu"],
+                "usd_hr": float(os.environ.get("GPU_MODAL_USD_HR", "2.5")),
+                "uptime_s": None,
+                "ready": ready,
+                "url": modal_url,
+                "image": KINDS["modal"]["image"],
+            })
         for p in pods if isinstance(pods, list) else pods.get("pods", []):
             if not (p.get("name") or "").startswith(POD_PREFIX):
                 continue

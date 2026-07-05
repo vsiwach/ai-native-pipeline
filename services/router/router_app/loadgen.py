@@ -64,6 +64,7 @@ class LoadRun:
         self.ok = 0
         self.errors = 0
         self.finished = False
+        self.last_error: str | None = None
 
     # -- lifecycle ---------------------------------------------------------
     def start(self) -> None:
@@ -89,6 +90,7 @@ class LoadRun:
             "sent": self.sent,
             "ok": self.ok,
             "errors": self.errors,
+            "last_error": self.last_error,
             "finished": self.finished,
         }
 
@@ -117,8 +119,9 @@ class LoadRun:
                     self.ok += 1
                 else:
                     self.errors += 1
-            except Exception:  # noqa: BLE001 — an error is a data point
+            except Exception as exc:  # noqa: BLE001 — an error is a data point
                 self.errors += 1
+                self.last_error = str(exc)[:160] or type(exc).__name__
 
     async def _run(self) -> None:
         rng = random.Random(self.seed)
