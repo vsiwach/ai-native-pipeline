@@ -1118,6 +1118,12 @@ def get_app(registry_path: Path | None = None,
                 mirror = state.shadow_for(route)
                 if mirror is None:
                     return _error(404, "no_shadow_candidate", route)
+                if not mirror.log_path.exists():
+                    # adopt rotates the cohort log; certifying before any
+                    # traffic (or right after a re-adopt) has no evidence
+                    return _error(409, "no_shadow_cohort",
+                                  "no mirrored traffic yet — Start traffic "
+                                  "after adopting, then certify")
                 return ops.start_certify(
                     KINDS[kind]["pool"], str(mirror.log_path),
                     str(state.policy_path or "routing-policy.yaml"),
