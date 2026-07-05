@@ -481,7 +481,10 @@ async function runReplay(){
       `REPLAY — real run recorded ${meta.started||''} · ${speed}× · t+${Math.min(now,total).toFixed(0)}s / ${total.toFixed(0)}s`;
     if(i >= events.length){ clearInterval(tick);
       document.getElementById('mode-tag').textContent =
-        `REPLAY complete — real run recorded ${meta.started||''} (${total.toFixed(0)}s at ${speed}×)`; }
+        `REPLAY complete — real run recorded ${meta.started||''} (${total.toFixed(0)}s at ${speed}×)`;
+      document.getElementById('caption-text').innerHTML =
+        `■ <b>End of recorded run</b> (${total.toFixed(0)}s) — all pools terminated, ledger closed, certificate PASS on the wall. ` +
+        `<a href="demo.html?replay=true" style="color:var(--lime)">Replay again</a> · drive it live with <span class="mono">?router=&lt;url&gt;&amp;token=&lt;dev token&gt;</span>.`; }
   }, 200);
 }
 
