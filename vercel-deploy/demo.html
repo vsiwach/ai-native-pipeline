@@ -97,22 +97,22 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <div class="card" id="run-card">
     <h3>BYOC MIGRATION RUN <span class="pass" id="gpu-budget">—</span></h3>
 
-    <div class="runstep" id="step-traffic">
-      <div class="runstep-head"><span class="stepnum">1</span> START TRAFFIC</div>
-      <div class="runstep-body">
-        <button class="primary" id="btn-load" onclick="toggleLoad()">▶ Start traffic</button>
-        <span class="note" id="step1-status">Replays short voice-style turns (the customer's eval set) through the router at 2 rps; the incumbent answers while every request mirrors to the candidate — held to the voice SLO: TTFT p99 &lt; 500 ms.</span>
-      </div>
-    </div>
-
     <div class="runstep" id="step-pool">
-      <div class="runstep-head"><span class="stepnum">2</span> GPU POOL — MAX runtime · scale-to-zero</div>
+      <div class="runstep-head"><span class="stepnum">1</span> PREPARE GPU POOL — MAX runtime · scale-to-zero</div>
       <div class="runstep-body">
         <button class="primary" id="btn-pool" onclick="preparePool(this)">Prepare pool</button>
-        <span class="note" id="step2-status">no pool visible yet</span>
+        <span class="note" id="step2-status">Wakes the pool, adopts it as the route's candidate (this RESETS the evidence cohort), and benches it at the voice gate (p99 TTFT &lt; 500 ms).</span>
       </div>
       <div class="note mono" id="gpu-pods" style="display:none"></div>
       <div class="note mono" id="gpu-jobs"></div>
+    </div>
+
+    <div class="runstep" id="step-traffic">
+      <div class="runstep-head"><span class="stepnum">2</span> START TRAFFIC</div>
+      <div class="runstep-body">
+        <button class="primary" id="btn-load" onclick="toggleLoad()">▶ Start traffic</button>
+        <span class="note" id="step1-status">Fills the cohort: short voice-style turns (the customer's eval set) at 2 rps; the incumbent answers while every request mirrors to the adopted candidate.</span>
+      </div>
     </div>
 
     <div class="runstep" id="step-certify">
@@ -415,7 +415,7 @@ async function preparePool(btn){
     await gpuPost({action:'bench', pod_id: p.id});
     const done = await pollJob('bench', 600);
     st.textContent = done && done.rc === 0
-      ? `pool ready · adopted + benched (${(done.tail||[]).slice(-1)[0]||''})`.slice(0,140)
+      ? 'pool adopted + benched at the voice gate — now Start traffic (step 2) to fill the cohort'
       : 'bench did not finish cleanly — see job tail below';
     btn.textContent = '✓ Pool prepared';
   }catch(e){ st.textContent = 'prepare failed: '+e; btn.disabled=false; }
