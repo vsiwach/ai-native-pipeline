@@ -1,0 +1,6 @@
+# Catalog snapshot consumed by services/model_apis' manifest test.
+filegroup(
+    name = "model_apis_catalog",
+    srcs = ["model-apis.json"],
+    visibility = ["//visibility:public"],
+)

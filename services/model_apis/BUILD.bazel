@@ -1,0 +1,15 @@
+# Declaration-only service: the app image is services/llm's llm_app, so the
+# only build artifact here is the manifest test (catalog expansion contract +
+# Dockerfile drift).
+py_test(
+    name = "model_apis_manifest_test",
+    size = "small",
+    srcs = ["tests/test_manifest.py"],
+    main = "tests/test_manifest.py",
+    data = [
+        "Dockerfile",
+        "service.py",
+        "//deploy/baseten:model_apis_catalog",
+    ],
+    deps = ["//tools/devkit:devkit_lib"],
+)

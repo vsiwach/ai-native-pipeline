@@ -1,0 +1,13 @@
+# Declaration-only service: the app image is services/llm's llm_app, so the
+# only build artifact here is the manifest test (contract + Dockerfile drift).
+py_test(
+    name = "qwen3_8b_manifest_test",
+    size = "small",
+    srcs = ["tests/test_manifest.py"],
+    main = "tests/test_manifest.py",
+    data = [
+        "Dockerfile",
+        "service.py",
+    ],
+    deps = ["//tools/devkit:devkit_lib"],
+)

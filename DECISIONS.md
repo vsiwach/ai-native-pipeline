@@ -118,3 +118,20 @@ Each entry: what was decided, why, and what a human may want to revisit.
   instead (symlink escapes the deploy root) — noted in SUMMARY.md.
 - First-attempt run dirs from the two failed script iterations were
   deleted; only the passing run's artifacts are committed.
+
+## F — quality gates
+- `./dev check` surfaced two PRE-EXISTING artifact gaps (not Phase 6's):
+  `services/model_apis` and `services/qwen3_8b` had no BUILD.bazel or
+  tests/. Both are declaration-only pool services (the app is
+  services/llm's llm_app), so the honest testable surface is the manifest
+  itself: contract fields, catalog expansion (model_apis), and
+  Dockerfile == exact manifest render (drift guard — both held). Added
+  minimal suites + BUILD targets + a `deploy/baseten` filegroup for the
+  catalog. `./dev check` now fully green (13 bazel test targets).
+- CI (`containers.yml`) needed NO change: the build matrix is generated
+  from the registry, so docs-assist joined automatically; its image builds
+  (kb/README.md satisfies the COPY) and /healthz answers 200.
+- `.claude/launch.json` stays uncommitted: it carried the user's own
+  pre-session edit; my only addition is the local `demo-site` static
+  server entry used to verify `demo.html?mock=true`.
+- `tools/mcp/` (untracked, pre-session) left untouched.
