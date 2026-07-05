@@ -110,7 +110,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <script>
 const qs = new URLSearchParams(location.search);
 const MOCK = qs.get('mock') === 'true';
-const REPLAY = qs.get('replay') === 'true';
+let REPLAY = qs.get('replay') === 'true';
 const ROUTER = qs.get('router') || 'http://localhost:8600';
 
 const state = {
@@ -199,7 +199,16 @@ async function loadLive(){
   try{
     const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
     applyCosts(d);
-  }catch(e){ liveFailed = true; document.getElementById('mode-tag').textContent = 'MOCK MODE — router unreachable · append ?router=<url> for live'; loadMock(); return; }
+  }catch(e){
+    liveFailed = true;
+    // router unreachable: prefer the RECORDED real run over fabricated
+    // mock numbers (flaky-provider insurance — replay is never fabricated)
+    try{
+      const head = await fetch('replay/console-trace.jsonl', {method:'HEAD'});
+      if(head.ok){ REPLAY = true; runReplay(); return; }
+    }catch(_){ }
+    document.getElementById('mode-tag').textContent = 'MOCK MODE — router unreachable · append ?router=<url> for live or ?replay=true for the recorded run'; loadMock(); return;
+  }
   await loadCert();
   render();
 }
