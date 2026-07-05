@@ -1121,7 +1121,7 @@ def get_app(registry_path: Path | None = None,
                 return ops.start_certify(
                     KINDS[kind]["pool"], str(mirror.log_path),
                     str(state.policy_path or "routing-policy.yaml"),
-                    KINDS[kind]["image"])
+                    KINDS[kind]["image"], route=route)
             return _error(400, "bad_action",
                           "action: launch|terminate|bench|adopt|certify")
         except RuntimeError as exc:   # budget guard / RunPod API errors

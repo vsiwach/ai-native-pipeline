@@ -67,7 +67,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <header>
   <div>
     <div class="brand">MODULAR</div>
-    <h1>BYOC certified migration — route: <span class="route">docs-assist</span></h1>
+    <h1>BYOC certified migration — <span class="route">voice workload</span></h1>
   </div>
   <div class="tag" id="mode-tag">F1.2 · F1.3 · F0.2 · F0.4</div>
 </header>
@@ -101,7 +101,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
       <div class="runstep-head"><span class="stepnum">1</span> START TRAFFIC</div>
       <div class="runstep-body">
         <button class="primary" id="btn-load" onclick="toggleLoad()">▶ Start traffic</button>
-        <span class="note" id="step1-status">Replays the customer eval set through the router; the incumbent answers while every request is mirrored to the candidate.</span>
+        <span class="note" id="step1-status">Replays short voice-style turns (the customer's eval set) through the router at 2 rps; the incumbent answers while every request mirrors to the candidate — held to the voice SLO: TTFT p99 &lt; 500 ms.</span>
       </div>
     </div>
 
@@ -134,10 +134,16 @@ button:disabled{opacity:.4;cursor:not-allowed}
 const qs = new URLSearchParams(location.search);
 const MOCK = qs.get('mock') === 'true';
 let REPLAY = qs.get('replay') === 'true';
-// Public deployments gate the mutating controls; pass ?token=<dev token>
-const TOKEN = qs.get('token') || '';
+// Turnkey live: the hosted control plane (Modal, scale-to-zero) is the
+// default router so this tab IS the live dashboard — override with
+// ?router=<url>. The site sits behind the passcode gate; the dev token
+// only unlocks bounded, ledger-guarded actions.
+const DEFAULT_ROUTER = 'https://vsiwach--certified-migration-router-serve.modal.run';
+const DEFAULT_TOKEN = 'modular-live-3aa01c81';
+const TOKEN = qs.get('token') || DEFAULT_TOKEN;
+const ROUTE = qs.get('route') || 'voice-agent';
 const devHeaders = () => TOKEN ? {'X-Dev-Token': TOKEN} : {};
-const ROUTER = qs.get('router') || 'http://localhost:8600';
+const ROUTER = qs.get('router') || DEFAULT_ROUTER;
 
 const state = {
   phase: 'certify',
@@ -202,14 +208,18 @@ function renderCert(c){
     `route config <b>sha256:${c.config_sha}</b><br>`+
     `SLO <b>${c.slo}</b><br>`+
     `signed <b>${c.algo}</b> · verify: <b>tools/certify.py verify</b>`;
-  document.getElementById('btn-promote').disabled = c.verdict!=='PROMOTE_ELIGIBLE';
+  // promote gating lives in loadCert (live certs only) / loadMock — this
+  // renderer must not overwrite it
+  if(MOCK) document.getElementById('btn-promote').disabled =
+    c.verdict !== 'PROMOTE_ELIGIBLE';
 }
 
-let liveFailed = false;
+let liveFailed = false, liveMisses = 0;
 function applyCosts(d){
   (d.pools||[]).forEach(pl=>{ if(state.pools[pl.id]){ state.pools[pl.id].usd_mtok = pl.usd_per_mtok; state.pools[pl.id].ttft = pl.p99_ttft_ms; }});
-  state.serving = d.routes?.['docs-assist']?.serving || state.serving;
-  state.shadowed = d.routes?.['docs-assist']?.shadowed || state.shadowed;
+  const rt = d.routes?.[ROUTE] || d.routes?.['docs-assist'];  // old traces recorded docs-assist
+  state.serving = rt?.serving || state.serving;
+  state.shadowed = rt?.shadowed || state.shadowed;
 }
 async function loadCert(){
   // prefer the LIVE router's newest cert (a cert minted this session shows
@@ -239,8 +249,14 @@ async function loadLive(){
   if(liveFailed) return;
   try{
     const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
-    applyCosts(d);
+    applyCosts(d); liveMisses = 0;
   }catch(e){
+    // the hosted control plane wakes from scale-to-zero — tolerate two
+    // misses (~10 s of polling) before concluding it is unreachable
+    if(++liveMisses < 3){
+      document.getElementById('mode-tag').textContent = 'LIVE — waking the control plane…';
+      return;
+    }
     liveFailed = true;
     // router unreachable: prefer the RECORDED real run over fabricated
     // mock numbers (flaky-provider insurance — replay is never fabricated)
@@ -271,7 +287,7 @@ function promote(){
     state.serving = state.serving==='frontier' ? 'a100' : 'mi300x';
     state.phase = 'rollback';
     document.getElementById('action-note').textContent = 'Promoted. Traffic now serves from '+state.serving.toUpperCase()+'. Rollback stays armed for the life of the route.';
-    if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/promote',{method:'POST',headers:devHeaders()}).catch(()=>{});
+    if(!MOCK) fetch(ROUTER+'/v1/routes/'+ROUTE+'/promote',{method:'POST',headers:devHeaders()}).catch(()=>{});
     render();
   }
 }
@@ -279,7 +295,7 @@ function rollback(){
   state.serving = state.serving==='mi300x' ? 'a100' : 'frontier';
   state.phase = 'promote';
   document.getElementById('action-note').textContent = 'Rolled back in <5s. The ledger recorded both transitions.';
-  if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/rollback',{method:'POST',headers:devHeaders()}).catch(()=>{});
+  if(!MOCK) fetch(ROUTER+'/v1/routes/'+ROUTE+'/rollback',{method:'POST',headers:devHeaders()}).catch(()=>{});
   render();
 }
 
@@ -292,7 +308,7 @@ async function toggleLoad(){
   if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
   try{
     const body = loadRunning ? {action:'stop'}
-      : {action:'start', route:'docs-assist', rps:2, duration_s:120, stream_ratio:0.5};
+      : {action:'start', route:ROUTE, rps:2, duration_s:120, stream_ratio:0.5};
     const r = await fetch(ROUTER+'/v1/dev/loadgen', {method:'POST',
       headers:{'Content-Type':'application/json', ...devHeaders()}, body: JSON.stringify(body)});
     renderLoad(await r.json());
@@ -393,7 +409,7 @@ async function preparePool(btn){
     }
     if(!p.ready){ st.textContent = 'pool never became ready — try again'; btn.disabled=false; return; }
     st.textContent = 'adopting as shadow candidate (cohort log rotates)…';
-    await gpuPost({action:'adopt', pod_id: p.id});
+    await gpuPost({action:'adopt', pod_id: p.id, route: ROUTE});
     adoptedPool = p;
     st.textContent = 'benchmarking — measured $/Mtok at the declared $/hr…';
     await gpuPost({action:'bench', pod_id: p.id});
@@ -423,7 +439,7 @@ async function certifyRun(btn){
   btn.disabled = true;
   document.getElementById('action-note').textContent =
     'Certifying: grounding + rubric parity on the mirrored cohort, p99 SLO from the bench report, ed25519 signature…';
-  await gpuPost({action:'certify', pool: p.kind});
+  await gpuPost({action:'certify', pool: p.kind, route: ROUTE});
   const done = await pollJob('certify', 300);
   await loadCert();
   document.getElementById('action-note').textContent = done && done.rc === 0

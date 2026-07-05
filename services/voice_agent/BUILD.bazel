@@ -1,0 +1,13 @@
+# Declaration-only service: the app is services/docs_assist, so the only
+# build artifact here is the manifest test (contract + Dockerfile drift).
+py_test(
+    name = "voice_agent_manifest_test",
+    size = "small",
+    srcs = ["tests/test_manifest.py"],
+    main = "tests/test_manifest.py",
+    data = [
+        "Dockerfile",
+        "service.py",
+    ],
+    deps = ["//tools/devkit:devkit_lib"],
+)

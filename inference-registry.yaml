@@ -145,6 +145,13 @@ backends:
     model_id: Qwen/Qwen3-8B
     cold_start_s: 25.0
     kv_ttl_s: 300.0
+  voice-agent:
+    path: services/voice_agent
+    tier: realtime
+    target: cpu
+    max_replicas: 3
+    scale_to_zero: true
+    engine: openai-proxy
 
 # Infrastructure services: built and smoke-tested by the same CI matrix,
 # but never routing targets.

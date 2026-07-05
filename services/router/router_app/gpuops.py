@@ -219,28 +219,31 @@ class GpuOps:
     def start_bench(self, pod: dict, reports_dir: str) -> dict:
         pool = KINDS.get(pod["kind"], {}).get("pool", pod["kind"])
         out = Path(reports_dir) / f"{pool}.json"
+        # voice workload: short turns, latency-critical — the repo's voice
+        # SLO (TTFT p99 < 500 ms) is the gate, not the forgiving 800
         cmd = [sys.executable, "tools/bench.py",
                "--base-url", pod["url"], "--model", MODEL,
                "--pool-usd-hr", str(pod["usd_hr"]),
-               "--pool-name", pool, "--profile", "docs-agent",
+               "--pool-name", pool, "--profile", "voice",
                "--requests", "40", "--concurrency", "4",
-               "--slo-ttft-ms", "800", "--out", str(out)]
+               "--slo-ttft-ms", "500", "--out", str(out)]
         self.jobs["bench"] = Job("bench", cmd, self.root)
         self.emit("gpu_ops", action="bench", pod=pod["id"], pool=pool)
         return self.jobs["bench"].status()
 
     def start_certify(self, pool: str, shadow_log: str, policy_path: str,
-                      image: str) -> dict:
+                      image: str, route: str = "voice-agent") -> dict:
         report = str(Path(os.environ.get("BENCH_REPORTS_DIR",
                                          "bench-reports")) / f"{pool}.json")
         build = f"{MODEL.split('/')[-1].lower()}@{image.split(':')[-1]}+{pool}"
         cmd = ["./dev", "certify", "run",
+               "--route", route,
                "--evals", "evals/docs_qa.jsonl",
                "--shadow-log", shadow_log,
                "--bench-report", report,
                "--route-config", policy_path,
                "--model-build", build,
-               "--gate-parity", "0.90", "--slo-ttft-ms", "800",
+               "--gate-parity", "0.90", "--slo-ttft-ms", "500",
                "--out", "certs"]
         self.jobs["certify"] = Job("certify", cmd, self.root)
         self.emit("gpu_ops", action="certify", pool=pool, build=build)

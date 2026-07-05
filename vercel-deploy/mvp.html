@@ -62,9 +62,9 @@
     <!-- 02 -->
     <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">02</span>
-      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The route: an agent that answers for Modular itself</h2>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The route: a voice workload, grounded in Modular&rsquo;s own docs</h2>
     </div>
-    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">The migrated route is <strong>docs-assist</strong> &mdash; a retrieval-grounded agent over Modular&rsquo;s public documentation (MAX, Mojo, Mammoth, the skills repo). Every answer must cite the retrieved sources; ungrounded answers fail certification by construction. It is packaged as a skill in the conventions of Modular&rsquo;s own skills repo &mdash; intended as a contribution, not a fork &mdash; and served <strong>MAX-first</strong> on both pools, with the bring-up driven by Modular&rsquo;s import-model and debug-model skills: the &sect;4.2 flywheel, demonstrated rather than described. A viewer can ask it anything, live, and watch which silicon answers.</p>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">The migrated route is <strong>voice-agent</strong> &mdash; a <strong>voice workload</strong>: short conversational turns answered by a retrieval-grounded agent over Modular&rsquo;s public documentation (MAX, Mojo, Mammoth, the skills repo). Voice is the least forgiving serving workload &mdash; the SLO of record is <strong>TTFT p99 &lt; 500 ms, TPOT p99 &lt; 60 ms</strong> &mdash; which is exactly why it anchors the demo: the measured MAX numbers (p99 TTFT 308.5 ms, TPOT 20.8 ms) pass it outright. Every answer must cite the retrieved sources; ungrounded answers fail certification by construction. It is packaged as a skill in the conventions of Modular&rsquo;s own skills repo &mdash; intended as a contribution, not a fork &mdash; and served <strong>MAX-first</strong> on both pools, with the bring-up driven by Modular&rsquo;s import-model and debug-model skills: the &sect;4.2 flywheel, demonstrated rather than described. A viewer can ask it anything, live, and watch which silicon answers.</p>
 
     <!-- 03 -->
     <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
@@ -148,8 +148,8 @@
     <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; line-height: 1.75; background: #F4F4EE; border: 1px solid #E4E4DC; padding: 14px 18px; margin: 12px 0 0 0; color: #3A3A32; overflow-x: auto;">
 chat / replayer &rarr; router (shadow &middot; placement &middot; release &middot; /v1/costs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; frontier API &nbsp;(incumbent &middot; customer key &middot; zero markup)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; docs-assist &rarr; MAX 26.4 @ Modal A100 80GB (scale-to-zero &middot; act 1)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&rarr; docs-assist &rarr; MAX 26.4 @ AMD MI300X &nbsp;(act 2 &middot; awaiting healthy capacity)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; voice-agent &rarr; MAX 26.4 @ Modal A100 80GB (scale-to-zero &middot; act 1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&rarr; voice-agent &rarr; MAX 26.4 @ AMD MI300X &nbsp;(act 2 &middot; awaiting healthy capacity)<br>
 certifier: evals(sha256, custody) + shadow log + bench SLO &rarr; signed cert &rarr; gates promote<br>
 console (BYOC &middot; LIVE tab) &larr; polls /v1/costs &middot; shows certificates &middot; REPLAY narrates recorded runs
     </div>
