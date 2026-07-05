@@ -12,6 +12,9 @@ Commands:
   new service <name>          scaffold a contract-compliant service
       [--tier realtime|standard|batch] [--target cpu|gpu]
   run <service> [--port N]    docker build + run + /healthz probe
+  bench <args...>             $/Mtok at fixed SLO (tools/bench.py)
+  certify <args...>           signed parity certs (tools/certify.py);
+                              a passing run updates vercel-deploy/certs/latest.json
 """
 
 import argparse
@@ -119,6 +122,49 @@ def cmd_release_demo(args) -> int:
     return subprocess.run(["python3", str(script)]).returncode
 
 
+def link_latest_cert(repo_root: Path, out_dir: str = "certs") -> Path | None:
+    """Point vercel-deploy/certs/latest.json at the newest cert record so the
+    demo console always renders the cert that actually gated promotion.
+    Relative symlink; returns the target or None when no cert exists."""
+    certs = sorted((repo_root / out_dir).glob("*.cert.json"),
+                   key=lambda p: p.stat().st_mtime)
+    if not certs:
+        return None
+    link = repo_root / "vercel-deploy" / "certs" / "latest.json"
+    link.parent.mkdir(parents=True, exist_ok=True)
+    if link.is_symlink() or link.exists():
+        link.unlink()
+    link.symlink_to(Path("../..") / certs[-1].relative_to(repo_root))
+    return certs[-1]
+
+
+def _tool_passthrough(tool: str, extra: list[str]) -> int:
+    return subprocess.run(
+        [sys.executable, str(REPO_ROOT / "tools" / tool), *extra],
+        cwd=REPO_ROOT).returncode
+
+
+def cmd_bench(args) -> int:
+    """$/Mtok at fixed SLO — thin wrapper over tools/bench.py."""
+    return _tool_passthrough("bench.py", args.args)
+
+
+def cmd_certify(args) -> int:
+    """Signed parity certs — wrapper over tools/certify.py. On a successful
+    `run` (verdict PROMOTE_ELIGIBLE) the newest cert becomes
+    vercel-deploy/certs/latest.json."""
+    rc = _tool_passthrough("certify.py", args.args)
+    if rc == 0 and args.args[:1] == ["run"]:
+        out_dir = "certs"
+        if "--out" in args.args:
+            out_dir = args.args[args.args.index("--out") + 1]
+        target = link_latest_cert(REPO_ROOT, out_dir)
+        if target is not None:
+            ui.ok(f"vercel-deploy/certs/latest.json -> "
+                  f"{target.relative_to(REPO_ROOT)}")
+    return rc
+
+
 def cmd_run(args) -> int:
     if not shutil.which("docker"):
         ui.fail("docker not installed")
@@ -222,6 +268,16 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("release-demo",
                    help="simulate the release engine (canary, auto-rollback, shadow)")
 
+    p_bench = sub.add_parser(
+        "bench", help="measure $/Mtok at fixed SLO (tools/bench.py passthrough)")
+    p_bench.add_argument("args", nargs=argparse.REMAINDER,
+                         help="forwarded to tools/bench.py (see --help there)")
+    p_certify = sub.add_parser(
+        "certify", help="signed parity certs (tools/certify.py passthrough; "
+        "a passing run updates vercel-deploy/certs/latest.json)")
+    p_certify.add_argument("args", nargs=argparse.REMAINDER,
+                           help="forwarded to tools/certify.py")
+
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
@@ -240,6 +296,8 @@ def main(argv: list[str] | None = None) -> int:
         "chat": lambda: cmd_chat(args),
         "scale-demo": lambda: cmd_scale_demo(args),
         "release-demo": lambda: cmd_release_demo(args),
+        "bench": lambda: cmd_bench(args),
+        "certify": lambda: cmd_certify(args),
     }
     return dispatch[args.command]()
 
