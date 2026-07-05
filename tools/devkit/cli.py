@@ -224,6 +224,14 @@ def cmd_run(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    # bench/certify forward EVERYTHING to their tool — dispatch before
+    # argparse, which would claim leading --options for itself (REMAINDER
+    # only swallows args after the first positional).
+    if argv[:1] == ["bench"]:
+        return cmd_bench(argparse.Namespace(args=argv[1:]))
+    if argv[:1] == ["certify"]:
+        return cmd_certify(argparse.Namespace(args=argv[1:]))
     parser = argparse.ArgumentParser(
         prog="dev", description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,

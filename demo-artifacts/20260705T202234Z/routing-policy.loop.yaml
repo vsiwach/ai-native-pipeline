@@ -1,0 +1,15 @@
+tiers:
+  realtime: {max_latency_ms: 30000, prefer: lowest_latency, ttft_ms: 5000, tpot_ms: 200}
+  standard: {max_latency_ms: 30000, prefer: lowest_cost}
+  batch: {max_latency_ms: null, prefer: lowest_cost, queue: true}
+cost_table: {frontier-api: 10.0, shadow-candidate: 0.5}
+cache: {enabled: false}
+affinity: {enabled: false, prefix_tokens: 32, capacity: 8}
+routes:
+  docs-assist:
+    shadow_candidate: http://127.0.0.1:8113/v1
+    shadow_id: docs-assist-candidate
+    shadow_provider: shadow-candidate
+endpoints:
+  docs-assist:
+    - {id: frontier, provider: frontier-api, url: "http://127.0.0.1:8112"}

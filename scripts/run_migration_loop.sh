@@ -19,6 +19,15 @@ KB="$REPO/services/docs_assist/kb/modular_kb.sqlite"
 [ -f "$KB" ] || { echo "KB index missing — run tools/ragindex/build_index.py first"; exit 1; }
 
 PORT_SIM=8111 PORT_PRIMARY=8112 PORT_CANDIDATE=8113 PORT_ROUTER=8114
+for p in $PORT_SIM $PORT_PRIMARY $PORT_CANDIDATE $PORT_ROUTER; do
+  if lsof -ti ":$p" >/dev/null 2>&1; then
+    echo "port $p is busy (a previous run leaked?) — kill it first:"
+    echo "  lsof -ti :$PORT_SIM -ti :$PORT_PRIMARY -ti :$PORT_CANDIDATE -ti :$PORT_ROUTER | xargs kill"
+    exit 1
+  fi
+done
+# exec inside the subshell so $! IS the server pid (a plain subshell pid
+# would die on kill while the python child lived on, leaking ports)
 PIDS=()
 cleanup() { for p in "${PIDS[@]:-}"; do kill "$p" 2>/dev/null || true; done; }
 trap cleanup EXIT
@@ -32,14 +41,14 @@ wait_healthy() { # url
 }
 
 echo "== starting llm-sim (:$PORT_SIM)"
-(cd services/llm && ENGINE=max TARGET=cpu MODEL_NAME=llm-sim COLD_START_S=1.0 \
+(cd services/llm && exec env ENGINE=max TARGET=cpu MODEL_NAME=llm-sim COLD_START_S=1.0 \
   python3 -m uvicorn llm_app.main:app --port $PORT_SIM --log-level warning \
   >"$RUN_DIR/llm-sim.log" 2>&1) & PIDS+=($!)
 
 echo "== starting docs-assist primary (:$PORT_PRIMARY) + candidate (:$PORT_CANDIDATE)"
 for role_port in "primary:$PORT_PRIMARY" "candidate:$PORT_CANDIDATE"; do
   role="${role_port%%:*}"; port="${role_port##*:}"
-  (cd services/docs_assist && \
+  (cd services/docs_assist && exec env \
     UPSTREAM_BASE_URL="http://127.0.0.1:$PORT_SIM/v1" UPSTREAM_MODEL=llm-sim \
     KB_INDEX="$KB" \
     python3 -m uvicorn app:app --port "$port" --log-level warning \
@@ -65,7 +74,7 @@ endpoints:
   docs-assist:
     - {id: frontier, provider: frontier-api, url: "http://127.0.0.1:$PORT_PRIMARY"}
 EOF
-(cd services/router && \
+(cd services/router && exec env \
   REGISTRY_PATH="$REPO/inference-registry.yaml" ROUTING_POLICY_PATH="$POLICY" \
   SHADOW_LOG_DIR="$RUN_DIR/shadow-logs" ROUTER_QUEUE_DIR="$RUN_DIR/queue" \
   BENCH_REPORTS_DIR="$RUN_DIR/bench-reports" INCIDENT_AGENT=0 \
@@ -91,6 +100,7 @@ for _ in $(seq 1 60); do
   [ "$n" -ge "$N_EVALS" ] && break
   sleep 0.5
 done
+[ -f "$SHADOW_LOG" ] || { echo "shadow log never appeared: $SHADOW_LOG"; exit 1; }
 echo "   shadow log lines: $(grep -c . "$SHADOW_LOG")"
 
 echo "== shadow-stats + /v1/costs snapshots"

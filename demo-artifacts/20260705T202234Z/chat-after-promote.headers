@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+date: Sun, 05 Jul 2026 20:22:52 GMT
+server: uvicorn
+x-backend: shadow-candidate
+x-replica: docs-assist-candidate
+x-cache: miss
+x-route-reason: least_pending
+content-length: 450
+content-type: application/json
+

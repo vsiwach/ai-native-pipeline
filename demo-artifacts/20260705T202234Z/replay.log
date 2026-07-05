@@ -1,0 +1,12 @@
+[0] 200 What license is the MAX framework and serving layer released
+[0] 200 Which parts of Mojo are open source, and what did Modular op
+[0] 200 What is Mammoth in the Modular stack?
+[0] 200 Which hardware vendors does MAX support for serving on day 0
+[0] 200 What is the role of the Mojo standard library and kernels — 
+[0] 200 How does KV-aware routing decide where a request lands?
+[0] 200 What is disaggregated serving and why does it lower cost?
+[0] 200 Can I self-host MAX for single-node serving for free?
+[0] 200 What skills does the Modular skills repo provide for coding 
+[0] 200 What Python interoperability does Mojo offer?
+[0] 200 Which open model families does Modular serve with day-0 cove
+[0] 200 What does the OpenAI-compatible endpoint on MAX expose?

@@ -1,0 +1,39 @@
+{
+  "kind": "modular-demo/certification-record",
+  "version": 1,
+  "route": "docs-assist",
+  "created": "2026-07-05T16:22:52Z",
+  "eval_set": {
+    "path": "evals/docs_qa.jsonl",
+    "sha256": "31d7e4214ab7bb0a0b010f5ebe3a8921d2b12098b35bb1d63f7cd9e78e8079d4",
+    "custody": "customer"
+  },
+  "model_build": "llm-sim@max-local-sim",
+  "route_config": {
+    "path": "/Users/vikramsiwach/Downloads/ai-native-pipeline/demo-artifacts/20260705T202234Z/routing-policy.loop.yaml",
+    "sha256": "6c34ce8059a84c8850e909a02fe8853e47369b7f3f8bf969f85b2dba622eb7f6"
+  },
+  "quality": {
+    "parity": 0.0,
+    "gate": 0.0,
+    "pass": true,
+    "scored": 12,
+    "passed": 0,
+    "method": "grounding+rubric"
+  },
+  "slo": {
+    "gate_ttft_ms": 5000.0,
+    "measured": {
+      "p99_ttft_ms": 120.6,
+      "p99_tpot_ms": 7.7,
+      "usd_per_mtok": 0.0
+    },
+    "pass": true
+  },
+  "verdict": "PROMOTE_ELIGIBLE",
+  "signature_block": {
+    "algo": "ed25519",
+    "public_key": "8835b5bf571458579456cdd2180bfeb3a23c4ad73797dc1b176c43ec134acf4c",
+    "signature": "c3ce28422d7cfebf0c815d05735b3fd2fccb6a6bc0fffb3b9d6a96b34eb8945d48c6836abecebd3259c1ed28429a8804e0f0c14a6340998d26d92b74e782c400"
+  }
+}

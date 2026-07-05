@@ -94,3 +94,27 @@ Each entry: what was decided, why, and what a human may want to revisit.
 - q11 has only `must_not_include` guards (by design) — flagged NO_KEYWORDS,
   nothing to verify positively.
 - Result after fix: 12/12 items clean, 0 MISSING.
+
+## E — end-to-end loop (sim)
+- `scripts/run_migration_loop.sh` runs the whole thing:
+  llm-sim → docs-assist(primary)+docs-assist(candidate) → router with
+  shadow route → replay → certify → verify → tamper → promote/rollback
+  drill. Evidence committed at `demo-artifacts/20260705T202234Z/`.
+- **Two certs, deliberately.** At the real gate (0.90) the sim run is
+  verdict **HOLD** with parity 0.0% — the lorem-token sim can't emit `[n]`
+  citation markers, so grounding honestly fails; that cert is in
+  `certs-gate90/`. A second run with `--gate-parity 0.0` (gate value is
+  printed inside the signed record — nothing hidden) produces the
+  PROMOTE_ELIGIBLE cert that exercises the ./dev certify symlink path.
+  Meaningful parity numbers require a real instruction-following model on
+  a GPU pod — listed as needs-a-human in SUMMARY.md.
+- Two loop-runner bugs found live and fixed: `./dev bench --flag` lost its
+  leading flags to the parent argparse (REMAINDER quirk → early dispatch),
+  and backgrounded subshells leaked their python children on cleanup
+  (`exec env ...` so the recorded pid IS the server; plus a port preflight
+  and a hard shadow-log existence check).
+- `vercel-deploy/certs/latest.json` is now a relative symlink into
+  `demo-artifacts/` (committed). A real Vercel deploy must copy the cert
+  instead (symlink escapes the deploy root) — noted in SUMMARY.md.
+- First-attempt run dirs from the two failed script iterations were
+  deleted; only the passing run's artifacts are committed.

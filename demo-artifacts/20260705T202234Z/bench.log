@@ -1,0 +1,12 @@
+{
+  "pool": "llm-sim-local",
+  "output_tok_s_aggregate": 374.4,
+  "usd_per_mtok": 0.0,
+  "p99_ttft_ms": 120.6,
+  "p99_tpot_ms": 7.7,
+  "slo": {
+    "gate_ttft_ms": 5000.0,
+    "pass": true
+  }
+}
+-> /Users/vikramsiwach/Downloads/ai-native-pipeline/demo-artifacts/20260705T202234Z/bench-reports/llm-sim-local.json
