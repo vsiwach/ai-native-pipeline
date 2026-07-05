@@ -35,3 +35,15 @@ py_test(
     main = "tests/test_mcp_server.py",
     deps = [":policy_check_lib"],
 )
+
+# Planning/summary logic is stdlib (httpx is imported lazily by the runner),
+# so the test needs only the source file.
+py_test(
+    name = "loadgen_test",
+    size = "small",
+    srcs = [
+        "loadgen.py",
+        "tests/test_loadgen.py",
+    ],
+    main = "tests/test_loadgen.py",
+)
