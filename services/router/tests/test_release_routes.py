@@ -123,6 +123,8 @@ def test_shadow_mirrors_while_primary_serves(migration_client):
     assert resp.json()["choices"][0]["message"]["content"] == \
         "primary answer [1]"
     assert resp.headers["X-Replica"] == "frontier"
+    # grounding evidence forwarded end to end (the demo console renders it)
+    assert resp.headers["X-Citations"] == '[{"n": 1, "url": "https://d/x"}]'
     # ...while the candidate got a mirror of the request
     mirror = c.state.shadows["docs-assist"]
     assert mirror.flush(timeout_s=5)

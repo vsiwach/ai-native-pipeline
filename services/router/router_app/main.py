@@ -651,7 +651,8 @@ def get_app(registry_path: Path | None = None,
                                "X-Route-Reason": choice.reason}
                 for h in ("X-TTFT-Ms", "X-Decode-Ms", "X-Tokens-Per-Sec",
                           "X-Est-Cost", "X-Prompt-Tokens",
-                          "X-Completion-Tokens", "X-Cache"):
+                          "X-Completion-Tokens", "X-Cache",
+                          "X-Citations", "X-Retrieval-Ms"):
                     if h in up_hdrs:
                         out_headers[h] = up_hdrs[h]
                 return StreamingResponse(
@@ -677,9 +678,12 @@ def get_app(registry_path: Path | None = None,
             "X-Route-Reason": choice.reason,
         }
         # forward backend economics so clients (bench harness) can log the
-        # same numbers the router recorded — one provenance chain end to end
+        # same numbers the router recorded — one provenance chain end to end.
+        # X-Citations/X-Retrieval-Ms: grounding evidence from agent backends
+        # (docs-assist), which the demo console renders per answer.
         for h in ("X-TTFT-Ms", "X-Decode-Ms", "X-Tokens-Per-Sec",
-                  "X-Est-Cost", "X-Prompt-Tokens", "X-Completion-Tokens"):
+                  "X-Est-Cost", "X-Prompt-Tokens", "X-Completion-Tokens",
+                  "X-Citations", "X-Retrieval-Ms"):
             if h in resp.headers:
                 headers[h] = resp.headers[h]
         media = resp.headers.get("content-type", "application/json")

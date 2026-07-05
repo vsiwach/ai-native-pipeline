@@ -167,7 +167,9 @@ function render(){
   document.getElementById('s-certify').textContent = state.parity ? 'parity '+(state.parity*100).toFixed(1)+'%' : '—';
   document.getElementById('s-promote').textContent = state.phase==='promote'?'eligible':(idx>2?'promoted':'—');
 
-  const inc = p.frontier.usd_mtok, cur = p[state.serving].usd_mtok;
+  // serving id may name a pool with no card (live routers use their own
+  // replica ids) — degrade to em-dashes instead of crashing the poll loop
+  const inc = p.frontier.usd_mtok, cur = (p[state.serving]||{}).usd_mtok;
   state.savings = (inc && cur) ? Math.round((1-cur/inc)*100) : null;
   document.getElementById('metrics').innerHTML = `
     <div class="metric"><div class="l">savings vs incumbent</div><div class="n lime">${state.savings==null?'—':'−'+state.savings+'%'}</div></div>
@@ -250,7 +252,7 @@ async function ask(){
 
 function chip(el, t0, cites){
   const ms = Math.round(performance.now()-t0);
-  const s = state.serving, p = state.pools[s];
+  const s = state.serving, p = state.pools[s] || {cls:'', usd_mtok:null};
   const cost = p.usd_mtok ? '$'+(p.usd_mtok*300/1e6).toFixed(6) : '—';
   const c = document.createElement('span'); c.className='chip';
   c.innerHTML = `served by <span class="${p.cls}">${s.toUpperCase()}</span> · ${ms}ms · ~${cost}/answer` + (cites?`<br>sources: ${cites}`:'');
