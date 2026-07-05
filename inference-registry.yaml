@@ -12,6 +12,13 @@ backends:
     model_id: deepseek-ai/DeepSeek-V4-Pro
     cold_start_s: 0.5
     kv_ttl_s: 300.0
+  docs-assist:
+    path: services/docs_assist
+    tier: realtime
+    target: cpu
+    max_replicas: 3
+    scale_to_zero: true
+    engine: openai-proxy
   glm-4.7:
     path: services/model_apis
     tier: standard

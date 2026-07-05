@@ -1,0 +1,28 @@
+# Tests only — the container build stays in Docker/CI (Dockerfile is rendered
+# from service.py's Image chain).
+load("@pypi//:requirements.bzl", "requirement")
+
+py_library(
+    name = "docs_assist_app",
+    srcs = [
+        "app.py",
+        "retrieval.py",
+    ],
+    imports = ["."],
+    visibility = ["//visibility:public"],
+    deps = [
+        requirement("fastapi"),
+        requirement("httpx"),
+    ],
+)
+
+py_test(
+    name = "docs_assist_tests",
+    size = "small",
+    srcs = glob(["tests/**/*.py"]),
+    main = "tests/bazel_runner.py",
+    deps = [
+        ":docs_assist_app",
+        requirement("pytest"),
+    ],
+)

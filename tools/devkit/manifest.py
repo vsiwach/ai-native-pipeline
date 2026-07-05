@@ -43,7 +43,8 @@ from dataclasses import dataclass, field
 
 VALID_TIERS = ("realtime", "standard", "batch")
 VALID_TARGETS = ("cpu", "gpu")
-VALID_ENGINES = ("max", "sklearn", "baseten", "vllm", "baseten-api")
+VALID_ENGINES = ("max", "sklearn", "baseten", "vllm", "baseten-api",
+                 "openai-proxy")
 
 
 class Image:
