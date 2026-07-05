@@ -25,13 +25,13 @@
 
     <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #16160F;">
       <span style="font-weight: 600;">MODULAR</span>
-      <span style="color: #8A8A80;">MVP &middot; FROM PLAN TO PROOF</span>
+      <span style="color: #8A8A80;">BYOC &middot; THE ENTERPRISE PLAY</span>
     </div>
     <div style="height: 3px; background: #16160F; margin: 10px 0 0 0;"></div>
 
-    <h1 style="font-size: 40px; line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; margin: 30px 0 0 0;">The conversion machine,<br>running <span style="box-shadow: inset 0 -0.34em 0 #D5F26E;">on real silicon</span>.</h1>
+    <h1 style="font-size: 40px; line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; margin: 30px 0 0 0;">BYOC certified migration,<br>running <span style="box-shadow: inset 0 -0.34em 0 #D5F26E;">on real silicon</span>.</h1>
 
-    <p style="font-size: 15.5px; line-height: 1.55; color: #55554D; margin: 18px 0 0 0; max-width: 60ch;">The PRD names its own MVP (&sect;9): the bake-off kit, the bench harness, the migration skeleton. This document describes that MVP built and demoable &mdash; certified migration of a live agent route across a frontier API, NVIDIA, and AMD, with signed parity certificates and measured costs. Four minutes, three acts, no leap of faith.</p>
+    <p style="font-size: 15.5px; line-height: 1.55; color: #55554D; margin: 18px 0 0 0; max-width: 60ch;">The PRD names its own MVP (&sect;9): the bake-off kit, the bench harness, the migration skeleton. This document describes that MVP built, demoable, and re-framed as the <strong>BYOC play</strong>: certified migration of a live agent route from a frontier API onto GPU capacity the customer controls &mdash; serving on the <strong>MAX runtime</strong>, with signed parity certificates and measured costs. The console runs it in three steps: start traffic &rarr; prepare the GPU pool &rarr; certify &amp; promote. As of July&nbsp;5 it has been executed for real: parity 100% at the 0.90 gate on an A100, p99 TTFT 308.5&nbsp;ms, $2.04/Mtok measured.</p>
 
     <div style="display: flex; gap: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8A8A80; margin: 16px 0 0 0;">
       <span>VIKRAM SIWACH</span><span>JULY 2026</span><span style="color: #6F8F1F;">REFERENCE: GITHUB.COM/VSIWACH/AI-NATIVE-PIPELINE</span>
@@ -87,12 +87,12 @@
         </tr>
         <tr>
           <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6F8F1F; vertical-align: top;">1 &middot; MIGRATE</td>
-          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC; vertical-align: top;">Replayed traffic fills the shadow log; the certifier scores grounding + rubric against the eval set and checks p99 SLO from the bench report; the signed certificate reads PROMOTE_ELIGIBLE; one click promotes. The next live answer streams from the A100.</td>
+          <td style="padding: 10px 14px 10px 0; border-bottom: 1px solid #E4E4DC; vertical-align: top;">Replayed traffic fills the shadow log; the certifier scores grounding + rubric against the eval set and checks p99 SLO from the bench report; the signed certificate reads PROMOTE_ELIGIBLE; one click promotes. Executed 2026-07-05 on an A100 (MAX 26.4 runtime): parity 100% at the 0.90 gate, p99 TTFT 308.5 ms &le; 800 ms, $2.04/Mtok measured at $1.39/hr.</td>
           <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; vertical-align: top;">The conversion machine of PRD Figure 1, end to end &mdash; quality and SLO gate the move; the ~60&ndash;90% cost drop is the reward, not the argument.</td>
         </tr>
         <tr>
           <td style="padding: 10px 14px 10px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6F8F1F; vertical-align: top;">2 &middot; CROSS-VENDOR</td>
-          <td style="padding: 10px 14px 10px 0; vertical-align: top;">The bench panel shows both pools&rsquo; measured $/Mtok at equal SLO; placement moves the route to the MI300X; a second certificate is cut; the next answer streams from AMD. One click rolls everything back in under five seconds.</td>
+          <td style="padding: 10px 14px 10px 0; vertical-align: top;">Same buttons, AMD pool: bench both vendors at equal SLO, cut a second certificate, move the route, roll back in one click. Status: blocked on provider capacity &mdash; RunPod rented two consecutive MI300X pods that never booted (2026-07-05); Modal is NVIDIA-only. The flow is vendor-blind by construction and runs the day healthy MI300X capacity exists.</td>
           <td style="padding: 10px 0; vertical-align: top;">Cross-silicon serving is a working product motion, not a roadmap slide &mdash; and reversibility is what makes an enterprise say yes.</td>
         </tr>
       </tbody>
@@ -104,6 +104,42 @@
       <p style="font-size: 13px; line-height: 1.6; margin: 0;">Measured: every latency, every tokens/sec, every open-pool $/Mtok (pod price &divide; measured throughput), the frontier price actually paid. Replayed: the traffic itself &mdash; real public support-style questions, timed replay; we play the customer. Extrapolated and labeled: monthly-bill projections. Simulated: nothing in the serving path. The demo console&rsquo;s offline mode exists and is labeled MOCK in the header &mdash; mock numbers are never presented as measured. <strong>In a commodity market an unproven cost advantage is marketing; this MVP is built so that nothing shown is unproven.</strong></p>
     </div>
 
+
+    <!-- 04b — MAX runtime measured -->
+    <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">04</span>
+      <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">The MAX runtime, measured against a vanilla stack</h2>
+    </div>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">The serving layer on every pool is <strong>Modular&rsquo;s MAX runtime</strong> (pinned container <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px;">modular/max-nvidia-full:26.4.0</span>) &mdash; not a wrapper around another engine. To keep that claim honest, the same bench (same model, same A100 80GB PCIe class, same $1.39/hr, same docs-agent profile: 40 requests &times; concurrency 4, ~1,800-token prefill, 300-token decode) was run against a vanilla vLLM 0.9.1 container:</p>
+    <table style="width: 100%; border-collapse: collapse; margin: 12px 0 0 0; font-size: 12.5px; line-height: 1.55;">
+      <thead>
+        <tr style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #8A8A80; text-align: left;">
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F;">RUNTIME &middot; QWEN2.5-14B &middot; A100 80GB</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F;">P50 / P99 TTFT</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F;">P99 TPOT</th>
+          <th style="font-weight: 500; padding: 0 14px 7px 0; border-bottom: 1.5px solid #16160F;">AGG TOK/S</th>
+          <th style="font-weight: 500; padding: 0 0 7px 0; border-bottom: 1.5px solid #16160F;">$/MTOK (MEASURED)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC; font-weight: 600;">MAX 26.4.0</td>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC;">162 / 308.5 ms</td>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC;">20.8 ms</td>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC;">189.4</td>
+          <td style="padding: 9px 0; border-bottom: 1px solid #E4E4DC;">$2.04</td>
+        </tr>
+        <tr>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC; font-weight: 600;">vLLM 0.9.1</td>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC;" id="vllm-ttft">422 / 2440 ms*</td>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC;">22.5 ms</td>
+          <td style="padding: 9px 14px 9px 0; border-bottom: 1px solid #E4E4DC;">164.0</td>
+          <td style="padding: 9px 0; border-bottom: 1px solid #E4E4DC;">$2.35</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 12px; line-height: 1.6; color: #55554D; margin: 8px 0 0 0;">*The vLLM pod was benched immediately after boot, so its tail (p95&asymp;p99) captures first-batch warmup; the MAX pod had served prior traffic. The medians are the fair comparison: <strong>2.6&times; faster first token, +15% throughput, ~9% lower steady-state TPOT on identical hardware and workload</strong>. Both reports are committed under <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">bench-reports/</span> with the exact request profile embedded &mdash; rerun them yourself with <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px;">./dev bench</span>. One workload profile on one GPU class is a data point, not a benchmark suite; Phase 0&rsquo;s independent bake-off remains the standing commitment.</p>
+
     <!-- 05 -->
     <div style="display: flex; align-items: baseline; gap: 12px; margin: 26px 0 0 0; border-top: 1px solid #E4E4DC; padding-top: 18px;">
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">05</span>
@@ -112,12 +148,12 @@
     <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; line-height: 1.75; background: #F4F4EE; border: 1px solid #E4E4DC; padding: 14px 18px; margin: 12px 0 0 0; color: #3A3A32; overflow-x: auto;">
 chat / replayer &rarr; router (shadow &middot; placement &middot; release &middot; /v1/costs)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; frontier API &nbsp;(incumbent &middot; customer key &middot; zero markup)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; docs-assist &rarr; MAX serve @ RunPod A100 &nbsp;80GB &nbsp;(NVIDIA &middot; act 1)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&rarr; docs-assist &rarr; MAX serve @ RunPod MI300X 192GB (AMD &middot; act 2)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; docs-assist &rarr; MAX 26.4 @ Modal A100 80GB (scale-to-zero &middot; act 1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&rarr; docs-assist &rarr; MAX 26.4 @ AMD MI300X &nbsp;(act 2 &middot; awaiting healthy capacity)<br>
 certifier: evals(sha256, custody) + shadow log + bench SLO &rarr; signed cert &rarr; gates promote<br>
-console (this site &rsquo;s DEMO tab) &larr; polls /v1/costs &middot; streams answers &middot; shows certificates
+console (BYOC &middot; LIVE tab) &larr; polls /v1/costs &middot; shows certificates &middot; REPLAY narrates recorded runs
     </div>
-    <p style="font-size: 13.5px; line-height: 1.62; margin: 12px 0 0 0;">Everything rides the existing reference implementation &mdash; the router, release engine, placement policy, and governance already in <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;">ai-native-pipeline</span>; the MVP adds the agent service, the shadow mirror, the certifier, the bench, and this console. Eight build days, two rented GPUs, roughly <strong>$30&ndash;90 of total GPU spend</strong>. BYOC is the same loop with the pools living in the customer&rsquo;s VPC via the repo&rsquo;s existing Terraform interface &mdash; the demo&rsquo;s <em>egress class: in-VPC</em> field is that future&rsquo;s seed.</p>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 12px 0 0 0;">Everything rides the existing reference implementation &mdash; the router, release engine, placement policy, and governance already in <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;">ai-native-pipeline</span>; the BYOC layer adds the agent service, the shadow mirror, the certifier, the bench, and this console. The whole control plane is itself hosted serverlessly (one Modal web app, scale-to-zero) so this site&rsquo;s console drives it live with nothing installed; total GPU spend across every run so far: <strong>under $5, per-second billed, ledger-capped at $40</strong>. BYOC is the same loop with the pools living in the customer&rsquo;s VPC via the repo&rsquo;s existing Terraform interface &mdash; the demo&rsquo;s <em>egress class: in-VPC</em> field is that future&rsquo;s seed.</p>
 
     <!-- Closing CTA -->
     <div style="margin: 30px 0 0 0; border-top: 3px solid #16160F; padding-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">

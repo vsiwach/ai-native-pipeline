@@ -1,0 +1,31 @@
+{
+  "kind": "modular-demo/bench-report",
+  "version": 1,
+  "pool": "a100-vllm",
+  "pool_usd_hr": 1.39,
+  "base_url": "https://e4op4slmxa6sqo-8000.proxy.runpod.net/v1",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "profile": "docs-agent",
+  "profile_def": {
+    "prompt_pad": 1800,
+    "max_tokens": 300,
+    "note": "RAG context + question -> cited answer (decode-moderate)"
+  },
+  "requests": 40,
+  "concurrency": 4,
+  "completed": 40,
+  "wall_s": 73.4,
+  "output_tok_s_aggregate": 164.0,
+  "usd_per_mtok": 2.354,
+  "p50_ttft_ms": 422.4,
+  "p95_ttft_ms": 2439.5,
+  "p99_ttft_ms": 2440.3,
+  "p50_tpot_ms": 22.4,
+  "p99_tpot_ms": 22.5,
+  "slo": {
+    "gate_ttft_ms": 800.0,
+    "pass": false
+  },
+  "measured_at": "2026-07-05T18:31:38Z",
+  "disclosure": "cost derived from measured tok/s x declared pool price; rerunnable"
+}

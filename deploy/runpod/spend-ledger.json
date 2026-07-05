@@ -60,6 +60,12 @@
       "start_ts": 1783286432.404193,
       "usd_per_hr": 2.19,
       "end_ts": 1783287312.6614919
+    },
+    {
+      "what": "runpod NVIDIA A100 80GB PCIe pod e4op4slmxa6sqo (vLLM comparison bench)",
+      "start_ts": 1783290297.912147,
+      "usd_per_hr": 1.39,
+      "end_ts": 1783290715.9059432
     }
   ]
 }

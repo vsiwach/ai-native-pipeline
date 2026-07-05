@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Certified Migration — Live Demo · Modular</title>
+<title>BYOC Certified Migration — Live · Modular</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#16160F;--panel:#1D1D15;--panel2:#2C2C24;--line:#3A3A32;--txt:#F4F4EE;--mut:#A8A89E;--dim:#8A8A80;--lime:#D5F26E;--ink:#16160F}
@@ -51,6 +51,12 @@ button{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;border-ra
 button.primary{background:var(--lime);color:var(--ink);border-color:var(--lime)}
 button:disabled{opacity:.4;cursor:not-allowed}
 .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:4px}
+.runstep{border-top:1px solid var(--line);padding:12px 0}
+.runstep:first-of-type{border-top:none;padding-top:4px}
+.runstep-head{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--mut);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.stepnum{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--lime);color:var(--ink);font-weight:700;font-size:11px}
+.runstep-body{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.runstep-body .note{flex:1 1 220px;margin:0}
 .foot{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);margin-left:auto}
 .note{font-size:11px;color:var(--dim);margin-top:14px;line-height:1.6}
 @media(max-width:900px){.grid,.two,.metrics{grid-template-columns:1fr}.stepper{grid-template-columns:repeat(2,1fr)}}
@@ -61,7 +67,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <header>
   <div>
     <div class="brand">MODULAR</div>
-    <h1>Certified migration — route: <span class="route">docs-assist</span></h1>
+    <h1>BYOC certified migration — route: <span class="route">docs-assist</span></h1>
   </div>
   <div class="tag" id="mode-tag">F1.2 · F1.3 · F0.2 · F0.4</div>
 </header>
@@ -86,27 +92,39 @@ button:disabled{opacity:.4;cursor:not-allowed}
   <div class="card">
     <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
     <div class="cert" id="cert">loading…</div>
+    <div class="note" id="cert-note">Grounding + rubric parity on the shadow log · p99 SLO from the bench report · ed25519-signed · verify offline with <span class="mono">tools/certify.py verify</span></div>
   </div>
-  <div class="card">
-    <h3>ACTIONS</h3>
-    <div class="actions">
-      <button class="primary" id="btn-promote" onclick="promote()">Promote route →</button>
-      <button id="btn-rollback" onclick="rollback()">↶ Rollback</button>
-      <button id="btn-load" onclick="toggleLoad()">▶ Generate load</button>
-    </div>
-    <div class="note" id="action-note">Promotion is gated on the certificate verdict. Rollback restores the previous pool instantly; the ledger records both. Generate load replays synthetic traffic through the router (2 rps · 2 min · mixed streaming) — the shadow log fills with zero humans typing.</div>
-  </div>
-</div>
+  <div class="card" id="run-card">
+    <h3>BYOC MIGRATION RUN <span class="pass" id="gpu-budget">—</span></h3>
 
-<div class="card" id="gpu-card" style="display:none">
-  <h3>GPU POOLS — rented per second, driven from here <span class="pass" id="gpu-budget">—</span></h3>
-  <div id="gpu-pods" class="note">no pods</div>
-  <div class="actions">
-    <button onclick="gpuLaunch('a100', this)">▲ Launch A100 (NVIDIA · MAX 26.4)</button>
-    <button onclick="gpuLaunch('mi300x', this)">▲ Launch MI300X (AMD · MAX 26.4)</button>
+    <div class="runstep" id="step-traffic">
+      <div class="runstep-head"><span class="stepnum">1</span> START TRAFFIC</div>
+      <div class="runstep-body">
+        <button class="primary" id="btn-load" onclick="toggleLoad()">▶ Start traffic</button>
+        <span class="note" id="step1-status">Replays the customer eval set through the router; the incumbent answers while every request is mirrored to the candidate.</span>
+      </div>
+    </div>
+
+    <div class="runstep" id="step-pool">
+      <div class="runstep-head"><span class="stepnum">2</span> GPU POOL — MAX runtime · scale-to-zero</div>
+      <div class="runstep-body">
+        <button class="primary" id="btn-pool" onclick="preparePool(this)">Prepare pool</button>
+        <span class="note" id="step2-status">no pool visible yet</span>
+      </div>
+      <div class="note mono" id="gpu-pods" style="display:none"></div>
+      <div class="note mono" id="gpu-jobs"></div>
+    </div>
+
+    <div class="runstep" id="step-certify">
+      <div class="runstep-head"><span class="stepnum">3</span> CERTIFY &amp; PROMOTE</div>
+      <div class="runstep-body">
+        <button id="btn-certify" onclick="certifyRun(this)">Certify</button>
+        <button class="primary" id="btn-promote" onclick="promote()" disabled>Promote route →</button>
+        <button id="btn-rollback" onclick="rollback()">↶ Rollback</button>
+      </div>
+      <div class="note" id="action-note">Promotion unlocks only on a PASS certificate — parity ≥ 90% on the customer's evals and p99 TTFT inside the SLO, signed. Rollback restores the incumbent instantly.</div>
+    </div>
   </div>
-  <div class="note">Flow per pool: wait READY → <b>Adopt as candidate</b> (shadow log rotates, cohort starts clean) → <b>Generate load</b> above (eval questions, verbatim) → <b>Bench</b> (measured $/Mtok at the actual $/hr) → <b>Certify</b> (0.90 parity gate; a pass relinks the cert above) → <b>Terminate</b>. The router holds the RunPod key and the spend ledger; this page never sees either.</div>
-  <div class="note mono" id="gpu-jobs"></div>
 </div>
 
 <p class="note">Unofficial demo built on public Modular materials · costs shown are measured (pool $/hr ÷ measured tok/s), never estimated · every artifact rerunnable: <span class="mono">./dev bench · tools/certify.py</span> · ledger: <span class="mono">/v1/costs</span></p>
@@ -194,14 +212,28 @@ function applyCosts(d){
   state.shadowed = d.routes?.['docs-assist']?.shadowed || state.shadowed;
 }
 async function loadCert(){
-  try{
-    const r = await fetch('certs/latest.json', {cache:'no-store'}); const c = await r.json();
-    state.parity = c.quality.parity;
-    renderCert({verdict:c.verdict, parity:c.quality.parity, gate:c.quality.gate,
-      eval_sha:c.eval_set.sha256.slice(0,8)+'…', config_sha:c.route_config.sha256.slice(0,8)+'…',
-      build:c.model_build, algo:c.signature_block.algo,
-      slo:`p99 TTFT ${c.slo?.measured?.p99_ttft_ms??'—'}ms ≤ ${c.slo?.gate_ttft_ms}ms`});
-  }catch(e){}
+  // prefer the LIVE router's newest cert (a cert minted this session shows
+  // immediately); fall back to the site's static copy (replay/mock)
+  let c = null, liveCert = false;
+  if(!MOCK && !REPLAY){
+    try{ const r = await fetch(ROUTER+'/v1/certs/latest', {cache:'no-store'});
+         if(r.ok){ c = await r.json(); liveCert = !c.error; } }catch(e){}
+  }
+  if(!c || c.error){
+    try{ c = await (await fetch('certs/latest.json', {cache:'no-store'})).json(); }
+    catch(e){ return; }
+  }
+  if(c.error) return;
+  state.parity = c.quality.parity;
+  // live mode: promotion is gated by a cert minted on THIS router — the
+  // site's baked cert is display-only reference, never a gate pass
+  const pass = c.verdict === 'PROMOTE_ELIGIBLE' && (liveCert || REPLAY || MOCK);
+  const promoteBtn = document.getElementById('btn-promote');
+  if(promoteBtn && !REPLAY) promoteBtn.disabled = !pass;
+  renderCert({verdict:c.verdict, parity:c.quality.parity, gate:c.quality.gate,
+    eval_sha:c.eval_set.sha256.slice(0,8)+'…', config_sha:c.route_config.sha256.slice(0,8)+'…',
+    build:c.model_build, algo:c.signature_block.algo,
+    slo:`p99 TTFT ${c.slo?.measured?.p99_ttft_ms??'—'}ms ≤ ${c.slo?.gate_ttft_ms}ms`});
 }
 async function loadLive(){
   if(liveFailed) return;
@@ -271,9 +303,14 @@ function renderLoad(s){
   loadRunning = !!s.running;
   const btn = document.getElementById('btn-load');
   btn.textContent = loadRunning
-    ? `■ Stop load · ${s.sent} sent · ${s.errors} err`
-    : (s.sent ? `▶ Generate load · last run ${s.sent} sent, ${s.errors} err`
-              : '▶ Generate load');
+    ? `■ Stop traffic · ${s.sent} sent · ${s.errors} err`
+    : (s.sent ? `▶ Start traffic` : '▶ Start traffic');
+  const st = document.getElementById('step1-status');
+  if(s.sent || loadRunning){
+    st.textContent = loadRunning
+      ? `running — ${s.sent} sent, ${s.errors} errors · mirrored requests become the certification cohort`
+      : `last run: ${s.sent} sent, ${s.errors} errors · ${state.shadowed||0} mirrored to the candidate`;
+  }
 }
 async function pollLoad(){
   if(MOCK) return;
@@ -281,9 +318,13 @@ async function pollLoad(){
   catch(e){}
 }
 
-// GPU pool ops — the router wraps RunPod server-side (/v1/dev/gpu); this
-// page only clicks. Money actions arm on first click, fire on the second.
+// GPU pool — the router wraps the providers server-side (/v1/dev/gpu);
+// this page only clicks. The BYOC run prefers the Modal pool (scale-to-
+// zero, self-managing); leftover RunPod pods render read-only with a
+// terminate control (arm on first click, fire on the second).
 const gpuArm = {};
+let gpuState = {pods: [], jobs: {}};
+let adoptedPool = null;
 function armTwice(key, btn, warn){
   if(gpuArm[key] && Date.now() - gpuArm[key] < 6000){ delete gpuArm[key]; return true; }
   gpuArm[key] = Date.now(); const prev = btn.textContent; btn.textContent = warn;
@@ -297,40 +338,99 @@ async function gpuPost(body){
   if(d.error) document.getElementById('gpu-jobs').textContent = d.error.message || JSON.stringify(d.error);
   return d;
 }
-async function gpuLaunch(kind, btn){
-  if(!armTwice('launch-'+kind, btn, 'rents a GPU by the second — click again')) return;
-  await gpuPost({action:'launch', kind}); pollGpu();
-}
 async function gpuAct(action, pod, btn){
   if(action==='terminate' && !armTwice('term-'+pod, btn, 'really terminate? click again')) return;
   await gpuPost({action, pod_id: pod}); pollGpu();
 }
-async function gpuCert(pool){ await gpuPost({action:'certify', pool}); pollGpu(); }
+function preferredPool(){
+  return gpuState.pods.find(p=>p.kind==='modal') || gpuState.pods[0] || null;
+}
 function renderGpu(d){
-  const card = document.getElementById('gpu-card');
-  if(!d.enabled){ card.style.display='none'; return; }
-  card.style.display='';
-  document.getElementById('gpu-budget').textContent =
+  gpuState = d.enabled ? d : {pods: [], jobs: {}};
+  if(d.budget) document.getElementById('gpu-budget').textContent =
     `ledger $${d.budget.spent_usd} / cap $${d.budget.cap_usd}`;
-  const noBtns = REPLAY ? 'disabled' : '';
-  document.getElementById('gpu-pods').innerHTML = d.pods.length ? d.pods.map(p=>`
-    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:8px 0">
-      <span class="mono">${p.kind.toUpperCase()} · ${p.gpu||''} · $${p.usd_hr}/hr · ${p.ready?'● READY':(p.uptime_s?'starting…':'provisioning…')}</span>
-      <span style="display:flex;gap:6px;flex-wrap:wrap">
-        <button onclick="gpuAct('adopt','${p.id}',this)" ${p.ready&&!REPLAY?'':'disabled'}>Adopt as candidate</button>
-        <button onclick="gpuAct('bench','${p.id}',this)" ${p.ready&&!REPLAY?'':'disabled'}>Bench</button>
-        <button onclick="gpuCert('${p.kind}')" ${noBtns}>Certify</button>
-        <button onclick="gpuAct('terminate','${p.id}',this)" ${noBtns}>✕ Terminate</button>
-      </span>
-    </div>`).join('') : 'no pods — launch one below';
+  const p = preferredPool();
+  const st = document.getElementById('step2-status');
+  if(!d.enabled){ st.textContent = 'GPU ops not enabled on this router'; }
+  else if(!p){ st.textContent = 'no pool registered'; }
+  else if(!adoptedPool){
+    st.textContent = `${p.gpu} · $${p.usd_hr}/hr · ${p.ready ? '● READY' : 'cold — Prepare pool wakes it (first wake can take minutes)'}`;
+  }
+  // leftover non-Modal pods: read-only rows + terminate (no launch surface)
+  const others = (d.pods||[]).filter(x=>x.kind!=='modal');
+  const podsEl = document.getElementById('gpu-pods');
+  podsEl.style.display = others.length ? '' : 'none';
+  podsEl.innerHTML = others.map(x=>`
+    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:6px 0">
+      <span>${x.kind.toUpperCase()} · ${x.gpu||''} · $${x.usd_hr}/hr · ${x.ready?'● READY':'not serving'}</span>
+      <button onclick="gpuAct('terminate','${x.id}',this)" ${REPLAY?'disabled':''}>✕ Terminate</button>
+    </div>`).join('');
   const jobs = Object.values(d.jobs||{});
   document.getElementById('gpu-jobs').innerHTML = jobs.map(j=>
     `${j.name}: ${j.running?'running':'exit '+j.rc} · ${j.elapsed_s}s<br>` +
-    (j.tail||[]).slice(-3).map(t=>t.replace(/</g,'&lt;')).join('<br>')).join('<hr>');
+    (j.tail||[]).slice(-2).map(t=>t.replace(/</g,'&lt;')).join('<br>')).join('<hr>');
 }
 async function pollGpu(){
   if(MOCK || REPLAY) return;
   try{ renderGpu(await (await fetch(ROUTER+'/v1/dev/gpu')).json()); }catch(e){}
+}
+
+// STEP 2 — one button: wake if cold, adopt as candidate, bench. The pool's
+// measured $/Mtok and p99 TTFT land on its card via /v1/costs.
+async function preparePool(btn){
+  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
+  btn.disabled = true;
+  const st = document.getElementById('step2-status');
+  try{
+    let p = preferredPool();
+    if(!p){ st.textContent = 'no pool registered on the router'; btn.disabled=false; return; }
+    let waited = 0;
+    while(!p.ready && waited < 720){
+      st.textContent = `waking ${p.gpu} — scale-from-zero, ${waited}s (first wake can take ~8 min)…`;
+      // the readiness probe itself nudges the provider awake
+      await new Promise(r=>setTimeout(r,15000)); waited += 15;
+      await pollGpu(); p = preferredPool();
+    }
+    if(!p.ready){ st.textContent = 'pool never became ready — try again'; btn.disabled=false; return; }
+    st.textContent = 'adopting as shadow candidate (cohort log rotates)…';
+    await gpuPost({action:'adopt', pod_id: p.id});
+    adoptedPool = p;
+    st.textContent = 'benchmarking — measured $/Mtok at the declared $/hr…';
+    await gpuPost({action:'bench', pod_id: p.id});
+    const done = await pollJob('bench', 600);
+    st.textContent = done && done.rc === 0
+      ? `pool ready · adopted + benched (${(done.tail||[]).slice(-1)[0]||''})`.slice(0,140)
+      : 'bench did not finish cleanly — see job tail below';
+    btn.textContent = '✓ Pool prepared';
+  }catch(e){ st.textContent = 'prepare failed: '+e; btn.disabled=false; }
+}
+async function pollJob(name, timeout_s){
+  const t0 = Date.now();
+  while((Date.now()-t0)/1000 < timeout_s){
+    await new Promise(r=>setTimeout(r,5000));
+    await pollGpu();
+    const j = (gpuState.jobs||{})[name];
+    if(j && !j.running) return j;
+  }
+  return null;
+}
+
+// STEP 3 — certify against the adopted pool; a PASS unlocks Promote.
+async function certifyRun(btn){
+  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
+  const p = adoptedPool || preferredPool();
+  if(!p){ return; }
+  btn.disabled = true;
+  document.getElementById('action-note').textContent =
+    'Certifying: grounding + rubric parity on the mirrored cohort, p99 SLO from the bench report, ed25519 signature…';
+  await gpuPost({action:'certify', pool: p.kind});
+  const done = await pollJob('certify', 300);
+  await loadCert();
+  document.getElementById('action-note').textContent = done && done.rc === 0
+    ? 'Certificate PASS — promotion unlocked. Promote swaps the route to the GPU candidate; rollback stays armed.'
+    : 'Certificate HOLD — the gate refused (parity or SLO). Inspect the job tail; grow the traffic cohort and retry.';
+  btn.disabled = false;
+  btn.textContent = 'Re-certify';
 }
 
 // REPLAY: play a RECORDED real run (tools/record_console.py trace) through
@@ -355,7 +455,7 @@ async function runReplay(){
   const capEl = document.getElementById('replay-caption');
   if(captions.length) capEl.style.display='';
   await loadCert();
-  for (const id of ['btn-load','btn-promote','btn-rollback']){
+  for (const id of ['btn-load','btn-promote','btn-rollback','btn-pool','btn-certify']){
     const b = document.getElementById(id);
     b.disabled = true;
     b.title = 'Replay of a recorded run — controls need a live router (?router=<url>)';

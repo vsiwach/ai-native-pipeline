@@ -741,6 +741,18 @@ def get_app(registry_path: Path | None = None,
             return JSONResponse(status_code=409, content=result)
         return result
 
+    @app.get("/v1/certs/latest")
+    def latest_cert():
+        """Newest signed certification record. The console prefers this
+        over its static copy so a cert minted on a hosted stack shows up
+        without a site redeploy."""
+        certs_dir = Path(os.environ.get("CERTS_DIR", "certs"))
+        certs = sorted(certs_dir.glob("*.cert.json"),
+                       key=lambda p: p.stat().st_mtime)
+        if not certs:
+            return _error(404, "no_certs", "no certification record yet")
+        return JSONResponse(content=json.loads(certs[-1].read_text()))
+
     @app.get("/v1/events")
     def events(limit: int = 100, kind: str | None = None):
         return {"events": state.events.recent(limit, kind),
