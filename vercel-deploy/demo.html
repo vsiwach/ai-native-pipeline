@@ -47,16 +47,6 @@ h1 .route{font-family:'IBM Plex Mono',monospace;color:var(--lime)}
 .metric .l{font-size:10.5px;color:var(--dim)}
 .metric .n{font-family:'IBM Plex Mono',monospace;font-size:19px;color:var(--txt);margin-top:3px}
 .metric .n.lime{color:var(--lime)}
-.chat{display:flex;flex-direction:column;height:460px}
-.log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px}
-.msg{max-width:92%;border-radius:10px;padding:9px 12px;font-size:13.5px;line-height:1.55}
-.msg.user{align-self:flex-end;background:var(--panel2);border:1px solid var(--line)}
-.msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
-.msg .chip{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);margin-top:7px;border-top:1px solid var(--line);padding-top:6px}
-.msg .chip .pool-a100{color:#8fd4a8}.msg .chip .pool-mi300x{color:#f0a882}.msg .chip .pool-frontier{color:var(--mut)}
-.inp{display:flex;gap:8px;margin-top:10px}
-.inp input{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-family:'Archivo',sans-serif;font-size:13.5px;padding:10px 12px;outline:none}
-.inp input:focus{border-color:var(--lime)}
 button{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--mut)}
 button.primary{background:var(--lime);color:var(--ink);border-color:var(--lime)}
 button:disabled{opacity:.4;cursor:not-allowed}
@@ -88,28 +78,18 @@ button:disabled{opacity:.4;cursor:not-allowed}
 <div class="metrics" id="metrics"></div>
 
 <div class="two">
-  <div class="card chat">
-    <h3>ASK THE AGENT — answers grounded in Modular's public docs</h3>
-    <div class="log" id="log"></div>
-    <div class="inp">
-      <input id="q" placeholder="e.g. What license is the Mojo compiler under?" onkeydown="if(event.key==='Enter')ask()">
-      <button class="primary" onclick="ask()">Ask</button>
-    </div>
+  <div class="card">
+    <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
+    <div class="cert" id="cert">loading…</div>
   </div>
-  <div>
-    <div class="card">
-      <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
-      <div class="cert" id="cert">loading…</div>
+  <div class="card">
+    <h3>ACTIONS</h3>
+    <div class="actions">
+      <button class="primary" id="btn-promote" onclick="promote()">Promote route →</button>
+      <button id="btn-rollback" onclick="rollback()">↶ Rollback</button>
+      <button id="btn-load" onclick="toggleLoad()">▶ Generate load</button>
     </div>
-    <div class="card">
-      <h3>ACTIONS</h3>
-      <div class="actions">
-        <button class="primary" id="btn-promote" onclick="promote()">Promote route →</button>
-        <button id="btn-rollback" onclick="rollback()">↶ Rollback</button>
-        <button id="btn-load" onclick="toggleLoad()">▶ Generate load</button>
-      </div>
-      <div class="note" id="action-note">Promotion is gated on the certificate verdict. Rollback restores the previous pool instantly; the ledger records both. Generate load replays synthetic traffic through the router (2 rps · 2 min · mixed streaming) — the shadow log fills with zero humans typing.</div>
-    </div>
+    <div class="note" id="action-note">Promotion is gated on the certificate verdict. Rollback restores the previous pool instantly; the ledger records both. Generate load replays synthetic traffic through the router (2 rps · 2 min · mixed streaming) — the shadow log fills with zero humans typing.</div>
   </div>
 </div>
 
@@ -138,10 +118,6 @@ const MOCK_DATA = {
     eval_sha:'9f3ac41d…', config_sha:'71bb08e2…', build:'qwen2.5-14b@max-26.4',
     algo:'ed25519', slo:'p99 TTFT 412ms ≤ 800ms' },
   shadowed: 5124,
-  answers: {
-    default: {text:'The MAX framework and serving layer are open source under the Apache 2.0 license [1], and the Mojo compiler ships open source in fall 2026 [2]. You can self-host single-node serving free forever; fleet operations (Mammoth) are the commercial layer [3].', cites:'docs.modular.com/max · /mojo/faq · /mammoth'},
-    kv: {text:'KV-aware routing scores each candidate replica on tokens-already-cached minus queue depth minus pool cost tier [1]; trajectory affinity keeps an agent loop pinned to its warm replica [2].', cites:'docs.modular.com/mammoth'},
-  }
 };
 
 function fmt(n, d=2){ return n==null ? '—' : Number(n).toFixed(d); }
@@ -222,49 +198,11 @@ function loadMock(){
   render();
 }
 
-function addMsg(cls, text){ const el=document.createElement('div'); el.className='msg '+cls; el.textContent=text; document.getElementById('log').appendChild(el); el.scrollIntoView(); return el; }
-
-async function ask(){
-  const q = document.getElementById('q').value.trim(); if(!q) return;
-  document.getElementById('q').value=''; addMsg('user', q);
-  const bot = addMsg('bot',''); const t0 = performance.now();
-  if(MOCK){
-    const a = /kv|rout/i.test(q) ? MOCK_DATA.answers.kv : MOCK_DATA.answers.default;
-    let i=0; const words=a.text.split(' ');
-    await new Promise(res=>{ const iv=setInterval(()=>{ bot.textContent=words.slice(0,++i).join(' '); if(i>=words.length){clearInterval(iv);res();} }, 30); });
-    chip(bot, t0, a.cites); return;
-  }
-  try{
-    const r = await fetch(ROUTER+'/v1/chat/completions?model=docs-assist', {method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({messages:[{role:'user',content:q}], max_tokens:300, stream:true})});
-    const cites = r.headers.get('X-Citations');
-    const reader = r.body.getReader(); const dec = new TextDecoder(); let buf='';
-    while(true){ const {done,value} = await reader.read(); if(done) break;
-      buf += dec.decode(value,{stream:true});
-      for(const line of buf.split('\n')){ if(!line.startsWith('data:')||line.includes('[DONE]')) continue;
-        try{ const d=JSON.parse(line.slice(5)); bot.textContent += d.choices?.[0]?.delta?.content||''; }catch(e){} }
-      buf = buf.slice(buf.lastIndexOf('\n')+1);
-    }
-    let citeStr=''; try{ citeStr=(JSON.parse(cites)||[]).map(c=>c.url.replace('https://','')).join(' · ');}catch(e){}
-    chip(bot, t0, citeStr);
-  }catch(e){ bot.textContent = 'router unreachable — is '+ROUTER+' up? (or use ?mock=true)'; }
-}
-
-function chip(el, t0, cites){
-  const ms = Math.round(performance.now()-t0);
-  const s = state.serving, p = state.pools[s] || {cls:'', usd_mtok:null};
-  const cost = p.usd_mtok ? '$'+(p.usd_mtok*300/1e6).toFixed(6) : '—';
-  const c = document.createElement('span'); c.className='chip';
-  c.innerHTML = `served by <span class="${p.cls}">${s.toUpperCase()}</span> · ${ms}ms · ~${cost}/answer` + (cites?`<br>sources: ${cites}`:'');
-  el.appendChild(c);
-}
-
 function promote(){
   if(MOCK || true){
     state.serving = state.serving==='frontier' ? 'a100' : 'mi300x';
     state.phase = 'rollback';
-    document.getElementById('action-note').textContent = 'Promoted. Next answers stream from '+state.serving.toUpperCase()+'. Rollback stays armed for the life of the route.';
+    document.getElementById('action-note').textContent = 'Promoted. Traffic now serves from '+state.serving.toUpperCase()+'. Rollback stays armed for the life of the route.';
     if(!MOCK) fetch(ROUTER+'/v1/routes/docs-assist/promote',{method:'POST'}).catch(()=>{});
     render();
   }
