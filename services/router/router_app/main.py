@@ -777,10 +777,25 @@ def get_app(registry_path: Path | None = None,
 
     @app.get("/v1/costs")
     def costs():
+        from router_app.costs import bench_pools
         snap = state.ledger.snapshot()
         snap["cache"] = {"hits": state.cache.hits,
                          "misses": state.cache.misses,
                          "hit_rate": round(state.cache.hit_rate, 4)}
+        # Phase 6 additions (what vercel-deploy/demo.html polls): measured
+        # per-pool economics from bench reports + per-route serving/shadow
+        # counters. Both additive — existing consumers keep their shape.
+        snap["pools"] = bench_pools(
+            os.environ.get("BENCH_REPORTS_DIR", "bench-reports"))
+        routes = {}
+        for model, endpoints in state.policy["endpoints"].items():
+            mirror = state.shadows.get(model)
+            head = endpoints[0] if endpoints else {}
+            routes[model] = {
+                "serving": head.get("id", head.get("url")),
+                "shadowed": mirror.submitted if mirror else 0,
+            }
+        snap["routes"] = routes
         return snap
 
     @app.get("/devboard")

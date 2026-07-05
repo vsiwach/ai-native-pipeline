@@ -5,9 +5,40 @@ Two record paths share one ledger:
   - record()      legacy predict backends — flat per-request cost + latency
   - record_llm()  LLM backends — cache hit/miss, TTFT, tokens/sec, token cost
 The snapshot reports both; LLM-only fields are None for predict backends.
+
+bench_pools() is the measured-price surface (Phase 6): per-pool $/Mtok and
+p99 TTFT read straight from tools/bench.py reports — never estimated here.
 """
 
+import json
 import threading
+from pathlib import Path
+
+
+def bench_pools(reports_dir: str | Path = "bench-reports") -> list[dict]:
+    """Latest bench report per pool from `<reports_dir>/*.json`, newest by
+    embedded measured_at. Malformed or foreign files are skipped — this
+    surface only repeats what tools/bench.py measured."""
+    newest: dict[str, dict] = {}
+    for p in sorted(Path(reports_dir).glob("*.json")):
+        try:
+            r = json.loads(p.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if r.get("kind") != "modular-demo/bench-report" or "pool" not in r:
+            continue
+        prev = newest.get(r["pool"])
+        if prev is None or (r.get("measured_at") or "") >= \
+                (prev.get("measured_at") or ""):
+            newest[r["pool"]] = r
+    return [{
+        "id": r["pool"],
+        "usd_per_mtok": r.get("usd_per_mtok"),
+        "p99_ttft_ms": r.get("p99_ttft_ms"),
+        "p99_tpot_ms": r.get("p99_tpot_ms"),
+        "pool_usd_hr": r.get("pool_usd_hr"),
+        "measured_at": r.get("measured_at"),
+    } for r in sorted(newest.values(), key=lambda r: r["pool"])]
 
 
 def _avg(total, n):
