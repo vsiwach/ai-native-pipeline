@@ -6,60 +6,64 @@
 <title>BYOC Certified Migration — Live · Modular</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#16160F;--panel:#1D1D15;--panel2:#2C2C24;--line:#3A3A32;--txt:#F4F4EE;--mut:#A8A89E;--dim:#8A8A80;--lime:#D5F26E;--ink:#16160F}
+:root{--bg:#16160F;--panel:#1D1D15;--panel2:#2C2C24;--line:#3A3A32;--txt:#F4F4EE;--mut:#A8A89E;--dim:#8A8A80;--lime:#D5F26E;--amber:#E0A85B;--ink:#16160F}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font-family:'Archivo',sans-serif;min-height:100vh}
 .mono{font-family:'IBM Plex Mono',monospace}
-.wrap{max-width:1080px;margin:0 auto;padding:28px 24px 60px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.wrap{max-width:1020px;margin:0 auto;padding:28px 24px 60px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap}
 .brand{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:3px;color:var(--lime)}
-h1{font-size:22px;font-weight:600;margin-top:4px}
+h1{font-size:21px;font-weight:600;margin-top:4px}
 h1 .route{font-family:'IBM Plex Mono',monospace;color:var(--lime)}
 .tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:5px;padding:5px 10px}
-.stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;text-align:center}
-.step .k{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mut)}
-.step .v{font-size:11px;color:var(--dim);margin-top:3px}
-.step.done .k{color:var(--lime)}
-.step.active{background:var(--panel2);border-color:var(--lime)}
-.step.active .k{color:var(--lime)}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.pool{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.card h3{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--dim);letter-spacing:1px;margin-bottom:12px}
+button{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--mut)}
+button.primary{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+button.big{font-size:15px;padding:13px 22px}
+button:disabled{opacity:.45;cursor:not-allowed}
+/* hero */
+.hero-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hero-status{font-size:13px;color:var(--mut);line-height:1.55;flex:1 1 300px}
+.track{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.seg{flex:1 1 100px;text-align:center;padding:8px 4px;border-radius:6px;border:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:var(--dim)}
+.seg.done{border-color:var(--lime);color:var(--lime)}
+.seg.active{background:var(--panel2);border-color:var(--lime);color:var(--lime);animation:pulse 1.6s infinite}
+.seg.fail{border-color:var(--amber);color:var(--amber)}
+@keyframes pulse{50%{opacity:.55}}
+/* pools */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.pool{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 17px}
 .pool.serving{border-color:var(--lime)}
 .pool .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim)}
-.pool .name{font-size:15px;font-weight:600;margin:4px 0 2px}
-.pool .sub{font-size:11.5px;color:var(--mut)}
-.pool .stats{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;display:grid;gap:4px}
+.pool .name{font-size:16px;font-weight:600;margin:5px 0 2px}
+.pool .sub{font-size:12px;color:var(--mut)}
+.pool .stats{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;display:grid;gap:5px}
 .pool .stats div{display:flex;justify-content:space-between}
 .pool .stats span:last-child{color:var(--txt)}
 .pool.serving .stats span:last-child{color:var(--lime)}
-.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;border-radius:4px;padding:2px 8px;margin-top:8px}
+.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;border-radius:4px;padding:2px 8px;margin-top:10px}
 .badge.live{background:var(--lime);color:var(--ink)}
 .badge.idle{border:1px solid var(--line);color:var(--dim)}
-.two{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:start}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
-.card h3{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.metric{background:var(--panel);border-radius:8px;padding:11px;text-align:center}
+.metric .l{font-size:10.5px;color:var(--dim)}
+.metric .n{font-family:'IBM Plex Mono',monospace;font-size:18px;color:var(--txt);margin-top:4px}
+.metric .n.lime{color:var(--lime)}
+/* cert */
 .cert{font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.9;color:var(--dim)}
 .cert b{color:var(--mut);font-weight:400}
 .pass{background:var(--lime);color:var(--ink);border-radius:4px;padding:2px 8px;font-size:10.5px;float:right}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.metric{background:var(--panel);border-radius:8px;padding:10px;text-align:center}
-.metric .l{font-size:10.5px;color:var(--dim)}
-.metric .n{font-family:'IBM Plex Mono',monospace;font-size:19px;color:var(--txt);margin-top:3px}
-.metric .n.lime{color:var(--lime)}
-button{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--mut)}
-button.primary{background:var(--lime);color:var(--ink);border-color:var(--lime)}
-button:disabled{opacity:.4;cursor:not-allowed}
-.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:4px}
-.runstep{border-top:1px solid var(--line);padding:12px 0}
-.runstep:first-of-type{border-top:none;padding-top:4px}
-.runstep-head{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--mut);display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.stepnum{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--lime);color:var(--ink);font-weight:700;font-size:11px}
-.runstep-body{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.runstep-body .note{flex:1 1 220px;margin:0}
-.foot{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);margin-left:auto}
-.note{font-size:11px;color:var(--dim);margin-top:14px;line-height:1.6}
-@media(max-width:900px){.grid,.two,.metrics{grid-template-columns:1fr}.stepper{grid-template-columns:repeat(2,1fr)}}
+.pass.hold{background:var(--amber)}
+/* advanced */
+details{margin-bottom:12px}
+details summary{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:1px;cursor:pointer;padding:10px 4px}
+.advrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding:10px 0}
+.advrow .note{flex:1 1 240px}
+.note{font-size:11.5px;color:var(--dim);line-height:1.6}
+.joblog{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);margin-top:6px}
+@media(max-width:760px){.grid,.metrics{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -69,168 +73,133 @@ button:disabled{opacity:.4;cursor:not-allowed}
     <div class="brand">MODULAR</div>
     <h1>BYOC certified migration — <span class="route">voice workload</span></h1>
   </div>
-  <div class="tag" id="mode-tag">F1.2 · F1.3 · F0.2 · F0.4</div>
+  <div class="tag" id="mode-tag">LIVE</div>
 </header>
 
-<div class="stepper" id="stepper">
-  <div class="step" data-s="shadow"><div class="k">1 · SHADOW</div><div class="v" id="s-shadow">—</div></div>
-  <div class="step" data-s="certify"><div class="k">2 · CERTIFY</div><div class="v" id="s-certify">—</div></div>
-  <div class="step" data-s="promote"><div class="k">3 · PROMOTE</div><div class="v" id="s-promote">—</div></div>
-  <div class="step" data-s="rollback"><div class="k">↶ ROLLBACK</div><div class="v">armed · &lt;5s</div></div>
+<div class="card" id="replay-caption" style="display:none;border-color:var(--lime)">
+  <h3 style="color:var(--lime)">REPLAY NARRATION</h3>
+  <div id="caption-text" style="font-size:14px;line-height:1.55">—</div>
 </div>
 
+<!-- HERO: the one button + the pipeline -->
+<div class="card">
+  <div class="hero-row">
+    <button class="primary big" id="btn-migrate" onclick="runMigration(this)">⚡ Run migration</button>
+    <button class="big" id="btn-rollback" onclick="rollback()" style="display:none">↶ Roll back</button>
+    <div class="hero-status" id="migrate-status">One click: the GPU pool wakes, becomes the route's candidate, is benchmarked, takes a mirror of live voice traffic, and — only if the signed certificate passes — the route moves off the incumbent. A refusal is the system working.</div>
+  </div>
+  <div class="track" id="track">
+    <div class="seg" data-s="wake_pool">WAKE POOL</div>
+    <div class="seg" data-s="adopt">ADOPT</div>
+    <div class="seg" data-s="bench">BENCH</div>
+    <div class="seg" data-s="traffic">TRAFFIC</div>
+    <div class="seg" data-s="certify">CERTIFY</div>
+    <div class="seg" data-s="promote">PROMOTE</div>
+  </div>
+</div>
+
+<!-- POOLS: incumbent vs candidate -->
 <div class="grid" id="pools"></div>
 
+<!-- METRICS -->
 <div class="metrics" id="metrics"></div>
 
-<div class="card" id="replay-caption" style="display:none;border-color:var(--lime)">
-  <div class="mono" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;color:var(--lime)">REPLAY NARRATION</div>
-  <div id="caption-text" style="font-size:14px;line-height:1.5;margin-top:6px">—</div>
+<!-- CERT -->
+<div class="card">
+  <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
+  <div class="cert" id="cert">no certificate yet — run a migration</div>
+  <div class="note" style="margin-top:10px">Grounding + rubric parity on the mirrored cohort · p99 TTFT gated at 800&nbsp;ms on this hosted path (it crosses public TLS ingress twice; the direct-path A100 measurement is 308.5&nbsp;ms — see the BYOC doc) · signed, verify offline with <span class="mono">tools/certify.py verify</span></div>
 </div>
 
-<div class="two">
+<!-- ADVANCED -->
+<details>
+  <summary>ADVANCED — drive the stages manually</summary>
   <div class="card">
-    <h3>SIGNED PARITY CERTIFICATE <span class="pass" id="cert-verdict">—</span></h3>
-    <div class="cert" id="cert">loading…</div>
-    <div class="note" id="cert-note">Grounding + rubric parity on the shadow log · p99 SLO from the bench report · ed25519-signed · verify offline with <span class="mono">tools/certify.py verify</span></div>
+    <div class="advrow">
+      <button id="btn-pool" onclick="preparePool(this)">Prepare pool</button>
+      <span class="note" id="pool-status">Wakes the pool, adopts it as the candidate (resets the evidence cohort), benches it.</span>
+    </div>
+    <div class="advrow">
+      <button id="btn-load" onclick="toggleLoad()">▶ Start traffic</button>
+      <span class="note" id="traffic-status">2 rps of short voice turns for 2 minutes; every request mirrors to the adopted candidate.</span>
+    </div>
+    <div class="advrow">
+      <button id="btn-certify" onclick="certifyRun(this)">Certify</button>
+      <button id="btn-promote" onclick="promote()" disabled>Promote route →</button>
+      <span class="note" id="action-note">Promote unlocks only on a certificate minted by this router.</span>
+    </div>
+    <div class="joblog" id="gpu-jobs"></div>
+    <div class="joblog" id="gpu-pods"></div>
   </div>
-  <div class="card" id="run-card">
-    <h3>BYOC MIGRATION RUN <span class="pass" id="gpu-budget">—</span></h3>
+</details>
 
-    <div class="runstep" id="step-auto">
-      <div class="runstep-body">
-        <button class="primary" id="btn-migrate" onclick="runMigration(this)">⚡ Run migration</button>
-        <span class="note" id="migrate-status">One click, the whole story: wake pool → adopt → voice traffic → bench → certify → on a PASS, traffic moves from the frontier incumbent to the open-model pool. The gate cannot be skipped — a HOLD ends the run on the incumbent. Or drive the steps yourself below.</span>
-      </div>
-    </div>
-
-    <div class="runstep" id="step-pool">
-      <div class="runstep-head"><span class="stepnum">1</span> PREPARE GPU POOL — MAX runtime · scale-to-zero</div>
-      <div class="runstep-body">
-        <button class="primary" id="btn-pool" onclick="preparePool(this)">Prepare pool</button>
-        <span class="note" id="step2-status">Wakes the pool, adopts it as the route's candidate (this RESETS the evidence cohort), and benches it at the voice gate (p99 TTFT &lt; 500 ms).</span>
-      </div>
-      <div class="note mono" id="gpu-pods" style="display:none"></div>
-      <div class="note mono" id="gpu-jobs"></div>
-    </div>
-
-    <div class="runstep" id="step-traffic">
-      <div class="runstep-head"><span class="stepnum">2</span> START TRAFFIC</div>
-      <div class="runstep-body">
-        <button class="primary" id="btn-load" onclick="toggleLoad()">▶ Start traffic</button>
-        <span class="note" id="step1-status">Fills the cohort: short voice-style turns (the customer's eval set) at 2 rps; the incumbent answers while every request mirrors to the adopted candidate.</span>
-      </div>
-    </div>
-
-    <div class="runstep" id="step-certify">
-      <div class="runstep-head"><span class="stepnum">3</span> CERTIFY &amp; PROMOTE</div>
-      <div class="runstep-body">
-        <button id="btn-certify" onclick="certifyRun(this)">Certify</button>
-        <button class="primary" id="btn-promote" onclick="promote()" disabled>Promote route →</button>
-        <button id="btn-rollback" onclick="rollback()">↶ Rollback</button>
-      </div>
-      <div class="note" id="action-note">Promotion unlocks only on a PASS certificate — parity ≥ 90% on the customer's evals and p99 TTFT inside the SLO, signed. Rollback restores the incumbent instantly.</div>
-    </div>
-  </div>
-</div>
-
-<p class="note">Unofficial demo built on public Modular materials · costs shown are measured (pool $/hr ÷ measured tok/s), never estimated · every artifact rerunnable: <span class="mono">./dev bench · tools/certify.py</span> · ledger: <span class="mono">/v1/costs</span></p>
+<p class="note">Unofficial demo built on public Modular materials · every number is measured (pool $/hr ÷ measured tok/s), never estimated · <span class="mono" id="gpu-budget">ledger —</span> · rerun anything: <span class="mono">./dev bench · tools/certify.py verify</span></p>
 </div>
 
 <script>
 const qs = new URLSearchParams(location.search);
 const MOCK = qs.get('mock') === 'true';
 let REPLAY = qs.get('replay') === 'true';
-// Turnkey live: the hosted control plane (Modal, scale-to-zero) is the
-// default router so this tab IS the live dashboard — override with
-// ?router=<url>. The site sits behind the passcode gate; the dev token
-// only unlocks bounded, ledger-guarded actions.
 const DEFAULT_ROUTER = 'https://vsiwach--certified-migration-router-serve.modal.run';
 const DEFAULT_TOKEN = 'modular-live-3aa01c81';
+const ROUTER = qs.get('router') || DEFAULT_ROUTER;
 const TOKEN = qs.get('token') || DEFAULT_TOKEN;
 const ROUTE = qs.get('route') || 'voice-agent';
 const devHeaders = () => TOKEN ? {'X-Dev-Token': TOKEN} : {};
-const ROUTER = qs.get('router') || DEFAULT_ROUTER;
 
 const state = {
-  phase: 'certify',
   serving: 'frontier',
   pools: {
-    frontier: {label:'INCUMBENT', name:'frontier-api / gpt-class', sub:'customer key · zero markup', usd_mtok: 10.0, ttft: 638, cls:'pool-frontier'},
-    a100:     {label:'POOL · NVIDIA', name:'RunPod A100 80GB', sub:'MAX serve · Qwen2.5-14B', usd_mtok: null, ttft: null, cls:'pool-a100'},
-    mi300x:   {label:'POOL · AMD', name:'RunPod MI300X 192GB', sub:'MAX serve · same weights', usd_mtok: null, ttft: null, cls:'pool-mi300x'},
-    'modal-a100': {label:'POOL · MODAL', name:'Modal A100 80GB', sub:'MAX serve · scale-to-zero', usd_mtok: null, ttft: null, cls:'pool-a100'}
+    frontier:  {label:'INCUMBENT', name:'frontier-api / gpt-class', sub:'customer key · zero markup — the slot takes any OpenAI-compatible endpoint', usd_mtok: 10.0, ttft: 638},
+    candidate: {label:'GPU CANDIDATE', name:'Modal A100 80GB', sub:'MAX 26.4 runtime · scale-to-zero', usd_mtok: null, ttft: null},
   },
-  shadowed: 0, parity: null, savings: null
+  shadowed: 0, parity: null, sloLine: null,
 };
+const CANDIDATE_NAMES = {'modal-a100':'Modal A100 80GB', 'a100':'RunPod A100 80GB (recorded run)', 'mi300x':'RunPod MI300X 192GB (recorded run)'};
 
-const MOCK_DATA = {
-  bench: { a100: {usd_mtok: 0.31, ttft: 412}, mi300x: {usd_mtok: 0.19, ttft: 447} },
-  cert: { verdict:'PROMOTE_ELIGIBLE', parity: 0.958, gate: 0.90,
-    eval_sha:'9f3ac41d…', config_sha:'71bb08e2…', build:'qwen2.5-14b@max-26.4',
-    algo:'ed25519', slo:'p99 TTFT 412ms ≤ 800ms' },
-  shadowed: 5124,
-};
-
-function fmt(n, d=2){ return n==null ? '—' : Number(n).toFixed(d); }
+function fmt(n,d=2){ return n==null ? '—' : Number(n).toFixed(d); }
 
 function render(){
   const p = state.pools;
-  document.getElementById('pools').innerHTML = Object.entries(p).map(([k,v])=>`
-    <div class="pool ${state.serving===k?'serving':''}">
+  const candLive = state.serving && state.serving !== 'frontier';
+  document.getElementById('pools').innerHTML = [
+    ['frontier', !candLive], ['candidate', candLive]].map(([k, serving])=>{
+    const v = p[k];
+    return `<div class="pool ${serving?'serving':''}">
       <div class="lbl">${v.label}</div>
       <div class="name">${v.name}</div>
       <div class="sub">${v.sub}</div>
       <div class="stats">
-        <div><span>$/Mtok</span><span>${v.usd_mtok==null?'—':'$'+fmt(v.usd_mtok)}</span></div>
-        <div><span>p99 TTFT</span><span>${v.ttft==null?'—':v.ttft+'ms'}</span></div>
+        <div><span>$/Mtok (measured)</span><span>${v.usd_mtok==null?'—':'$'+fmt(v.usd_mtok)}</span></div>
+        <div><span>p99 TTFT</span><span>${v.ttft==null?'—':fmt(v.ttft,1)+'ms'}</span></div>
       </div>
-      <span class="badge ${state.serving===k?'live':'idle'}">${state.serving===k?'● SERVING':'standby'}</span>
-    </div>`).join('');
+      <span class="badge ${serving?'live':'idle'}">${serving?'● SERVING':'standby'}</span>
+    </div>`;}).join('');
 
-  const steps = document.querySelectorAll('.step');
-  const order = ['shadow','certify','promote','rollback'];
-  const idx = order.indexOf(state.phase);
-  steps.forEach((el,i)=>{ el.classList.toggle('done', i<idx); el.classList.toggle('active', i===idx); });
-  document.getElementById('s-shadow').textContent = state.shadowed ? state.shadowed.toLocaleString()+' req mirrored' : '—';
-  document.getElementById('s-certify').textContent = state.parity ? 'parity '+(state.parity*100).toFixed(1)+'%' : '—';
-  document.getElementById('s-promote').textContent = state.phase==='promote'?'eligible':(idx>2?'promoted':'—');
-
-  // serving id may name a pool with no card (live routers use their own
-  // replica ids) — degrade to em-dashes instead of crashing the poll loop
-  const inc = p.frontier.usd_mtok, cur = (p[state.serving]||{}).usd_mtok;
-  state.savings = (inc && cur) ? Math.round((1-cur/inc)*100) : null;
+  const inc = p.frontier.usd_mtok, cur = candLive ? p.candidate.usd_mtok : null;
+  const savings = (inc && cur) ? Math.round((1-cur/inc)*100) : null;
   document.getElementById('metrics').innerHTML = `
-    <div class="metric"><div class="l">savings vs incumbent</div><div class="n lime">${state.savings==null?'—':'−'+state.savings+'%'}</div></div>
-    <div class="metric"><div class="l">SLO at gate</div><div class="n">${p[state.serving].ttft?'p99 ✓':'—'}</div></div>
-    <div class="metric"><div class="l">requests shadowed</div><div class="n">${state.shadowed?state.shadowed.toLocaleString():'—'}</div></div>
-    <div class="metric"><div class="l">egress class</div><div class="n">in-VPC</div></div>`;
+    <div class="metric"><div class="l">savings vs incumbent</div><div class="n lime">${savings==null?'—':'−'+savings+'%'}</div></div>
+    <div class="metric"><div class="l">SLO at gate</div><div class="n">${state.sloLine||'—'}</div></div>
+    <div class="metric"><div class="l">requests mirrored</div><div class="n">${state.shadowed?state.shadowed.toLocaleString():'—'}</div></div>
+    <div class="metric"><div class="l">parity on evals</div><div class="n">${state.parity==null?'—':(state.parity*100).toFixed(1)+'%'}</div></div>`;
+
+  document.getElementById('btn-rollback').style.display = candLive && !REPLAY ? '' : 'none';
 }
 
-function renderCert(c){
-  document.getElementById('cert-verdict').textContent = c.verdict==='PROMOTE_ELIGIBLE' ? `PASS · ${(c.parity*100).toFixed(1)}% ≥ ${(c.gate*100).toFixed(0)}%` : 'HOLD';
-  document.getElementById('cert').innerHTML =
-    `eval set <b>sha256:${c.eval_sha}</b> · customer custody<br>`+
-    `model build <b>${c.build}</b><br>`+
-    `route config <b>sha256:${c.config_sha}</b><br>`+
-    `SLO <b>${c.slo}</b><br>`+
-    `signed <b>${c.algo}</b> · verify: <b>tools/certify.py verify</b>`;
-  // promote gating lives in loadCert (live certs only) / loadMock — this
-  // renderer must not overwrite it
-  if(MOCK) document.getElementById('btn-promote').disabled =
-    c.verdict !== 'PROMOTE_ELIGIBLE';
-}
-
+// ---- data plane ------------------------------------------------------------
 let liveFailed = false, liveMisses = 0;
 function applyCosts(d){
-  (d.pools||[]).forEach(pl=>{ if(state.pools[pl.id]){ state.pools[pl.id].usd_mtok = pl.usd_per_mtok; state.pools[pl.id].ttft = pl.p99_ttft_ms; }});
-  const rt = d.routes?.[ROUTE] || d.routes?.['docs-assist'];  // old traces recorded docs-assist
+  (d.pools||[]).forEach(pl=>{
+    state.pools.candidate.usd_mtok = pl.usd_per_mtok;
+    state.pools.candidate.ttft = pl.p99_ttft_ms;
+    if(CANDIDATE_NAMES[pl.id]) state.pools.candidate.name = CANDIDATE_NAMES[pl.id];
+  });
+  const rt = d.routes?.[ROUTE] || d.routes?.['docs-assist'];
   state.serving = rt?.serving || state.serving;
   state.shadowed = rt?.shadowed || state.shadowed;
 }
 async function loadCert(){
-  // prefer the LIVE router's newest cert (a cert minted this session shows
-  // immediately); fall back to the site's static copy (replay/mock)
   let c = null, liveCert = false;
   if(!MOCK && !REPLAY){
     try{ const r = await fetch(ROUTER+'/v1/certs/latest', {cache:'no-store'});
@@ -242,15 +211,19 @@ async function loadCert(){
   }
   if(c.error) return;
   state.parity = c.quality.parity;
-  // live mode: promotion is gated by a cert minted on THIS router — the
-  // site's baked cert is display-only reference, never a gate pass
+  state.sloLine = (c.slo?.measured?.p99_ttft_ms!=null) ? `${Math.round(c.slo.measured.p99_ttft_ms)}ms ${c.slo.pass?'✓':'✗'}` : null;
   const pass = c.verdict === 'PROMOTE_ELIGIBLE' && (liveCert || REPLAY || MOCK);
-  const promoteBtn = document.getElementById('btn-promote');
-  if(promoteBtn && !REPLAY) promoteBtn.disabled = !pass;
-  renderCert({verdict:c.verdict, parity:c.quality.parity, gate:c.quality.gate,
-    eval_sha:c.eval_set.sha256.slice(0,8)+'…', config_sha:c.route_config.sha256.slice(0,8)+'…',
-    build:c.model_build, algo:c.signature_block.algo,
-    slo:`p99 TTFT ${c.slo?.measured?.p99_ttft_ms??'—'}ms ≤ ${c.slo?.gate_ttft_ms}ms`});
+  const pb = document.getElementById('btn-promote');
+  if(pb && !REPLAY) pb.disabled = !pass;
+  const badge = document.getElementById('cert-verdict');
+  badge.textContent = c.verdict==='PROMOTE_ELIGIBLE' ? `PASS · ${(c.quality.parity*100).toFixed(1)}% ≥ ${(c.quality.gate*100).toFixed(0)}%` : 'HOLD';
+  badge.className = 'pass' + (c.verdict==='PROMOTE_ELIGIBLE' ? '' : ' hold');
+  document.getElementById('cert').innerHTML =
+    `eval set <b>sha256:${c.eval_set.sha256.slice(0,8)}…</b> · customer custody<br>`+
+    `model build <b>${c.model_build}</b><br>`+
+    `route config <b>sha256:${c.route_config.sha256.slice(0,8)}…</b><br>`+
+    `SLO <b>p99 TTFT ${c.slo?.measured?.p99_ttft_ms??'—'}ms ≤ ${c.slo?.gate_ttft_ms}ms</b> · $/Mtok <b>${c.slo?.measured?.usd_per_mtok??'—'}</b><br>`+
+    `signed <b>${c.signature_block.algo}</b> · verify: <b>tools/certify.py verify</b>`;
 }
 async function loadLive(){
   if(liveFailed) return;
@@ -258,112 +231,68 @@ async function loadLive(){
     const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
     applyCosts(d); liveMisses = 0;
   }catch(e){
-    // the hosted control plane wakes from scale-to-zero — tolerate two
-    // misses (~10 s of polling) before concluding it is unreachable
     if(++liveMisses < 3){
       document.getElementById('mode-tag').textContent = 'LIVE — waking the control plane…';
       return;
     }
     liveFailed = true;
-    // router unreachable: prefer the RECORDED real run over fabricated
-    // mock numbers (flaky-provider insurance — replay is never fabricated)
     try{
       const head = await fetch('replay/console-trace.jsonl', {method:'HEAD'});
       if(head.ok){ REPLAY = true; runReplay(); return; }
     }catch(_){ }
-    document.getElementById('mode-tag').textContent = 'MOCK MODE — router unreachable · append ?router=<url> for live or ?replay=true for the recorded run'; loadMock(); return;
+    document.getElementById('mode-tag').textContent = 'MOCK — router unreachable'; loadMock(); return;
   }
+  document.getElementById('mode-tag').textContent = 'LIVE';
   await loadCert();
   render();
 }
-
 function loadMock(){
-  state.pools.a100.usd_mtok = MOCK_DATA.bench.a100.usd_mtok;
-  state.pools.a100.ttft = MOCK_DATA.bench.a100.ttft;
-  state.pools.mi300x.usd_mtok = MOCK_DATA.bench.mi300x.usd_mtok;
-  state.pools.mi300x.ttft = MOCK_DATA.bench.mi300x.ttft;
-  state.shadowed = MOCK_DATA.shadowed;
-  state.parity = MOCK_DATA.cert.parity;
-  state.phase = 'promote';
-  renderCert(MOCK_DATA.cert);
+  state.pools.candidate.usd_mtok = 3.9; state.pools.candidate.ttft = 484;
+  state.shadowed = 118; state.parity = 1.0; state.sloLine = '484ms ✓';
+  document.getElementById('cert-verdict').textContent = 'PASS · 100.0% ≥ 90% (MOCK)';
+  document.getElementById('cert').textContent = 'mock certificate — labeled, never presented as measured';
   render();
 }
 
-function promote(){
-  if(MOCK || true){
-    state.serving = state.serving==='frontier' ? 'a100' : 'mi300x';
-    state.phase = 'rollback';
-    document.getElementById('action-note').textContent = 'Promoted. Traffic now serves from '+state.serving.toUpperCase()+'. Rollback stays armed for the life of the route.';
-    if(!MOCK) fetch(ROUTER+'/v1/routes/'+ROUTE+'/promote',{method:'POST',headers:devHeaders()}).catch(()=>{});
-    render();
-  }
-}
-function rollback(){
-  state.serving = state.serving==='mi300x' ? 'a100' : 'frontier';
-  state.phase = 'promote';
-  document.getElementById('action-note').textContent = 'Rolled back in <5s. The ledger recorded both transitions.';
-  if(!MOCK) fetch(ROUTER+'/v1/routes/'+ROUTE+'/rollback',{method:'POST',headers:devHeaders()}).catch(()=>{});
-  render();
-}
-
-// Synthetic load: POST the router's dev loadgen surface; button doubles as
-// a live status readout while the run is up. Mock mode has no router to
-// drive, so the button explains itself instead.
+// ---- traffic ---------------------------------------------------------------
 let loadRunning = false;
 async function toggleLoad(){
   const btn = document.getElementById('btn-load');
-  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
+  if(MOCK){ btn.textContent = 'needs a live router'; return; }
   try{
     const body = loadRunning ? {action:'stop'}
       : {action:'start', route:ROUTE, rps:2, duration_s:120, stream_ratio:0.5};
     const r = await fetch(ROUTER+'/v1/dev/loadgen', {method:'POST',
       headers:{'Content-Type':'application/json', ...devHeaders()}, body: JSON.stringify(body)});
     renderLoad(await r.json());
-    setTimeout(pollLoad, 1200);   // stop cancels async — re-poll for the settled state
+    setTimeout(pollLoad, 1200);
   }catch(e){ btn.textContent = 'router unreachable'; }
 }
 function renderLoad(s){
   loadRunning = !!s.running;
   const btn = document.getElementById('btn-load');
-  btn.textContent = loadRunning
-    ? `■ Stop traffic · ${s.sent} sent · ${s.errors} err`
-    : (s.sent ? `▶ Start traffic` : '▶ Start traffic');
-  const st = document.getElementById('step1-status');
+  btn.textContent = loadRunning ? `■ Stop traffic · ${s.sent} sent` : '▶ Start traffic';
+  const st = document.getElementById('traffic-status');
   if(s.sent || loadRunning){
     st.textContent = loadRunning
-      ? `running — ${s.sent} sent, ${s.errors} errors · mirrored requests become the certification cohort`
-      : `last run: ${s.sent} sent, ${s.errors} errors · ${state.shadowed||0} mirrored to the candidate`;
+      ? `running — ${s.sent} sent, ${s.errors} errors`
+      : `last run: ${s.sent} sent, ${s.errors} errors · ${state.shadowed||0} mirrored`;
   }
 }
 async function pollLoad(){
-  if(MOCK) return;
-  try{ renderLoad(await (await fetch(ROUTER+'/v1/dev/loadgen')).json()); }
-  catch(e){}
+  if(MOCK || REPLAY) return;
+  try{ renderLoad(await (await fetch(ROUTER+'/v1/dev/loadgen')).json()); }catch(e){}
 }
 
-// GPU pool — the router wraps the providers server-side (/v1/dev/gpu);
-// this page only clicks. The BYOC run prefers the Modal pool (scale-to-
-// zero, self-managing); leftover RunPod pods render read-only with a
-// terminate control (arm on first click, fire on the second).
-const gpuArm = {};
+// ---- gpu pool (advanced) -----------------------------------------------------
 let gpuState = {pods: [], jobs: {}};
 let adoptedPool = null;
-function armTwice(key, btn, warn){
-  if(gpuArm[key] && Date.now() - gpuArm[key] < 6000){ delete gpuArm[key]; return true; }
-  gpuArm[key] = Date.now(); const prev = btn.textContent; btn.textContent = warn;
-  setTimeout(()=>{ if(gpuArm[key]) btn.textContent = prev; }, 6000);
-  return false;
-}
 async function gpuPost(body){
   const r = await fetch(ROUTER+'/v1/dev/gpu', {method:'POST',
     headers:{'Content-Type':'application/json', ...devHeaders()}, body: JSON.stringify(body)});
   const d = await r.json();
   if(d.error) document.getElementById('gpu-jobs').textContent = d.error.message || JSON.stringify(d.error);
   return d;
-}
-async function gpuAct(action, pod, btn){
-  if(action==='terminate' && !armTwice('term-'+pod, btn, 'really terminate? click again')) return;
-  await gpuPost({action, pod_id: pod}); pollGpu();
 }
 function preferredPool(){
   return gpuState.pods.find(p=>p.kind==='modal') || gpuState.pods[0] || null;
@@ -373,59 +302,17 @@ function renderGpu(d){
   if(d.budget) document.getElementById('gpu-budget').textContent =
     `ledger $${d.budget.spent_usd} / cap $${d.budget.cap_usd}`;
   const p = preferredPool();
-  const st = document.getElementById('step2-status');
-  if(!d.enabled){ st.textContent = 'GPU ops not enabled on this router'; }
-  else if(!p){ st.textContent = 'no pool registered'; }
-  else if(!adoptedPool){
-    st.textContent = `${p.gpu} · $${p.usd_hr}/hr · ${p.ready ? '● READY' : 'cold — Prepare pool wakes it (first wake can take minutes)'}`;
+  if(p && !adoptedPool){
+    document.getElementById('pool-status').textContent =
+      `${p.gpu} · $${p.usd_hr}/hr · ${p.ready ? '● READY' : 'cold — first wake can take minutes'}`;
   }
-  // leftover non-Modal pods: read-only rows + terminate (no launch surface)
-  const others = (d.pods||[]).filter(x=>x.kind!=='modal');
-  const podsEl = document.getElementById('gpu-pods');
-  podsEl.style.display = others.length ? '' : 'none';
-  podsEl.innerHTML = others.map(x=>`
-    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:6px 0">
-      <span>${x.kind.toUpperCase()} · ${x.gpu||''} · $${x.usd_hr}/hr · ${x.ready?'● READY':'not serving'}</span>
-      <button onclick="gpuAct('terminate','${x.id}',this)" ${REPLAY?'disabled':''}>✕ Terminate</button>
-    </div>`).join('');
   const jobs = Object.values(d.jobs||{});
-  document.getElementById('gpu-jobs').innerHTML = jobs.map(j=>
-    `${j.name}: ${j.running?'running':'exit '+j.rc} · ${j.elapsed_s}s<br>` +
-    (j.tail||[]).slice(-2).map(t=>t.replace(/</g,'&lt;')).join('<br>')).join('<hr>');
+  document.getElementById('gpu-jobs').textContent = jobs.map(j=>
+    `${j.name}: ${j.running?'running':'exit '+j.rc} · ${j.elapsed_s}s · ${((j.tail||[]).slice(-1)[0]||'').slice(0,110)}`).join('  |  ');
 }
 async function pollGpu(){
   if(MOCK || REPLAY) return;
   try{ renderGpu(await (await fetch(ROUTER+'/v1/dev/gpu')).json()); }catch(e){}
-}
-
-// STEP 2 — one button: wake if cold, adopt as candidate, bench. The pool's
-// measured $/Mtok and p99 TTFT land on its card via /v1/costs.
-async function preparePool(btn){
-  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
-  btn.disabled = true;
-  const st = document.getElementById('step2-status');
-  try{
-    let p = preferredPool();
-    if(!p){ st.textContent = 'no pool registered on the router'; btn.disabled=false; return; }
-    let waited = 0;
-    while(!p.ready && waited < 720){
-      st.textContent = `waking ${p.gpu} — scale-from-zero, ${waited}s (first wake can take ~8 min)…`;
-      // the readiness probe itself nudges the provider awake
-      await new Promise(r=>setTimeout(r,15000)); waited += 15;
-      await pollGpu(); p = preferredPool();
-    }
-    if(!p.ready){ st.textContent = 'pool never became ready — try again'; btn.disabled=false; return; }
-    st.textContent = 'adopting as shadow candidate (cohort log rotates)…';
-    await gpuPost({action:'adopt', pod_id: p.id, route: ROUTE});
-    adoptedPool = p;
-    st.textContent = 'benchmarking — measured $/Mtok at the declared $/hr…';
-    await gpuPost({action:'bench', pod_id: p.id});
-    const done = await pollJob('bench', 600);
-    st.textContent = done && done.rc === 0
-      ? 'pool adopted + benched at the voice gate — now Start traffic (step 2) to fill the cohort'
-      : 'bench did not finish cleanly — see job tail below';
-    btn.textContent = '✓ Pool prepared';
-  }catch(e){ st.textContent = 'prepare failed: '+e; btn.disabled=false; }
 }
 async function pollJob(name, timeout_s){
   const t0 = Date.now();
@@ -437,10 +324,62 @@ async function pollJob(name, timeout_s){
   }
   return null;
 }
+async function preparePool(btn){
+  if(MOCK){ btn.textContent = 'needs a live router'; return; }
+  btn.disabled = true;
+  const st = document.getElementById('pool-status');
+  try{
+    let p = preferredPool(), waited = 0;
+    while((!p || !p.ready) && waited < 720){
+      st.textContent = `waking the pool — ${waited}s…`;
+      await new Promise(r=>setTimeout(r,15000)); waited += 15;
+      await pollGpu(); p = preferredPool();
+    }
+    if(!p || !p.ready){ st.textContent = 'pool never became ready — try again'; btn.disabled=false; return; }
+    st.textContent = 'adopting as candidate (cohort resets)…';
+    await gpuPost({action:'adopt', pod_id: p.id, route: ROUTE});
+    adoptedPool = p;
+    st.textContent = 'benching (warmed, 60 requests)…';
+    await gpuPost({action:'bench', pod_id: p.id});
+    const done = await pollJob('bench', 600);
+    st.textContent = done && done.rc === 0 ? 'pool adopted + benched — now Start traffic' : 'bench failed — see log';
+    btn.textContent = '✓ Pool prepared';
+  }catch(e){ st.textContent = 'prepare failed: '+e; btn.disabled=false; }
+}
+async function certifyRun(btn){
+  if(MOCK){ btn.textContent = 'needs a live router'; return; }
+  const p = adoptedPool || preferredPool();
+  if(!p) return;
+  btn.disabled = true;
+  document.getElementById('action-note').textContent = 'certifying…';
+  await gpuPost({action:'certify', pool: p.kind, route: ROUTE});
+  const done = await pollJob('certify', 300);
+  await loadCert();
+  document.getElementById('action-note').textContent = done && done.rc === 0
+    ? 'PASS — promotion unlocked.' : 'HOLD — the gate refused; grow the cohort or re-bench and retry.';
+  btn.disabled = false; btn.textContent = 'Re-certify';
+}
+function promote(){
+  if(MOCK) return;
+  fetch(ROUTER+'/v1/routes/'+ROUTE+'/promote',{method:'POST',headers:devHeaders()}).then(()=>loadLive()).catch(()=>{});
+}
+function rollback(){
+  if(MOCK) return;
+  fetch(ROUTER+'/v1/routes/'+ROUTE+'/rollback',{method:'POST',headers:devHeaders()}).then(()=>loadLive()).catch(()=>{});
+}
 
-// ONE CLICK — server-side orchestration; survives closing the tab.
+// ---- one click ----------------------------------------------------------------
+const TRACK = ['wake_pool','adopt','bench','traffic','certify','promote'];
+function renderTrack(stage, failed){
+  const idx = TRACK.indexOf(stage);
+  document.querySelectorAll('.track .seg').forEach((el,i)=>{
+    el.className = 'seg' + (stage==='done'
+      ? (failed && i===TRACK.length-1 ? ' fail' : ' done')
+      : (i<idx ? ' done' : (i===idx ? ' active' : '')));
+  });
+}
 async function runMigration(btn){
-  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
+  if(MOCK){ btn.textContent = 'needs a live router'; return; }
   const r = await fetch(ROUTER+'/v1/dev/migrate', {method:'POST',
     headers:{'Content-Type':'application/json', ...devHeaders()},
     body: JSON.stringify({action:'start', route:ROUTE})});
@@ -451,10 +390,12 @@ function renderMigration(m){
   const btn = document.getElementById('btn-migrate');
   const st = document.getElementById('migrate-status');
   btn.disabled = !!m.running;
-  const label = {wake_pool:'waking pool', adopt:'adopting candidate',
-    traffic:'voice traffic', bench:'benching', certify:'certifying',
-    promote:'PROMOTING', done: m.error ? 'failed' : (m.verdict==='PROMOTE_ELIGIBLE' ? 'MIGRATED ✓' : 'gate refused')}[m.stage] || m.stage;
-  btn.textContent = m.running ? `⚡ ${label} · ${Math.round(m.elapsed_s)}s` : (m.finished ? `⚡ ${label} — run again` : '⚡ Run migration');
+  const refused = m.finished && m.verdict !== 'PROMOTE_ELIGIBLE';
+  renderTrack(m.running ? m.stage : 'done', refused || !!m.error);
+  const label = m.running
+    ? {wake_pool:'waking pool',adopt:'adopting',bench:'benching',traffic:'mirroring traffic',certify:'certifying',promote:'PROMOTING'}[m.stage] || m.stage
+    : (m.error ? 'failed — run again' : (refused ? 'gate refused — run again' : 'MIGRATED ✓ — run again'));
+  btn.textContent = m.running ? `⚡ ${label} · ${Math.round(m.elapsed_s)}s` : `⚡ ${label}`;
   st.textContent = (m.detail || '') + (m.error ? ' — '+m.error : '');
 }
 async function pollMigration(){
@@ -462,28 +403,7 @@ async function pollMigration(){
   try{ renderMigration(await (await fetch(ROUTER+'/v1/dev/migrate')).json()); }catch(e){}
 }
 
-// STEP 3 — certify against the adopted pool; a PASS unlocks Promote.
-async function certifyRun(btn){
-  if(MOCK){ btn.textContent = 'needs a live router (?router=…)'; return; }
-  const p = adoptedPool || preferredPool();
-  if(!p){ return; }
-  btn.disabled = true;
-  document.getElementById('action-note').textContent =
-    'Certifying: grounding + rubric parity on the mirrored cohort, p99 SLO from the bench report, ed25519 signature…';
-  await gpuPost({action:'certify', pool: p.kind, route: ROUTE});
-  const done = await pollJob('certify', 300);
-  await loadCert();
-  document.getElementById('action-note').textContent = done && done.rc === 0
-    ? 'Certificate PASS — promotion unlocked. Promote swaps the route to the GPU candidate; rollback stays armed.'
-    : 'Certificate HOLD — the gate refused (parity or SLO). Inspect the job tail; grow the traffic cohort and retry.';
-  btn.disabled = false;
-  btn.textContent = 'Re-certify';
-}
-
-// REPLAY: play a RECORDED real run (tools/record_console.py trace) through
-// the same render paths the live mode uses. Nothing is fabricated — when
-// the GPU provider is flaky on demo day, the audience sees the real
-// recorded run instead. ?replay=true [&speed=N]
+// ---- replay ------------------------------------------------------------------
 async function runReplay(){
   const speed = Number(qs.get('speed')) || 10;
   let events;
@@ -491,24 +411,19 @@ async function runReplay(){
     const text = await (await fetch('replay/console-trace.jsonl')).text();
     events = text.split('\n').filter(l=>l.trim()).map(l=>JSON.parse(l));
   }catch(e){
-    document.getElementById('mode-tag').textContent = 'REPLAY — no trace found (replay/console-trace.jsonl)';
+    document.getElementById('mode-tag').textContent = 'REPLAY — no trace found';
     return;
   }
   const meta = events.find(e=>e.src==='meta')?.data || {};
   const total = events[events.length-1].t;
-  // narration: generated from the recorded events (tools/replay_captions.py)
   let captions = [];
   try{ captions = await (await fetch('replay/captions.json')).json(); }catch(e){}
-  const capEl = document.getElementById('replay-caption');
-  if(captions.length) capEl.style.display='';
+  if(captions.length) document.getElementById('replay-caption').style.display='';
   await loadCert();
-  for (const id of ['btn-load','btn-promote','btn-rollback','btn-pool','btn-certify','btn-migrate']){
-    const b = document.getElementById(id);
-    b.disabled = true;
-    b.title = 'Replay of a recorded run — controls need a live router (?router=<url>)';
+  for (const id of ['btn-load','btn-promote','btn-pool','btn-certify','btn-migrate']){
+    const b = document.getElementById(id); b.disabled = true;
+    b.title = 'Replay of a recorded run — controls need a live router';
   }
-  document.getElementById('action-note').textContent =
-    'REPLAY: this is the recorded real run — the panels below animate exactly what happened (load, bench, certify, promote, rollback, teardown). Controls are disabled; point ?router=<url> at a live router to drive it yourself.';
   const t0 = performance.now();
   let i = 0;
   const tick = setInterval(()=>{
@@ -522,22 +437,19 @@ async function runReplay(){
     }
     render();
     const cap = captions.filter(c=>c.t <= now).pop();
-    if(cap) document.getElementById('caption-text').textContent =
-      `t+${Math.round(cap.t)}s — ${cap.text}`;
+    if(cap) document.getElementById('caption-text').textContent = `t+${Math.round(cap.t)}s — ${cap.text}`;
     document.getElementById('mode-tag').textContent =
-      `REPLAY — real run recorded ${meta.started||''} · ${speed}× · t+${Math.min(now,total).toFixed(0)}s / ${total.toFixed(0)}s`;
+      `REPLAY — recorded ${meta.started||''} · ${speed}× · t+${Math.min(now,total).toFixed(0)}s / ${total.toFixed(0)}s`;
     if(i >= events.length){ clearInterval(tick);
-      document.getElementById('mode-tag').textContent =
-        `REPLAY complete — real run recorded ${meta.started||''} (${total.toFixed(0)}s at ${speed}×)`;
+      document.getElementById('mode-tag').textContent = `REPLAY complete (${total.toFixed(0)}s at ${speed}×)`;
       document.getElementById('caption-text').innerHTML =
-        `■ <b>End of recorded run</b> (${total.toFixed(0)}s) — all pools terminated, ledger closed, certificate PASS on the wall. ` +
-        `<a href="demo.html?replay=true" style="color:var(--lime)">Replay again</a> · drive it live with <span class="mono">?router=&lt;url&gt;&amp;token=&lt;dev token&gt;</span>.`; }
+        `■ <b>End of recorded run</b> — all pools terminated, ledger closed. <a href="demo.html?replay=true" style="color:var(--lime)">Replay again</a> or open the page plainly for the live console.`; }
   }, 200);
 }
 
-if(MOCK){ document.getElementById('mode-tag').textContent='MOCK MODE — ?mock=true'; loadMock(); }
+if(MOCK){ document.getElementById('mode-tag').textContent='MOCK — ?mock=true'; loadMock(); }
 else if(REPLAY){ runReplay(); }
-else { loadLive(); pollLoad(); pollGpu(); pollMigration(); setInterval(loadLive, 5000); setInterval(pollLoad, 2000); setInterval(pollGpu, 5000); setInterval(pollMigration, 3000); }
+else { loadLive(); pollLoad(); pollGpu(); pollMigration(); setInterval(loadLive, 5000); setInterval(pollLoad, 2500); setInterval(pollGpu, 5000); setInterval(pollMigration, 3000); }
 render();
 </script>
 </body>

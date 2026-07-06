@@ -62,7 +62,11 @@ app = modal.App("certified-migration-router")
     secrets=[modal.Secret.from_name("certified-migration-router")],
     timeout=60 * 60,
     scaledown_window=600,
-    memory=2048,
+    memory=3072,
+    # four uvicorns + the bench's client-side timers live here — Modal's
+    # default fractional CPU starves them and inflates measured TTFT tails
+    # (observed: p99 spread 397-925 ms on identical serving)
+    cpu=2.0,
     # the router is stateful (shadow logs, loadgen run, ledger, releases) —
     # one container, always; a second would split the demo's state
     max_containers=1,
