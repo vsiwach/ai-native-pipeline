@@ -151,11 +151,11 @@ const state = {
   serving: 'frontier',
   pools: {
     frontier:  {label:'INCUMBENT', name:'frontier-api / gpt-class', sub:'customer key · zero markup — the slot takes any OpenAI-compatible endpoint', usd_mtok: 10.0, ttft: 638},
-    candidate: {label:'GPU CANDIDATE', name:'Modal A100 80GB', sub:'MAX 26.4 runtime · scale-to-zero', usd_mtok: null, ttft: null},
+    candidate: {label:'ENTERPRISE GPU CANDIDATE', name:'A100 80GB — customer-controlled', sub:'MAX 26.4 runtime · serverless (Modal) · scale-to-zero', usd_mtok: null, ttft: null},
   },
   shadowed: 0, parity: null, sloLine: null,
 };
-const CANDIDATE_NAMES = {'modal-a100':'Modal A100 80GB', 'a100':'RunPod A100 80GB (recorded run)', 'mi300x':'RunPod MI300X 192GB (recorded run)'};
+const CANDIDATE_NAMES = {'modal-a100':'A100 80GB — customer-controlled', 'a100':'A100 80GB — customer-controlled (recorded run)', 'mi300x':'MI300X 192GB — customer-controlled (recorded run)'};
 
 function fmt(n,d=2){ return n==null ? '—' : Number(n).toFixed(d); }
 
