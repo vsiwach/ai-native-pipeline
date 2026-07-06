@@ -371,6 +371,10 @@ function rollback(){
 // ---- one click ----------------------------------------------------------------
 const TRACK = ['wake_pool','adopt','bench','traffic','certify','promote'];
 function renderTrack(stage, failed){
+  if(stage === 'idle'){
+    document.querySelectorAll('.track .seg').forEach(el=>{ el.className='seg'; });
+    return;
+  }
   const idx = TRACK.indexOf(stage);
   document.querySelectorAll('.track .seg').forEach((el,i)=>{
     el.className = 'seg' + (stage==='done'
@@ -385,12 +389,22 @@ async function runMigration(btn){
     body: JSON.stringify({action:'start', route:ROUTE})});
   renderMigration(await r.json());
 }
+const DEFAULT_STATUS = document.getElementById('migrate-status').textContent;
 function renderMigration(m){
   if(!m || !m.stage || m.stage==='idle') return;
   const btn = document.getElementById('btn-migrate');
   const st = document.getElementById('migrate-status');
   btn.disabled = !!m.running;
   const refused = m.finished && m.verdict !== 'PROMOTE_ELIGIBLE';
+  const migrated = m.finished && m.verdict === 'PROMOTE_ELIGIBLE' && !m.error;
+  // a successful migration that has since been ROLLED BACK is history, not
+  // state — reset to a fresh run affordance
+  if(migrated && state.serving === 'frontier'){
+    renderTrack('idle', false);
+    btn.textContent = '⚡ Run migration';
+    st.textContent = DEFAULT_STATUS;
+    return;
+  }
   renderTrack(m.running ? m.stage : 'done', refused || !!m.error);
   const label = m.running
     ? {wake_pool:'waking pool',adopt:'adopting',bench:'benching',traffic:'mirroring traffic',certify:'certifying',promote:'PROMOTING'}[m.stage] || m.stage
