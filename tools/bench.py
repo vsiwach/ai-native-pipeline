@@ -79,6 +79,15 @@ async def one(client, url, model, profile, api_key, ttfts, tpots, tok_counts):
 async def bench(args):
     ttfts, tpots, tok_counts = [], [], []
     async with httpx.AsyncClient(timeout=180) as client:
+        # warmup: unmeasured requests so first-batch effects (graph capture,
+        # cache priming, scale-from-zero settling) don't masquerade as the
+        # steady-state tail. Count is disclosed in the report.
+        for _ in range(args.warmup):
+            try:
+                await one(client, args.base_url.rstrip("/"), args.model,
+                          args.profile, args.api_key, [], [], [])
+            except Exception as e:  # noqa: BLE001
+                print(f"warn: warmup request failed: {e}")
         t_start = time.perf_counter()
         sem = asyncio.Semaphore(args.concurrency)
 
@@ -103,6 +112,7 @@ async def bench(args):
         "base_url": args.base_url, "model": args.model,
         "profile": args.profile, "profile_def": PROFILES[args.profile],
         "requests": args.requests, "concurrency": args.concurrency,
+        "warmup": args.warmup,
         "completed": len(tok_counts), "wall_s": round(wall_s, 1),
         "output_tok_s_aggregate": agg_tok_s,
         "usd_per_mtok": usd_mtok,
@@ -131,6 +141,8 @@ def main():
     ap.add_argument("--profile", choices=PROFILES, default="docs-agent")
     ap.add_argument("--requests", type=int, default=60)
     ap.add_argument("--concurrency", type=int, default=6)
+    ap.add_argument("--warmup", type=int, default=0,
+                    help="unmeasured warmup requests before the clock starts")
     ap.add_argument("--slo-ttft-ms", type=float, default=800)
     ap.add_argument("--api-key", default="")
     ap.add_argument("--out", default="bench-reports/report.json")

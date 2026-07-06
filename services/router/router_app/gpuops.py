@@ -225,7 +225,8 @@ class GpuOps:
                "--base-url", pod["url"], "--model", MODEL,
                "--pool-usd-hr", str(pod["usd_hr"]),
                "--pool-name", pool, "--profile", "voice",
-               "--requests", "40", "--concurrency", "4",
+               "--requests", "60", "--concurrency", "4",
+               "--warmup", "6",
                "--slo-ttft-ms", "500", "--out", str(out)]
         self.jobs["bench"] = Job("bench", cmd, self.root)
         self.emit("gpu_ops", action="bench", pod=pod["id"], pool=pool)
