@@ -25,16 +25,16 @@
 
     <div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.14em; color: #16160F;">
       <span style="font-weight: 600;">MODULAR</span>
-      <span style="color: #8A8A80;">BYOC &middot; THE ENTERPRISE PLAY</span>
+      <span style="color: #8A8A80;">BYOC-MVP &middot; THE ENTERPRISE PLAY</span>
     </div>
     <div style="height: 3px; background: #16160F; margin: 10px 0 0 0;"></div>
 
-    <h1 style="font-size: 40px; line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; margin: 30px 0 0 0;">BYOC certified migration,<br>running <span style="box-shadow: inset 0 -0.34em 0 #D5F26E;">on real silicon</span>.</h1>
+    <h1 style="font-size: 40px; line-height: 1.04; font-weight: 800; letter-spacing: -0.025em; margin: 30px 0 0 0;">BYOC-MVP: certified migration,<br>running <span style="box-shadow: inset 0 -0.34em 0 #D5F26E;">on real silicon</span>.</h1>
 
-    <p style="font-size: 15.5px; line-height: 1.55; color: #55554D; margin: 18px 0 0 0; max-width: 60ch;">The PRD names its own MVP (&sect;9): the bake-off kit, the bench harness, the migration skeleton. This document describes that MVP built, demoable, and re-framed as the <strong>BYOC play</strong>: certified migration of a live agent route from ANY OpenAI-compatible incumbent — a frontier API, a competitor’s managed-inference endpoint, or an existing self-hosted stack — onto GPU capacity the customer controls &mdash; serving on the <strong>MAX runtime</strong>, with signed parity certificates and measured costs. The console runs it in three steps: start traffic &rarr; prepare the GPU pool &rarr; certify &amp; promote. As of July&nbsp;5 it has been executed for real: parity 100% at the 0.90 gate on an A100, p99 TTFT 308.5&nbsp;ms, $2.04/Mtok measured.</p>
+    <p style="font-size: 15.5px; line-height: 1.55; color: #55554D; margin: 18px 0 0 0; max-width: 60ch;">The PRD names its own MVP (&sect;9): the bake-off kit, the bench harness, the migration skeleton. This document describes that MVP built, demoable, and re-framed as the <strong>BYOC-MVP</strong> &mdash; the enterprise play: certified migration of a live agent route from ANY OpenAI-compatible incumbent — a frontier API, a competitor’s managed-inference endpoint, or an existing self-hosted stack — onto GPU capacity the customer controls &mdash; serving on the <strong>MAX runtime</strong>, with signed parity certificates and measured costs. The console runs it with one click &mdash; wake pool &rarr; adopt &rarr; bench &rarr; mirror traffic &rarr; certify &rarr; promote &mdash; with a manual lane for every stage. As of July&nbsp;5 it has been executed for real: parity 100% at the 0.90 gate on an A100, p99 TTFT 308.5&nbsp;ms, $2.04/Mtok measured.</p>
 
     <div style="display: flex; gap: 22px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: #8A8A80; margin: 16px 0 0 0;">
-      <span>VIKRAM SIWACH</span><span>JULY 2026</span><span style="color: #6F8F1F;">REFERENCE: GITHUB.COM/VSIWACH/AI-NATIVE-PIPELINE</span>
+      <span>VIKRAM SIWACH</span><span>JULY 2026</span><span style="color: #6F8F1F;">PREPARED FOR THE MODULAR PRODUCT TEAM</span>
     </div>
 
     <!-- 01 -->
@@ -42,7 +42,7 @@
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">01</span>
       <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">What the MVP proves &mdash; and what it deliberately doesn&rsquo;t</h2>
     </div>
-    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">The strategy&rsquo;s own honesty section calls trajectory-level parity &ldquo;the least-proven claim in the plan.&rdquo; This MVP attacks exactly that gap with the machinery of PRD Figure 1: <strong>shadow &rarr; certify &rarr; promote &rarr; instant rollback</strong>, run end-to-end on a real agent route. It does not claim the 40% decode advantage &mdash; that is Phase 0&rsquo;s independent-benchmark work. It claims something a viewer can verify in the room: a route moved off a frontier API onto open silicon at certified quality, and then <em>across vendors</em>, with every number measured and every artifact rerunnable.</p>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 10px 0 0 0;">The strategy&rsquo;s own honesty section calls trajectory-level parity &ldquo;the least-proven claim in the plan.&rdquo; This MVP attacks exactly that gap with the machinery of PRD Figure 1: <strong>shadow &rarr; certify &rarr; promote &rarr; instant rollback</strong>, run end-to-end on a real agent route. It does not claim the 40% decode advantage &mdash; that is Phase 0&rsquo;s independent-benchmark work. It claims something a viewer can verify in the room: a route moved off a frontier API onto open silicon at certified quality &mdash; vendor-blind by construction &mdash; with every number measured and every artifact rerunnable.</p>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 16px 0 0 0;">
       <div style="border-top: 2px solid #16160F; padding-top: 10px;">
@@ -54,8 +54,8 @@
         <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">One command &mdash; <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px;">./dev bench</span> &mdash; measures p99 TTFT/TPOT and derives <strong>$/Mtok only from measured tokens/sec &times; declared pool price</strong>, for each pool. Reports embed the request profile so anyone can rerun them. SLO gates at p99, never averages.</p>
       </div>
       <div style="border-top: 2px solid #16160F; padding-top: 10px;">
-        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">CROSS-VENDOR &middot; F1.4 RUNG 1</div>
-        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">Route-level placement across <strong>NVIDIA A100 and AMD MI300X</strong> pools &mdash; the strategy&rsquo;s &ldquo;ships in 2026, nobody&rsquo;s permission needed&rdquo; rung, actually running. Same weights, both vendors, MAX-first serving; the placement follows the measured ledger, not an assertion.</p>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.1em; color: #6F8F1F; font-weight: 600;">VENDOR-BLIND &middot; BY CONSTRUCTION</div>
+        <p style="font-size: 12.5px; line-height: 1.58; margin: 7px 0 0 0;">The incumbent slot takes <strong>any OpenAI-compatible endpoint</strong>; the candidate slot takes any pool the MAX runtime serves. Today that candidate is NVIDIA A100 serverless capacity; AMD is the same buttons the day healthy MI300X capacity exists &mdash; zero code changes, and the gap is stated below, not papered over.</p>
       </div>
     </div>
 
@@ -91,7 +91,7 @@
           <td style="padding: 10px 0; border-bottom: 1px solid #E4E4DC; vertical-align: top;">The conversion machine of PRD Figure 1, end to end &mdash; quality and SLO gate the move; the ~60&ndash;90% cost drop is the reward, not the argument.</td>
         </tr>
         <tr>
-          <td style="padding: 10px 14px 10px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6F8F1F; vertical-align: top;">2 &middot; CROSS-VENDOR</td>
+          <td style="padding: 10px 14px 10px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #6F8F1F; vertical-align: top;">2 &middot; ROADMAP: AMD</td>
           <td style="padding: 10px 14px 10px 0; vertical-align: top;">Same buttons, AMD pool: bench both vendors at equal SLO, cut a second certificate, move the route, roll back in one click. Status: blocked on provider capacity &mdash; RunPod rented two consecutive MI300X pods that never booted (2026-07-05); Modal is NVIDIA-only. The flow is vendor-blind by construction and runs the day healthy MI300X capacity exists.</td>
           <td style="padding: 10px 0; vertical-align: top;">Cross-silicon serving is a working product motion, not a roadmap slide &mdash; and reversibility is what makes an enterprise say yes.</td>
         </tr>
@@ -145,15 +145,73 @@
       <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; color: #6F8F1F;">05</span>
       <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin: 0;">Architecture and build</h2>
     </div>
-    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; line-height: 1.75; background: #F4F4EE; border: 1px solid #E4E4DC; padding: 14px 18px; margin: 12px 0 0 0; color: #3A3A32; overflow-x: auto;">
-chat / replayer &rarr; router (shadow &middot; placement &middot; release &middot; /v1/costs)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; frontier API &nbsp;(incumbent &middot; customer key &middot; zero markup)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9500;&rarr; voice-agent &rarr; MAX 26.4 @ Modal A100 80GB (scale-to-zero &middot; act 1)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&rarr; voice-agent &rarr; MAX 26.4 @ AMD MI300X &nbsp;(act 2 &middot; awaiting healthy capacity)<br>
-certifier: evals(sha256, custody) + shadow log + bench SLO &rarr; signed cert &rarr; gates promote<br>
-console (BYOC &middot; LIVE tab) &larr; polls /v1/costs &middot; shows certificates &middot; REPLAY narrates recorded runs
-    </div>
-    <p style="font-size: 13.5px; line-height: 1.62; margin: 12px 0 0 0;">Everything rides the existing reference implementation &mdash; the router, release engine, placement policy, and governance already in <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px;">ai-native-pipeline</span>; the BYOC layer adds the agent service, the shadow mirror, the certifier, the bench, and this console. The whole control plane is itself hosted serverlessly (one Modal web app, scale-to-zero) so this site&rsquo;s console drives it live with nothing installed; total GPU spend across every run so far: <strong>under $5, per-second billed, ledger-capped at $40</strong>. BYOC is the same loop with the pools living in the customer&rsquo;s VPC via the repo&rsquo;s existing Terraform interface &mdash; the demo&rsquo;s <em>egress class: in-VPC</em> field is that future&rsquo;s seed.</p>
+    <div style="background: #F4F4EE; border: 1px solid #E4E4DC; padding: 18px; margin: 12px 0 0 0; overflow-x: auto;">
+<svg viewBox="0 0 760 365" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 760px; display: block; margin: 0 auto; font-family: 'IBM Plex Mono', monospace;">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#16160F"/>
+    </marker>
+    <marker id="arrd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#8A8A80"/>
+    </marker>
+  </defs>
+
+  <!-- console -->
+  <rect x="10" y="120" width="130" height="70" rx="8" fill="none" stroke="#16160F" stroke-width="1.5"/>
+  <text x="75" y="148" text-anchor="middle" font-size="11" font-weight="600" fill="#16160F">CONSOLE</text>
+  <text x="75" y="164" text-anchor="middle" font-size="8.5" fill="#55554D">one button &middot; browser</text>
+  <text x="75" y="177" text-anchor="middle" font-size="8.5" fill="#55554D">nothing installed</text>
+
+  <!-- control plane -->
+  <rect x="195" y="95" width="190" height="120" rx="8" fill="#16160F"/>
+  <text x="290" y="120" text-anchor="middle" font-size="11" font-weight="600" fill="#D5F26E">SERVING CONTROL PLANE</text>
+  <text x="290" y="140" text-anchor="middle" font-size="8.5" fill="#EBEBE6">router &middot; shadow mirror</text>
+  <text x="290" y="155" text-anchor="middle" font-size="8.5" fill="#EBEBE6">release engine &middot; cost ledger</text>
+  <text x="290" y="170" text-anchor="middle" font-size="8.5" fill="#EBEBE6">voice SLO enforcement</text>
+  <text x="290" y="192" text-anchor="middle" font-size="8" fill="#8A8A80">serverless &middot; scales to zero</text>
+
+  <!-- incumbent -->
+  <rect x="470" y="30" width="280" height="82" rx="8" fill="none" stroke="#16160F" stroke-width="1.5"/>
+  <text x="610" y="53" text-anchor="middle" font-size="10.5" font-weight="600" fill="#16160F">INCUMBENT &mdash; SERVING TODAY</text>
+  <text x="610" y="71" text-anchor="middle" font-size="8.5" fill="#55554D">any OpenAI-compatible endpoint:</text>
+  <text x="610" y="85" text-anchor="middle" font-size="8.5" fill="#55554D">frontier API &middot; competitor platform &middot; self-hosted</text>
+  <text x="610" y="101" text-anchor="middle" font-size="8.5" fill="#55554D">customer key &middot; zero markup</text>
+
+  <!-- candidate -->
+  <rect x="470" y="196" width="280" height="82" rx="8" fill="none" stroke="#6F8F1F" stroke-width="2"/>
+  <text x="610" y="219" text-anchor="middle" font-size="10.5" font-weight="600" fill="#16160F">ENTERPRISE GPU CANDIDATE</text>
+  <text x="610" y="237" text-anchor="middle" font-size="8.5" fill="#55554D">MAX 26.4 runtime &middot; A100 80GB</text>
+  <text x="610" y="251" text-anchor="middle" font-size="8.5" fill="#55554D">customer-controlled &middot; scale-to-zero</text>
+  <text x="610" y="267" text-anchor="middle" font-size="8.5" fill="#55554D">AMD next &mdash; same buttons, zero code changes</text>
+
+  <!-- promote / rollback pill (between the two right boxes) -->
+  <rect x="560" y="136" width="100" height="42" rx="21" fill="#D5F26E"/>
+  <text x="610" y="153" text-anchor="middle" font-size="8.5" font-weight="600" fill="#16160F">PROMOTE &#8645;</text>
+  <text x="610" y="167" text-anchor="middle" font-size="8.5" font-weight="600" fill="#16160F">ROLLBACK &lt;5s</text>
+
+  <!-- flows -->
+  <line x1="140" y1="155" x2="193" y2="155" stroke="#16160F" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="385" y1="115" x2="468" y2="78" stroke="#16160F" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="386" y="84" font-size="8" fill="#16160F">live traffic</text>
+  <line x1="385" y1="190" x2="468" y2="228" stroke="#8A8A80" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrd)"/>
+  <text x="330" y="236" font-size="8" fill="#8A8A80">shadow mirror</text>
+
+  <!-- certifier (bottom-left, clear of the pool boxes) -->
+  <rect x="40" y="290" width="420" height="62" rx="8" fill="none" stroke="#16160F" stroke-width="1.5"/>
+  <text x="250" y="312" text-anchor="middle" font-size="10.5" font-weight="600" fill="#16160F">CERTIFIER</text>
+  <text x="250" y="329" text-anchor="middle" font-size="8.5" fill="#55554D">parity on customer-owned evals (sha256) + p99 SLO</text>
+  <text x="250" y="342" text-anchor="middle" font-size="8.5" fill="#55554D">&rarr; ed25519-signed certificate</text>
+
+  <!-- evidence: control plane -> certifier -->
+  <line x1="290" y1="215" x2="290" y2="288" stroke="#8A8A80" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrd)"/>
+  <text x="298" y="258" font-size="8" fill="#8A8A80">evidence</text>
+
+  <!-- gates: certifier -> promote pill, routed in the clear lane between boxes -->
+  <path d="M 430 288 L 430 157 L 558 157" fill="none" stroke="#16160F" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="422" y="252" font-size="8" font-weight="600" fill="#6F8F1F" transform="rotate(-90 422 252)">gates promote</text>
+</svg>
+</div>
+    <p style="font-size: 13.5px; line-height: 1.62; margin: 12px 0 0 0;">Everything rides a production-shaped reference implementation &mdash; router, release engine, governance &mdash; with the BYOC-MVP layer adding the voice agent, the shadow mirror, the certifier, the bench, and this console. The whole control plane is itself hosted serverlessly (one Modal web app, scale-to-zero) so this site&rsquo;s console drives it live with nothing installed; total GPU spend across every run so far: <strong>under $5, per-second billed, ledger-capped at $40</strong>. BYOC at full scale is this same loop with the pools living in the customer&rsquo;s VPC &mdash; the demo&rsquo;s <em>egress class: in-VPC</em> field is that future&rsquo;s seed.</p>
 
     <!-- Closing CTA -->
     <div style="margin: 30px 0 0 0; border-top: 3px solid #16160F; padding-top: 18px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
