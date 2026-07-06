@@ -33,6 +33,9 @@ app = modal.App("max-qwen25")
     gpu="A100-80GB",
     timeout=60 * 60,
     scaledown_window=120,     # idle 2 min -> scale to zero -> $0
+    # one A100 serves the demo; without a cap, concurrent bench + mirror
+    # bursts scaled this out to 3 GPUs at 3x the burn (observed)
+    max_containers=1,
 )
 @modal.concurrent(max_inputs=32)
 @modal.web_server(PORT, startup_timeout=15 * 60)
