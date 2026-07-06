@@ -134,9 +134,24 @@ class MigrationRun:
             pod = self._pool()
             self._set("adopt", f"adopting {pod['id']} as the candidate "
                                "(evidence cohort resets)")
-            self._post("/v1/dev/gpu", {"action": "adopt",
-                                       "pod_id": pod["id"],
-                                       "route": self.route})
+            # a single flaky readiness probe must not kill the run — the
+            # hosted path's probes cross public ingress and can time out
+            # once while the pool is genuinely fine
+            last_exc: Exception | None = None
+            for attempt in range(4):
+                try:
+                    self._post("/v1/dev/gpu", {"action": "adopt",
+                                               "pod_id": pod["id"],
+                                               "route": self.route})
+                    last_exc = None
+                    break
+                except RuntimeError as exc:
+                    last_exc = exc
+                    self.detail = f"adopt attempt {attempt+1} failed " \
+                                  f"({str(exc)[:60]}) — retrying"
+                    time.sleep(15)
+            if last_exc is not None:
+                raise last_exc
 
             # bench BEFORE traffic: the SLO measurement belongs on a
             # quiescent pool (benching right after a mirror storm inflates

@@ -112,7 +112,7 @@ class GpuOps:
     def _probe(self, pod_id: str) -> bool:
         try:
             return httpx.get(f"{self.pod_url(pod_id)}/models",
-                             timeout=4).status_code == 200
+                             timeout=8).status_code == 200
         except httpx.HTTPError:
             return False
 
@@ -142,7 +142,7 @@ class GpuOps:
                 modal_url += "/v1"
             try:
                 ready = httpx.get(f"{modal_url}/models",
-                                  timeout=4).status_code == 200
+                                  timeout=8).status_code == 200
             except httpx.HTTPError:
                 ready = False   # cold — first request wakes it
             out.append({
