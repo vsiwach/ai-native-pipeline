@@ -2,8 +2,8 @@
 # Ops maintains cost_table; Phase 4's deploy pipeline appends cloud endpoints.
 tiers:
   # ttft_ms / tpot_ms are the LLM SLOs (time-to-first-token, time-per-output-
-  # token) the router routes and (Phase 8) autoscales against.
-  # voice SLO per the baseten-mvp mission: TTFT p99<500ms, TPOT p99<60ms
+  # token) the router routes and autoscales against.
+  # voice SLO of record: TTFT p99<500ms, TPOT p99<60ms
   realtime: {max_latency_ms: 250, prefer: lowest_latency, ttft_ms: 500, tpot_ms: 60}
   standard: {max_latency_ms: 2000, prefer: lowest_cost, ttft_ms: 2000, tpot_ms: 80}
   batch: {max_latency_ms: null, prefer: lowest_cost, queue: true}
@@ -12,38 +12,29 @@ cost_table: # $/1M requests, maintained by ops — router just reads it
   gcp-cloudrun-cpu: 0.40
   aws-apprunner-cpu: 0.46
   local-docker: 0.10
-  # LLM pools: ranking values for the cost-preference tiebreak. Real
-  # per-request cost is MEASURED (economics headers from the pool's
-  # $/hr share) — these only order the pools, cheapest first.
-  baseten-l4: 1.05
-  runpod-vllm-l4: 0.60
-  # Hosted Model APIs: per-token billed; ranking value only (real cost is
-  # measured per request from the catalog's per-token prices).
-  baseten-model-api: 3.00
-  # Certified migration (Phase 6): the incumbent frontier API vs the
-  # candidate pool. Ranking values only — REAL $/Mtok is measured by
+  # Certified migration: the incumbent (any OpenAI-compatible endpoint) vs
+  # the candidate GPU pool. Ranking values only — REAL $/Mtok is measured by
   # tools/bench.py and served from /v1/costs `pools`.
   frontier-api: 10.00
   shadow-candidate: 0.50
 
 cache: {enabled: true, ttl_s: 300, backend: in_memory} # swap for redis later
 
-# Certified migration (Phase 6): per-route release flags. While a route's
-# primary serves the client, the router mirrors each request to
-# shadow_candidate (fire-and-forget; failures logged, never surfaced) and
-# appends (request, primary, candidate) to shadow-logs/<route>.shadow.jsonl —
-# the evidence tools/certify.py scores. POST /v1/routes/<route>/promote swaps
-# the primary for the candidate (in-memory, like /v1/policy/placement);
-# /rollback restores the previous endpoints.
+# Certified migration: per-route release flags. While a route's primary serves
+# the client, the router mirrors each request to shadow_candidate (fire-and-
+# forget; failures logged, never surfaced) and appends (request, primary,
+# candidate) to shadow-logs/<route>.shadow.jsonl — the evidence
+# tools/certify.py scores. POST /v1/routes/<route>/promote swaps the primary
+# for the candidate (in-memory); /rollback restores the previous endpoints.
 routes:
   docs-assist:
     shadow_candidate: http://docs-assist-candidate:8080/v1
     shadow_id: docs-assist-candidate
     shadow_provider: shadow-candidate
 
-# Stateful KV/prefix-aware routing (Phase 7). consistent_hash keeps a prompt
-# prefix landing on the same replica so its KV is a hit, not an expensive
-# prefill; on that replica failing, traffic re-lands consistently elsewhere.
+# Stateful KV/prefix-aware routing. consistent_hash keeps a prompt prefix
+# landing on the same replica so its KV is a hit, not an expensive prefill;
+# on that replica failing, traffic re-lands consistently elsewhere.
 affinity: {enabled: true, prefix_tokens: 32, strategy: consistent_hash, capacity: 8}
 
 # Backend endpoints per model. Each entry is a replica: optional `id`
@@ -53,113 +44,13 @@ endpoints:
   house-price-reg:
     - provider: local-docker
       url: http://inference:8080
+  llm-sim:
+    - provider: local-docker
+      url: http://llm:8080
   # Certified-migration route: primary is the incumbent docs-assist instance
   # (UPSTREAM_BASE_URL -> frontier API or llm-sim); the candidate instance
-  # (UPSTREAM_BASE_URL -> MAX/vLLM pod) is in `routes:` above until promoted.
+  # (UPSTREAM_BASE_URL -> MAX GPU pool) is in `routes:` above until promoted.
   docs-assist:
     - id: frontier
       provider: frontier-api
       url: http://docs-assist:8080
-  llm-sim:
-    - provider: local-docker
-      url: http://llm:8080
-  # baseten-mvp: one model, two pools. Same model on both (fair F1
-  # baseline); the replicas are llm_app pool proxies (sim without keys,
-  # live when *_BASE_URL is set on the instance).
-  qwen3-8b:
-    - id: baseten-l4
-      provider: baseten-l4
-      pool: baseten-l4        # placement-policy pool id
-      url: http://pool-baseten:8080
-    # Baseten-native spill target: when the dedicated deployment degrades,
-    # traffic spills to Baseten's serverless Model APIs — a genuinely
-    # different failure domain on the same platform (the mux serves the
-    # request with its default catalog model).
-    - id: model-api-spill
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    # RunPod pool returns when their provisioning recovers (FRICTION #16):
-    # - id: vllm-l4
-    #   provider: runpod-vllm-l4
-    #   pool: vllm-l4
-    #   url: http://pool-vllm:8080
-  # Baseten hosted Model APIs (catalog: deploy/baseten/model-apis.json).
-  # Every alias is served by BOTH mux proxy replicas — quarantine one
-  # (chaos drills) and traffic spills to the other, same upstream.
-  deepseek-v4-pro:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  kimi-k2.5:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  kimi-k2.6:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  kimi-k2.7-code:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  nemotron-ultra:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  nemotron-super:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  openai-gpt-120b:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  glm-4.7:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  glm-5:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  glm-5.1:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080
-  glm-5.2:
-    - id: model-api-a
-      provider: baseten-model-api
-      url: http://pool-model-api-a:8080
-    - id: model-api-b
-      provider: baseten-model-api
-      url: http://pool-model-api-b:8080

@@ -2,50 +2,22 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "devboard",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8400",
-        "--directory",
-        "tools/devboard"
-      ],
-      "port": 8400
+      "name": "console-live",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/vikramsiwach/Downloads/baseten-mvp/console-live/server.js"],
+      "port": 4173
     },
     {
-      "name": "design-ref",
+      "name": "demo-site",
       "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8401",
-        "--directory",
-        "docs/design"
-      ],
-      "port": 8401
+      "runtimeArgs": ["-m", "http.server", "8420", "-d", "vercel-deploy"],
+      "port": 8420
     },
     {
-      "name": "router",
-      "runtimeExecutable": "env",
-      "runtimeArgs": [
-        "ROUTING_POLICY_PATH=/private/tmp/claude-501/-Users-vikramsiwach-Downloads-ai-native-pipeline/eb2edd82-249e-421a-9f85-40e106c83f79/scratchpad/smoke/routing-policy.yaml",
-        "GOODPUT_CURVES_PATH=/Users/vikramsiwach/Downloads/ai-native-pipeline/benchmarks/goodput.json",
-        "HEALTH_POLL_INTERVAL_S=2",
-        "ROUTER_QUEUE_DIR=/private/tmp/claude-501/-Users-vikramsiwach-Downloads-ai-native-pipeline/eb2edd82-249e-421a-9f85-40e106c83f79/scratchpad/smoke/queue",
-        "python3",
-        "-m",
-        "uvicorn",
-        "router_app.main:app",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        "8096",
-        "--log-level",
-        "error"
-      ],
-      "cwd": "services/router",
-      "port": 8096
+      "name": "reliability-plane",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8431", "-d", "/Users/vikramsiwach/baseten-build/baseten-reliability-plane"],
+      "port": 8431
     }
   ]
 }

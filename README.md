@@ -169,21 +169,18 @@ applied to humans and CI.
 | ⓧ | Governance | `governance/agent-policy.yaml` + `tools/policy_check.py` | What agents may do |
 | ⓨ | Dashboard | `tools/devboard` | Zero-backend pipeline board + LLM control surface (metrics, config-as-UX, incidents/MTTR) |
 | ⓨ | Agent tools | `tools/mcp_server.py` | `get_cloud_endpoints`, `run_terraform_plan` |
-| ⑧ Baseten MVP | Pool adapters | `services/llm/llm_app/openai_compat.py` | BasetenAdapter (Truss), VllmAdapter (RunPod), BasetenModelAPIAdapter (hosted Model APIs) — measured TTFT/decode/$, classified errors + retry/backoff, sim fallback without keys |
-| ⑧ | Model API catalog | `services/model_apis` + `deploy/baseten/model-apis.json` | EVERY Baseten library model (Kimi, GLM, DeepSeek, Nemotron…) as registry backends; catalog generated from the live `/v1/models` listing (`manage.py catalog`), one mux pool serves them all — new model = config, never code |
-| ⑧ | Two-pool model | `services/qwen3_8b` | One model, two pools (`baseten-l4`, `vllm-l4`); same llm_app image, env-flipped live |
-| ⑧ | Deploy tooling | `deploy/baseten`, `deploy/runpod` | `truss push` scaffold + management CLI; RunPod pod lifecycle with committed spend ledger + $40 budget guard |
-| ⑧ | Devboard v3 | `/devboard` on the router + `contracts/devboard.openapi.yaml` | Mission-control surface (docs/design/refined/); six live endpoints, no fabricated values |
-| ⑧ | Benchmarks | `benchmarks/` | Harness + summarizer; every displayed number traces to `benchmarks/raw/*.csv` (SLO-AUDITOR) |
-| ⑧ | Chaos + MTTR drills | `tools/chaos.py` | CHAOS-AGENT arsenal: inject latency/5xx, kill pool, exhaust concurrency — plus `drill --suite`: scripted fault → incident agent detects/quarantines/verifies/resolves → MTTR timeline lands in `benchmarks/raw/` |
-| ⑧ | Eval agents | `.claude/agents/` | SLO-AUDITOR, CHAOS-AGENT, STAFF-SKEPTIC — all three gate every feature (`evals/<feature>/`) |
-| ⑨ Certified migration | docs-assist route | `services/docs_assist` | Retrieval-grounded docs agent (OpenAI-compatible, SSE, `X-Citations`); KB = sqlite FTS5 built by `tools/ragindex/` from public docs |
+| ⑧ Serving platform | Devboard | `/devboard` on the router + `contracts/devboard.openapi.yaml` | Mission-control surface; live metrics, config-as-UX, incidents/MTTR — no fabricated values |
+| ⑧ | Benchmarks | `benchmarks/` | Harness + summarizer; every displayed number traces to `benchmarks/raw/*.csv` |
+| ⑧ | Pod tooling | `deploy/runpod` | RunPod pod lifecycle with committed spend ledger + $40 budget guard (drives the certified-migration GPU ops) |
+| ⑨ Certified migration (BYOC-MVP) | Migrated route | `services/voice_agent`, `services/docs_assist` | Retrieval-grounded agent (OpenAI-compatible, SSE, `X-Citations`) as a **voice workload**; KB = sqlite FTS5 built by `tools/ragindex/` from public docs |
 | ⑨ | Shadow mirror | `router_app/shadow.py` + `routing-policy.yaml` `routes:` | Primary serves the client; the candidate gets a mirror of every request; evidence appends to `shadow-logs/<route>.shadow.jsonl` |
 | ⑨ | Release controls | `POST /v1/routes/<r>/promote` · `…/rollback` · `GET …/shadow-stats` | Promote swaps the route's primary for the candidate via the release engine (events recorded); rollback restores the saved endpoints |
 | ⑨ | Certifier | `tools/certify.py` (`./dev certify`) | Grounding+rubric parity + bench SLO evidence → ed25519/HMAC-signed cert; `verify` validates, tampering invalidates; eval facts re-checked by `tools/ragindex/verify_evals.py` |
 | ⑨ | Bench + replay | `tools/bench.py` (`./dev bench`), `tools/replay.py` | Measured $/Mtok = declared pool $/hr ÷ measured tok/s; timed eval replay drives the shadow phase; `scripts/run_migration_loop.sh` runs the whole loop on the sim |
-| ⑨ | Synthetic load | `tools/loadgen.py` (CLI) + `POST /v1/dev/loadgen` (console button) | Seeded Poisson arrivals, profile mix, stream ratio, concurrency cap — panels/shadow fill with zero humans typing; in-router runs are bounded (≤20 rps, ≤10 min, one at a time) |
-| ⑨ | Demo console | `vercel-deploy/` | Unified site (hub/brief/strategy/prd/mvp/demo); `demo.html` polls `/v1/costs` + `certs/latest.json`, `?mock=true` runs backendless |
+| ⑨ | Synthetic load | `tools/loadgen.py` (CLI) + `POST /v1/dev/loadgen` (console button) | Seeded Poisson arrivals, profile mix, stream ratio, concurrency cap — panels/shadow fill with zero humans typing; in-router runs are bounded (≤20 rps, ≤10 min) |
+| ⑨ | GPU ops + one-click | `router_app/gpuops.py`, `router_app/migrate.py` (`/v1/dev/gpu`, `/v1/dev/migrate`) | Console wakes/adopts/benches/certifies/promotes an enterprise GPU pool server-side; RunPod key stays in router env; ledger budget guard |
+| ⑨ | Hosted control plane | `deploy/modal/` | Whole demo stack (sim + agent ×2 + router) as one Modal web app (scale-to-zero); MAX 26.4 serving on Modal A100 |
+| ⑨ | Demo console | `vercel-deploy/` | Unified site (hub/brief/strategy/prd/BYOC-MVP/live); `demo.html` polls `/v1/costs` + the router's `/v1/certs/latest`, `?mock=true` backendless, `?replay=true` narrated recorded run |
 
 ### Request lifecycle (runtime)
 

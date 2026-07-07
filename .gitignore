@@ -17,3 +17,7 @@ services/docs_assist/kb/*.sqlite
 shadow-logs/
 .certify-keys/
 kb_build.err
+
+# separate projects / untracked tooling — not part of the certified-migration repo
+baseten-application/
+tools/mcp/
