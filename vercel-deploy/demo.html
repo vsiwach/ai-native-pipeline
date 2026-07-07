@@ -147,6 +147,12 @@ const TOKEN = qs.get('token') || DEFAULT_TOKEN;
 const ROUTE = qs.get('route') || 'voice-agent';
 const devHeaders = () => TOKEN ? {'X-Dev-Token': TOKEN} : {};
 
+// Credit guard: an open tab keeps the (CPU) control plane warm and slowly
+// bills. After 5 min with no interaction and no run in flight, stop polling
+// so the serverless router scales to zero → $0. Any click resumes.
+let PAUSED = false, lastActive = Date.now(), migrationRunning = false;
+const IDLE_MS = 5 * 60 * 1000;
+
 const state = {
   serving: 'frontier',
   pools: {
@@ -226,7 +232,7 @@ async function loadCert(){
     `signed <b>${c.signature_block.algo}</b> · verify: <b>tools/certify.py verify</b>`;
 }
 async function loadLive(){
-  if(liveFailed) return;
+  if(liveFailed || PAUSED) return;
   try{
     const r = await fetch(ROUTER+'/v1/costs'); const d = await r.json();
     applyCosts(d); liveMisses = 0;
@@ -280,7 +286,7 @@ function renderLoad(s){
   }
 }
 async function pollLoad(){
-  if(MOCK || REPLAY) return;
+  if(MOCK || REPLAY || PAUSED) return;
   try{ renderLoad(await (await fetch(ROUTER+'/v1/dev/loadgen')).json()); }catch(e){}
 }
 
@@ -311,7 +317,7 @@ function renderGpu(d){
     `${j.name}: ${j.running?'running':'exit '+j.rc} · ${j.elapsed_s}s · ${((j.tail||[]).slice(-1)[0]||'').slice(0,110)}`).join('  |  ');
 }
 async function pollGpu(probe){
-  if(MOCK || REPLAY) return;
+  if(MOCK || REPLAY || (PAUSED && !probe)) return;
   // background polling is PASSIVE — probing would wake the scale-to-zero
   // pool and burn GPU credits just from having the tab open. Only the
   // Prepare-pool wake loop passes probe=true.
@@ -399,6 +405,7 @@ function renderMigration(m){
   const btn = document.getElementById('btn-migrate');
   const st = document.getElementById('migrate-status');
   btn.disabled = !!m.running;
+  migrationRunning = !!m.running;
   const refused = m.finished && m.verdict !== 'PROMOTE_ELIGIBLE';
   const migrated = m.finished && m.verdict === 'PROMOTE_ELIGIBLE' && !m.error;
   // a successful migration that has since been ROLLED BACK is history, not
@@ -417,7 +424,7 @@ function renderMigration(m){
   st.textContent = (m.detail || '') + (m.error ? ' — '+m.error : '');
 }
 async function pollMigration(){
-  if(MOCK || REPLAY) return;
+  if(MOCK || REPLAY || PAUSED) return;
   try{ renderMigration(await (await fetch(ROUTER+'/v1/dev/migrate')).json()); }catch(e){}
 }
 
@@ -467,7 +474,26 @@ async function runReplay(){
 
 if(MOCK){ document.getElementById('mode-tag').textContent='MOCK — ?mock=true'; loadMock(); }
 else if(REPLAY){ runReplay(); }
-else { loadLive(); pollLoad(); pollGpu(); pollMigration(); setInterval(loadLive, 5000); setInterval(pollLoad, 2500); setInterval(pollGpu, 5000); setInterval(pollMigration, 3000); }
+else {
+  function resume(){
+    lastActive = Date.now();
+    if(PAUSED){ PAUSED = false; document.getElementById('mode-tag').textContent = 'LIVE';
+      loadLive(); pollLoad(); pollGpu(); pollMigration(); }
+  }
+  ['click','keydown','visibilitychange'].forEach(e =>
+    document.addEventListener(e, () => { if(!document.hidden) resume(); }));
+  // watchdog: pause polling after 5 idle min (no run in flight) so the
+  // serverless control plane scales to zero and stops billing
+  setInterval(() => {
+    if(!PAUSED && !migrationRunning && Date.now() - lastActive > IDLE_MS){
+      PAUSED = true;
+      document.getElementById('mode-tag').textContent = 'PAUSED (idle) — click to resume · saves credit';
+    }
+  }, 30000);
+  loadLive(); pollLoad(); pollGpu(); pollMigration();
+  setInterval(loadLive, 5000); setInterval(pollLoad, 2500);
+  setInterval(pollGpu, 5000); setInterval(pollMigration, 3000);
+}
 render();
 </script>
 </body>

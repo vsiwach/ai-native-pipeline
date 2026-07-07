@@ -30,7 +30,7 @@ STAGES = ("wake_pool", "adopt", "traffic", "bench", "certify", "promote",
 class MigrationRun:
     def __init__(self, route: str = "voice-agent",
                  base: str | None = None, token: str = "",
-                 traffic_s: float = 120.0, rps: float = 2.0):
+                 traffic_s: float = 75.0, rps: float = 2.0):
         self.route = route
         self.base = (base or os.environ.get("LOADGEN_TARGET")
                      or "http://127.0.0.1:8114").rstrip("/")

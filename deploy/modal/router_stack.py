@@ -64,7 +64,7 @@ app = modal.App("certified-migration-router")
     image=image,
     secrets=[modal.Secret.from_name("certified-migration-router")],
     timeout=60 * 60,
-    scaledown_window=600,
+    scaledown_window=180,   # unused/paused control plane sleeps in 3 min
     memory=3072,
     # four uvicorns + the bench's client-side timers live here — Modal's
     # default fractional CPU starves them and inflates measured TTFT tails
