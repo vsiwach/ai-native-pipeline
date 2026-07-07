@@ -94,8 +94,11 @@ class MigrationRun:
                 "finished": self.finished}
 
     # -- the pipeline ----------------------------------------------------------
-    def _pool(self) -> dict | None:
-        pods = self._get("/v1/dev/gpu").get("pods", [])
+    def _pool(self, probe: bool = False) -> dict | None:
+        # probe=True actually wakes a scale-to-zero pool (wake stage only);
+        # everywhere else stays passive so status reads never burn credits
+        path = "/v1/dev/gpu?probe=1" if probe else "/v1/dev/gpu"
+        pods = self._get(path).get("pods", [])
         return next((p for p in pods if p["kind"] == "modal"), None) \
             or (pods[0] if pods else None)
 
@@ -128,10 +131,10 @@ class MigrationRun:
         try:
             self._set("wake_pool", "waking the GPU pool (scale-from-zero; "
                                    "first wake can take minutes)")
-            if not self._wait(lambda: (self._pool() or {}).get("ready"),
+            if not self._wait(lambda: (self._pool(probe=True) or {}).get("ready"),
                               timeout_s=900, what="wake"):
                 raise RuntimeError("pool never became ready (15 min)")
-            pod = self._pool()
+            pod = self._pool(probe=True)
             self._set("adopt", f"adopting {pod['id']} as the candidate "
                                "(evidence cohort resets)")
             # a single flaky readiness probe must not kill the run — the

@@ -719,13 +719,27 @@ def get_app(registry_path: Path | None = None,
                         "history": rel.history} if rel else None,
         }
 
+    def _client_id(request: Request) -> dict:
+        xff = request.headers.get("x-forwarded-for", "")
+        return {"ip": xff.split(",")[0].strip() or None,
+                "ua": (request.headers.get("user-agent") or "")[:80] or None}
+
+    @app.get("/v1/dev/usage")
+    def dev_usage():
+        """'Did someone run the MVP?' — durable across container restarts."""
+        from router_app import usage
+        return usage.summary()
+
     @app.post("/v1/routes/{route}/promote")
     def promote_route(route: str, request: Request):
         denied = _dev_denied(request)
         if denied is not None:
             return denied
         try:
-            return state.promote_route(route)
+            result = state.promote_route(route)
+            from router_app import usage
+            usage.record("promote", route=route, **_client_id(request))
+            return result
         except UnknownModel:
             return _error(404, "no_shadow_candidate",
                           f"route '{route}' has no shadow_candidate to "
@@ -739,6 +753,8 @@ def get_app(registry_path: Path | None = None,
         result = state.rollback_route(route)
         if result["status"] == "nothing_to_rollback":
             return JSONResponse(status_code=409, content=result)
+        from router_app import usage
+        usage.record("rollback", route=route, **_client_id(request))
         return result
 
     @app.get("/v1/certs/latest")
@@ -1040,12 +1056,15 @@ def get_app(registry_path: Path | None = None,
         return state.gpuops
 
     @app.get("/v1/dev/gpu")
-    def gpu_status():
+    def gpu_status(request: Request):
         ops = _gpuops()
         if ops is None:
             return {"enabled": False}
+        # PASSIVE by default: never wakes the serverless pool. Wake loops
+        # (Prepare pool / Run migration) pass ?probe=1 to actually check.
+        probe = request.query_params.get("probe") == "1"
         return {"enabled": True, "budget": ops.budget(),
-                "pods": ops.list_pods(), "jobs": ops.jobs_status()}
+                "pods": ops.list_pods(probe=probe), "jobs": ops.jobs_status()}
 
     @app.post("/v1/dev/gpu")
     async def gpu_ctl(request: Request):
@@ -1071,7 +1090,7 @@ def get_app(registry_path: Path | None = None,
                                     "nothing to terminate"}
                 return ops.terminate(body["pod_id"])
             if action == "bench":
-                pods = {p["id"]: p for p in ops.list_pods()}
+                pods = {p["id"]: p for p in ops.list_pods(probe=True)}
                 pod = pods.get(body.get("pod_id"))
                 if pod is None or not pod["ready"]:
                     return _error(409, "pod_not_ready",
@@ -1082,7 +1101,7 @@ def get_app(registry_path: Path | None = None,
                 # point the route's shadow candidate at the pod and rotate
                 # the shadow log — the cert cohort starts clean
                 route = body.get("route", "docs-assist")
-                pods = {p["id"]: p for p in ops.list_pods()}
+                pods = {p["id"]: p for p in ops.list_pods(probe=True)}
                 pod = pods.get(body.get("pod_id"))
                 if pod is None or not pod["ready"]:
                     return _error(409, "pod_not_ready",
@@ -1169,6 +1188,9 @@ def get_app(registry_path: Path | None = None,
             state.migration = run
             run.start()
             state.events.emit("migration", action="start", route=run.route)
+            from router_app import usage
+            usage.record("migration_start", route=run.route,
+                         **_client_id(request))
             return run.status()
         return _error(400, "bad_action", "action: start")
 

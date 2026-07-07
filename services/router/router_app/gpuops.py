@@ -93,6 +93,10 @@ class GpuOps:
         self.root = Path(root)
         self.emit = emit or (lambda kind, **f: None)
         self.jobs: dict[str, Job] = {}
+        # monotonic deadline: how long a recent confirmed wake keeps the
+        # serverless pool reported "ready" WITHOUT re-probing (which would
+        # wake it). See _modal_ready.
+        self._modal_ready_until = 0.0
 
     # ---- RunPod plumbing ---------------------------------------------------
     def _call(self, method: str, path: str, body: dict | None = None) -> dict:
@@ -116,6 +120,33 @@ class GpuOps:
         except httpx.HTTPError:
             return False
 
+    def _modal_url(self) -> str:
+        u = os.environ.get("GPU_MODAL_URL", "").rstrip("/")
+        return (u + "/v1") if u and not u.endswith("/v1") else u
+
+    def _modal_ready(self, probe: bool) -> bool:
+        """Readiness of the serverless Modal pool.
+
+        CRITICAL: any HTTP request to a Modal web endpoint COLD-STARTS the
+        container. So passive status polls (an open console tab, every few
+        seconds) must NEVER hit it — that turned idle browsing into an
+        endless wake->serve->sleep->wake credit drain. Only explicit wake
+        loops pass probe=True; passive callers read a short cached window a
+        recent confirmed wake refreshed, and otherwise report cold."""
+        now = time.monotonic()
+        if not probe:
+            return now < self._modal_ready_until
+        url = self._modal_url()
+        if not url:
+            return False
+        try:
+            ok = httpx.get(f"{url}/models", timeout=10).status_code == 200
+        except httpx.HTTPError:
+            ok = False   # cold — THIS request is what wakes it
+        if ok:
+            self._modal_ready_until = now + 90.0
+        return ok
+
     # ---- ledger (shared with deploy/runpod/pod.py) --------------------------
     @property
     def ledger_path(self) -> Path:
@@ -133,26 +164,21 @@ class GpuOps:
                 "remaining_usd": round(led["cap_usd"] - spent, 2)}
 
     # ---- operations ---------------------------------------------------------
-    def list_pods(self) -> list[dict]:
+    def list_pods(self, probe: bool = False) -> list[dict]:
+        """Pool inventory + readiness. probe=False (default) is PASSIVE: it
+        never wakes a scale-to-zero pool, so status polling costs nothing.
+        Only wake loops pass probe=True."""
         pods = self._call("GET", "/pods")
         out = []
-        modal_url = os.environ.get("GPU_MODAL_URL", "").rstrip("/")
-        if modal_url:
-            if not modal_url.endswith("/v1"):
-                modal_url += "/v1"
-            try:
-                ready = httpx.get(f"{modal_url}/models",
-                                  timeout=8).status_code == 200
-            except httpx.HTTPError:
-                ready = False   # cold — first request wakes it
+        if self._modal_url():
             out.append({
                 "id": "modal-a100",
                 "kind": "modal",
                 "gpu": KINDS["modal"]["gpu"],
                 "usd_hr": float(os.environ.get("GPU_MODAL_USD_HR", "2.5")),
                 "uptime_s": None,
-                "ready": ready,
-                "url": modal_url,
+                "ready": self._modal_ready(probe),
+                "url": self._modal_url(),
                 "image": KINDS["modal"]["image"],
             })
         for p in pods if isinstance(pods, list) else pods.get("pods", []):
@@ -167,7 +193,9 @@ class GpuOps:
                 "gpu": (p.get("machine") or {}).get("gpuTypeId"),
                 "usd_hr": p.get("costPerHr"),
                 "uptime_s": runtime.get("uptimeInSeconds"),
-                "ready": self._probe(pod_id),
+                # RunPod pods bill regardless, but keep probing active-only
+                "ready": self._probe(pod_id) if probe else
+                         bool(runtime.get("uptimeInSeconds")),
                 "url": self.pod_url(pod_id),
                 "image": p.get("imageName"),
             })

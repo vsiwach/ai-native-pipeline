@@ -34,7 +34,10 @@ MAX_ENDPOINT = "https://vsiwach--max-qwen25-serve.modal.run/v1"
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install("fastapi==0.115.12", "uvicorn==0.34.2", "httpx==0.28.1",
-                 "pydantic==2.11.4", "PyYAML==6.0.2")
+                 "pydantic==2.11.4", "PyYAML==6.0.2",
+                 # usage.py logs to a modal.Dict so 'did someone run it?'
+                 # survives the serverless container scaling to zero
+                 "modal")
     .add_local_dir(REPO / "services" / "router" / "router_app",
                    "/repo/services/router/router_app")
     .add_local_dir(REPO / "services" / "docs_assist",
@@ -105,6 +108,7 @@ def serve():
           BENCH_REPORTS_DIR="/repo/bench-reports",
           GPUOPS_ROOT="/repo",
           GPU_MODAL_URL=MAX_ENDPOINT,
+          USAGE_DURABLE="1",   # persist 'did someone run it?' to modal.Dict
           LOADGEN_TARGET="http://127.0.0.1:8114",
           INCIDENT_AGENT="0",
           ROUTER_CORS_ORIGINS="*")

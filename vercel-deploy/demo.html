@@ -310,9 +310,13 @@ function renderGpu(d){
   document.getElementById('gpu-jobs').textContent = jobs.map(j=>
     `${j.name}: ${j.running?'running':'exit '+j.rc} · ${j.elapsed_s}s · ${((j.tail||[]).slice(-1)[0]||'').slice(0,110)}`).join('  |  ');
 }
-async function pollGpu(){
+async function pollGpu(probe){
   if(MOCK || REPLAY) return;
-  try{ renderGpu(await (await fetch(ROUTER+'/v1/dev/gpu')).json()); }catch(e){}
+  // background polling is PASSIVE — probing would wake the scale-to-zero
+  // pool and burn GPU credits just from having the tab open. Only the
+  // Prepare-pool wake loop passes probe=true.
+  const q = probe ? '?probe=1' : '';
+  try{ renderGpu(await (await fetch(ROUTER+'/v1/dev/gpu'+q)).json()); }catch(e){}
 }
 async function pollJob(name, timeout_s){
   const t0 = Date.now();
@@ -333,7 +337,7 @@ async function preparePool(btn){
     while((!p || !p.ready) && waited < 720){
       st.textContent = `waking the pool — ${waited}s…`;
       await new Promise(r=>setTimeout(r,15000)); waited += 15;
-      await pollGpu(); p = preferredPool();
+      await pollGpu(true); p = preferredPool();
     }
     if(!p || !p.ready){ st.textContent = 'pool never became ready — try again'; btn.disabled=false; return; }
     st.textContent = 'adopting as candidate (cohort resets)…';
